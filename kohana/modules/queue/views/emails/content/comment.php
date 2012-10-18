@@ -1,0 +1,1 @@
+<p style="padding:5px 0 5px 0;"> <?=$name?> wrote:<br /> <span style="color:#444444;background-color:#f9f9f9;padding:2px 2px 2px 2px;">"<?=$comment?>"</span></p>
