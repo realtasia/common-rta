@@ -1,12 +1,26 @@
 <?php
+/**
+ * Instagram OAuth2 Provider
+ *
+ * @package    FuelPHP/OAuth2
+ * @category   Provider
+ * @author     Phil Sturgeon
+ * @copyright  (c) 2012 HappyNinjas Ltd
+ * @license    http://philsturgeon.co.uk/code/dbad-license
+ */
 
-class Provider_Instagram extends Provider
+namespace OAuth2;
+
+class Provider_Instagram extends Provider 
 {
-
-	public $name = 'instagram';
-
+	/**
+	 * @var  string  scope separator, most use "," but some like Google are spaces
+	 */
 	public $scope_seperator = '+';
 
+	/**
+	 * @var  string  the method to use when requesting tokens
+	 */
 	public $method = 'POST';
 
 	public function url_authorize()
@@ -23,18 +37,18 @@ class Provider_Instagram extends Provider
 	{
 		// Now make sure we have the default scope to get user data
 		$options['scope'] = \Arr::merge(
-
+			
 			// We need this default feed to get the authenticated users basic information
 			array('basic'),
-
+			
 			// And take either a string and array it, or empty array to merge into
 			(array) \Arr::get($options, 'scope', array())
 		);
-
+		
 		parent::__construct($options);
 	}
 
-	public function get_user_info(Token $token)
+	public function get_user_info(Token_Access $token)
 	{
 		$user = $token->user;
 

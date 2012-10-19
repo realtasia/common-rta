@@ -190,8 +190,8 @@ class Model_Interaction extends Model {
             return TRUE;
         } catch (MongoCursorException $e)
         {
-            Debug::error('Error updating interaction: :interaction for query: :query -> :e', array(
-                ':interaction' => print_r($query, TRUE),
+            Debug::error('Error deleting interaction: :interaction for query: :query -> :e', array(
+                ':interaction' => print_r($interaction, TRUE),
                 ':query'       => print_r($query, TRUE),
                 ':e'           => $e->getMessage()
             ));
@@ -223,8 +223,8 @@ class Model_Interaction extends Model {
             return $query;
         } catch (MongoCursorException $e)
         {
-            Debug::error('Error updating interaction: :interaction for query: :query -> :e', array(
-                ':interaction' => print_r($query, TRUE),
+            Debug::error('Error creating interaction: :interaction for query: :query -> :e', array(
+                ':interaction' => print_r($interaction, TRUE),
                 ':query'       => print_r($query, TRUE),
                 ':e'           => $e->getMessage()
             ));

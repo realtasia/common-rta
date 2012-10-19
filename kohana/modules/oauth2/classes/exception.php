@@ -7,7 +7,9 @@
  * @author Update to draft v10 by Edison Wong <hswong3i@pantarei-design.com>.
  */
 
-class Exception extends Exception {
+namespace OAuth2;
+
+class Exception extends \Exception {
 
 	/**
 	 * The result from the API server that represents the exception information.

@@ -1,12 +1,14 @@
 <?php
 /**
  * OAuth2 Token
- *
- * @package    OAuth2
+ * 
+ * @package    FuelPHP/OAuth2
  * @category   Token
  * @author     Phil Sturgeon
- * @copyright  (c) 2011 HappyNinjas Ltd
+ * @copyright  (c) 2012 HappyNinjas Ltd
  */
+
+namespace OAuth2;
 
 abstract class Token {
 
@@ -21,7 +23,7 @@ abstract class Token {
 	 */
 	public static function forge($type = 'access', array $options = null)
 	{
-		$class = 'Token_'.Inflector::classify($type);
+		$class = '\\OAuth2\\Token_'.\Inflector::classify($type);
 
 		return new $class($options);
 	}
@@ -39,7 +41,7 @@ abstract class Token {
 	{
 		return $this->$key;
 	}
-
+	
 	/**
 	 * Return a boolean if the property is set
 	 *
