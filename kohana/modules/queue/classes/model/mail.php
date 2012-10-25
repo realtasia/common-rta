@@ -49,13 +49,13 @@ class Model_Mail extends Model
         $m = Model::factory('user')->findOne(
               array(
                  '_id' => Model::check_id($user_id),
-                 'last_active' => array('$lt' => $t)
+                 'active' => array('$lt' => $t)
               ));
 
         if(empty($m))
             return TRUE;
 
-        return $t - $m['last_active'] >= 60;
+        return $t - $m['active'] >= 60;
     }
 }
 

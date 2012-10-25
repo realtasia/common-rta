@@ -414,9 +414,8 @@ class Job_Processor_Immediate
     protected static function extract_recipients($document)
     {
         $s = Arr::get((array) $document, 'subscribers', array());
-        $l = Arr::get((array) $document, 'likers', array());
 
-        return array_unique(Arr::merge($s, $l));
+        return array_unique($s);
     }
 
     /**

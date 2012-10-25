@@ -20,7 +20,7 @@ class Model_Interaction extends Model {
 
     /**
      *
-     * @var array Interactions 
+     * @var array Interactions
      */
     public static $interactions = array(
         'positive' => array(
@@ -35,7 +35,7 @@ class Model_Interaction extends Model {
      * Retrieve a user's subscriptions.
      *
      * @param string|MongoID $user_id
-     * 
+     *
      * @return array of object_id & type
      */
     public function subscriptions($user_id)
@@ -49,10 +49,10 @@ class Model_Interaction extends Model {
 
     /**
      * Retrieve an object's Subscribers
-     * 
+     *
      * @param string|MongoID $_id
-     * 
-     * @return array of user_id & type 
+     *
+     * @return array of user_id & type
      */
     public function subscribers($_id)
     {
@@ -70,9 +70,9 @@ class Model_Interaction extends Model {
      * @param string $type
      * @param string|MongoID $user_id
      * @uses self::insert_positive()
-     * 
-     * @return bool 
-     * @throws MongoCursorException 
+     *
+     * @return bool
+     * @throws MongoCursorException
      */
     public function subscribe($_id, $type, $user_id)
     {
@@ -88,9 +88,9 @@ class Model_Interaction extends Model {
      * @param string $type
      * @param string|MongoID $user_id
      * @uses self::remove_negative()
-     * 
+     *
      * @return bool
-     * @throws MongoCursorException 
+     * @throws MongoCursorException
      */
     public function unsubscribe($_id, $type, $user_id)
     {
@@ -100,11 +100,11 @@ class Model_Interaction extends Model {
     }
 
     /**
-     * Retrieve a user's likes 
+     * Retrieve a user's likes
      *
      * @param string|MongoID $user_id
-     * 
-     * @return array of object_id & type 
+     *
+     * @return array of object_id & type
      */
     public function likes($user_id)
     {
@@ -116,11 +116,11 @@ class Model_Interaction extends Model {
     }
 
     /**
-     * Retrieve a object's likers 
+     * Retrieve a object's likers
      *
      * @param string|MongoID $_id
-     * 
-     * @return array of user_ids & type 
+     *
+     * @return array of user_ids & type
      */
     public function likers($_id)
     {
@@ -138,9 +138,9 @@ class Model_Interaction extends Model {
      * @param string $type
      * @param string|MongoID $user_id
      * @uses self::insert_positive()
-     * 
-     * @return bool 
-     * @throws MongoCursorException 
+     *
+     * @return bool
+     * @throws MongoCursorException
      */
     public function like($_id, $type, $user_id)
     {
@@ -156,15 +156,31 @@ class Model_Interaction extends Model {
      * @param string $type
      * @param string|MongoID $user_id
      * @uses self::remove_negative()
-     * 
+     *
      * @return bool
-     * @throws MongoCursorException 
+     * @throws MongoCursorException
      */
     public function unlike($_id, $type, $user_id)
     {
         $query = static::query($_id, $type, $user_id);
 
         return $this->remove_negative('unlike', $query);
+    }
+
+
+    public function interacting($_id, $user_id)
+    {
+        $params = [
+            'object_id' => $_id,
+            'user_id' => $user_id
+        ];
+
+        $result = $this->collection->find($params);
+
+        if($result->hasNext())
+            return iterator_to_array ($result);
+
+        return [];
     }
 
     /**
@@ -174,7 +190,7 @@ class Model_Interaction extends Model {
      * @param array $query
      *
      * @return bool
-     * @throws MongoCursorException 
+     * @throws MongoCursorException
      */
     public function remove_negative($interaction, $query)
     {
@@ -207,8 +223,8 @@ class Model_Interaction extends Model {
      * @param array $query
      *
      * @return boolean
-     * @throws MongoCursorException 
-     */    
+     * @throws MongoCursorException
+     */
     public function insert_positive($interaction, $query)
     {
         if (!static::verify_interaction($interaction))
@@ -241,7 +257,7 @@ class Model_Interaction extends Model {
      * @param string|MongoID $user_id the user id
      *
      * @return array
-     */    
+     */
     protected static function query($_id, $type, $user_id)
     {
         if (static::verify_type($type))
@@ -257,7 +273,7 @@ class Model_Interaction extends Model {
      *
      * @param string $type
      * @return boolean
-     * @throws Interaction_Exception 
+     * @throws Interaction_Exception
      */
     protected static function verify_type($type)
     {
@@ -273,9 +289,9 @@ class Model_Interaction extends Model {
      *
      * @param string $interaction
      * @param boolean $positive
-     * 
+     *
      * @return boolean
-     * @throws Interaction_Exception 
+     * @throws Interaction_Exception
      */
     protected static function verify_interaction($interaction, $positive = TRUE)
     {
