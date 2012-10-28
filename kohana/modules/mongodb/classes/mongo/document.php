@@ -280,7 +280,7 @@ abstract class Mongo_Document {
             }
         }
 
-        if($current_user_id !== NULL)
+        if($user_id !== NULL)
         {
             // get a user
             $this->current_user = Mongo_Document::factory('user');

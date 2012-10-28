@@ -41,12 +41,11 @@ class Notifications{
      */
     public function own_post_likes($set = NULL)
     {
-        if(!is_null($set))
-        {
-            $this->notifications->likers['own_post'] = (bool) $set;
-            return TRUE;
-        }
-        return (bool) $this->notifications->likers['own_post'];
+        if ($set === NULL)
+            return (bool) $this->notifications->likers['own_post'];
+
+        $this->notifications->likers['own_post'] = (bool) $set;
+        return TRUE;
     }
 
     /**
@@ -60,12 +59,12 @@ class Notifications{
      */
     public function other_post_likes($set = NULL)
     {
-        if(!is_null($set))
-        {
-            $this->notifications->likers['other_posts'] = (bool) $set;
-            return TRUE;
-        }
-        return (bool) $this->notifications->likers['other_posts'];
+        if ($set === NULL)
+            return (bool) $this->notifications->likers['other_posts'];
+
+        $this->notifications->likers['other_posts'] = (bool) $set;
+        return TRUE;
+
     }
 
     /**
@@ -76,12 +75,12 @@ class Notifications{
      */
     public function profile_likes($set = NULL)
     {
-        if(!is_null($set))
-        {
-            $this->notifications->likers['profile'] = (bool) $set;
-            return TRUE;
-        }
-        return (bool) $this->notifications->likers['profile'];
+        if ($set === NULL)
+            return (bool) $this->notifications->likers['profile'];
+
+        $this->notifications->likers['profile'] = (bool) $set;
+        return TRUE;
+
     }
 
     /**
@@ -92,12 +91,11 @@ class Notifications{
      */
     public function own_post_subscribes($set = NULL)
     {
-        if(!is_null($set))
-        {
-            $this->notifications->subscribers['own_post'] = (bool) $set;
-            return TRUE;
-        }
-        return (bool) $this->notifications->subscribers['own_post'];
+        if ($set === NULL)
+            return (bool) $this->notifications->subscribers['own_post'];
+
+        $this->notifications->subscribers['own_post'] = (bool) $set;
+        return TRUE;
     }
 
     /**
@@ -108,12 +106,11 @@ class Notifications{
      */
     public function profile_subscribes($set = NULL)
     {
-        if(!is_null($set))
-        {
-            $this->notifications->subscribers['profile'] = (bool) $set;
-            return TRUE;
-        }
-        return (bool) $this->notifications->subscribers['profile'];
+        if ($set === NULL)
+            return (bool) $this->notifications->subscribers['profile'];
+
+        $this->notifications->subscribers['profile'] = (bool) $set;
+        return TRUE;
     }
 
     /**
@@ -124,13 +121,11 @@ class Notifications{
      */
     public function own_post_comments($set = NULL)
     {
-        if(!is_null($set))
-        {
-            $this->notifications->comments['own_post'] = (bool) $set;
-            return TRUE;
-        }
-        return (bool) $this->notifications->comments['own_post'];
+        if ($set === NULL)
+            return (bool) $this->notifications->comments['own_post'];
 
+        $this->notifications->comments['own_post'] = (bool) $set;
+        return TRUE;
     }
 
     /**
@@ -144,12 +139,11 @@ class Notifications{
      */
     public function other_post_comments($set = NULL)
     {
-        if(!is_null($set))
-        {
-            $this->notifications->comments['other_posts'] = (bool) $set;
-            return TRUE;
-        }
-        return (bool) $this->notifications->comments['other_posts'];
+        if ($set === NULL)
+            return (bool) $this->notifications->comments['other_posts'];
+
+        $this->notifications->comments['other_posts'] = (bool) $set;
+        return TRUE;
     }
 
     /**
@@ -160,12 +154,11 @@ class Notifications{
      */
     public function mention($set = NULL)
     {
-        if(!is_null($set))
-        {
-            $this->notifications->mentions = (bool) $set;
-            return TRUE;
-        }
-        return (bool) $this->notifications->mentions;
+        if ($set === NULL)
+            return (bool) $this->notifications->mentions;
+
+        $this->notifications->mentions = (bool) $set;
+        return TRUE;
     }
 
     /**
@@ -176,12 +169,11 @@ class Notifications{
      */
     public function testimonial($set = NULL)
     {
-        if(!is_null($set))
-        {
-            $this->notifications->testimonials = (bool) $set;
-            return TRUE;
-        }
-        return (bool) $this->notifications->testimonials;
+        if ($set === NULL)
+            return (bool) $this->notifications->testimonial;
+
+        $this->notifications->testimonial = (bool) $set;
+        return TRUE;
     }
 
     /**
@@ -192,12 +184,11 @@ class Notifications{
      */
     public function wallpost($set = NULL)
     {
-        if(!is_null($set))
-        {
-            $this->notifications->profile_posts = (bool) $set;
-            return TRUE;
-        }
-        return (bool) $this->notifications->profile_posts;
+        if ($set === NULL)
+            return (bool) $this->notifications->wallpost;
+
+        $this->notifications->wallpost = (bool) $set;
+        return TRUE;
     }
 
     /**
@@ -209,17 +200,29 @@ class Notifications{
      */
     protected static function parse_input($input)
     {
-        $retrieve = FALSE;
         if((is_object($input) AND $input instanceof MongoID) OR is_string($input))
         {
             $u = Model::factory('user')->get_selective($input, array('notifications'));
             return (object) $u->notifications;
 
         }
-        elseif(isset($input['notifications']) AND !empty($input['notifications']))
+        if(isset($input['notifications']) AND !empty($input['notifications']))
             return (object) $input['notifications'];
 
+        if(isset($input['wallpost']))
+            return (object) $input;
+
         return false;
+    }
+
+    public function as_array()
+    {
+        return (array) $this->notifications;
+    }
+
+    public function __destruct()
+    {
+        return $this->as_array();
     }
 
 }
