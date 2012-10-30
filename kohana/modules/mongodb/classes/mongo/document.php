@@ -1,6 +1,8 @@
 <?php
 
 /**
+ * This document has been modified, please see the original on the author's github page
+ *
  * This class objectifies a Mongo document and can be used with one of the following design patterns:
  *
  * 1. Table Data Gateway pattern
