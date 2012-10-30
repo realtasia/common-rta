@@ -417,6 +417,10 @@ abstract class Mongo_Document {
      */
     public function collection($fresh = FALSE, $user_id = NULL)
     {
+        if(!$user_id && $this->current_user)
+        {
+            $user_id = $this->current_user->_id;
+        }
         if ($fresh === TRUE)
         {
             if ($this->name)
@@ -430,7 +434,7 @@ abstract class Mongo_Document {
             else
             {
                 $class_name = $this->get_collection_class_name();
-                return new $class_name(NULL, NULL, NULL, get_class($this));
+                return new $class_name(NULL, NULL, NULL, get_class($this), $user_id);
             }
         }
 
