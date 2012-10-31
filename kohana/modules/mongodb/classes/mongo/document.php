@@ -417,12 +417,8 @@ abstract class Mongo_Document {
      * @param  boolean  $fresh  Pass TRUE if you don't want to get the singleton instance
      * @return Mongo_Collection
      */
-    public function collection($fresh = FALSE, $user_id = NULL)
+    public function collection($fresh = FALSE)
     {
-        if(!$user_id && $this->current_user)
-        {
-            $user_id = $this->current_user->_id;
-        }
         if ($fresh === TRUE)
         {
             if ($this->name)
@@ -431,12 +427,12 @@ abstract class Mongo_Document {
                 {
                     $this->db = Mongo_Database::$default;
                 }
-                return new Mongo_Collection($this->name, $this->db, $this->gridFS, get_class($this), $user_id);
+                return new Mongo_Collection($this->name, $this->db, $this->gridFS, get_class($this));
             }
             else
             {
                 $class_name = $this->get_collection_class_name();
-                return new $class_name(NULL, NULL, NULL, get_class($this), $user_id);
+                return new $class_name(NULL, NULL, NULL, get_class($this));
             }
         }
 
@@ -449,7 +445,7 @@ abstract class Mongo_Document {
                 {
                     $this->db = Mongo_Database::$default;
                 }
-                self::$collections[$name] = new Mongo_Collection($this->name, $this->db, $this->gridFS, get_class($this), $user_id);
+                self::$collections[$name] = new Mongo_Collection($this->name, $this->db, $this->gridFS, get_class($this));
             }
             return self::$collections[$name];
         }
@@ -458,7 +454,7 @@ abstract class Mongo_Document {
             $name = $this->get_collection_class_name();
             if (!isset(self::$collections[$name]))
             {
-                self::$collections[$name] = new $name(NULL, NULL, NULL, get_class($this), $user_id);
+                self::$collections[$name] = new $name(NULL, NULL, NULL, get_class($this));
             }
             return self::$collections[$name];
         }

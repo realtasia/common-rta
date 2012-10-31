@@ -71,7 +71,7 @@ class Mongo_Collection implements Iterator, Countable {
      */
     public static function factory($name, $user_id = NULL)
     {
-        return Mongo_Document::factory($name, NULL, $user_id)->collection(TRUE, $user_id);
+        return Mongo_Document::factory($name, NULL, $user_id)->collection(TRUE);
     }
 
     /** The name of the collection within the database or the gridFS prefix if gridFS is TRUE
@@ -113,7 +113,6 @@ class Mongo_Collection implements Iterator, Countable {
     /** A cache of Mongo_Document model instances for performance
      *  @static  array */
     protected static $models = array();
-    public $user_id = null;
 
     /**
      * Instantiate a new collection object, can be used for querying, updating, etc..
@@ -123,7 +122,7 @@ class Mongo_Collection implements Iterator, Countable {
      * @param  bool    $gridFS  Is the collection a gridFS instance?
      * @param  bool|string $model   Class name of template model for new documents
      */
-    public function __construct($name = NULL, $db = NULL, $gridFS = FALSE, $model = FALSE, $user_id = NULL)
+    public function __construct($name = NULL, $db = NULL, $gridFS = FALSE, $model = FALSE)
     {
         if ($name !== NULL)
         {
@@ -139,8 +138,6 @@ class Mongo_Collection implements Iterator, Countable {
         {
             $this->_model  = $model;
         }
-        if ($user_id)
-            $this->user_id = $user_id;
     }
 
     /**
@@ -1149,10 +1146,10 @@ class Mongo_Collection implements Iterator, Countable {
     {
         if ($user_id)
         {
-            $this->current_user = Mongo_Document::factory('user');
-            $this->current_user->load($user_id, ['_id', 'name']);
+            $user = Mongo_Document::factory('user');
+            $user->load($user_id, ['_id', 'name']);
 
-            return $this->current_user;
+            return $user;
         }
         return false;
     }
