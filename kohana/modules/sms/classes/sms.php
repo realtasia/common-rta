@@ -46,7 +46,8 @@ class SMS {
     {
         $config     = Arr::merge(Kohana::$config->load('sms')->as_array(), $config);
         // Create a new message
-        $this->_sms = NexmoMessage($config['api_key'], $config['api_secret']);
+
+        $this->_sms = new NexmoMessage($config['api_key'], $config['api_secret']);
 
         if ($to)
         {
@@ -61,6 +62,9 @@ class SMS {
         }
 
         $this->from($config['from']);
+
+
+        return $this;
     }
 
     /**
@@ -72,9 +76,9 @@ class SMS {
      */
     public function to($to)
     {
-        if ($this->check_number($to))
+        if ($number = $this->check_number($to))
         {
-            $this->to = $to;
+            $this->to = $number;
         }
         return $this;
     }
@@ -87,7 +91,7 @@ class SMS {
      */
     public function message($message)
     {
-        $this->message($message);
+        $this->message = $message;
         return $this;
     }
 
@@ -114,11 +118,11 @@ class SMS {
         // we need all 3
         if (!$this->to || !$this->from || !$this->message)
         {
+            Debug::log('Error invoked in MODPATH/classes/sms. Empty params');
             return $this->error((object)['errortext' => 'Invalid params, please set a valid $to, $from & $message']);
         }
 
         $result = $this->_sms->sendText($this->to, $this->from, $this->message);
-
         return $this->parse($result);
     }
 
@@ -132,18 +136,19 @@ class SMS {
     protected function check_number($number, $code = '+65')
     {
         // if 11 characters & starts with '+', it's okay (erm... really??)
-        if (count($number) === 11 && strpos($number, '+') === 0)
+        if (strlen($number) === 11 && strpos($number, '+') === 0)
         {
             return $number;
         }
 
         // if we've got 8 chars and doesn't start with +, add the code. (right..)
-        if (count($number) === 8 && strpos($number, '+') !== 0)
+        if (strlen($number) === 8 && strpos($number, '+') !== 0)
         {
             return $code . $number;
         }
 
         // nope, didn't validate!!
+        Debug::log('Error invoked in MODPATH/classes/sms. invalid number');
         return $this->error((object)['errortext' => 'Invalid $to number. Must be a valid SG mobile number with or without "+65" ']);
     }
 
@@ -159,9 +164,11 @@ class SMS {
             foreach($result->messages as $message)
             {
                 if($message->status == 0)
-                    $this->success($message);
+                {
+                    return $this->success($message);
+                }
                 else
-                    $this->error($message);
+                    return false;
             }
             return true;
         }
