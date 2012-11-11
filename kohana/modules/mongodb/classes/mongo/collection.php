@@ -1142,18 +1142,6 @@ class Mongo_Collection implements Iterator, Countable {
         return $this->name;
     }
 
-    public function get_user($user_id = null)
-    {
-        if ($user_id)
-        {
-            $user = Mongo_Document::factory('user');
-            $user->load($user_id, ['_id', 'name']);
-
-            return $user;
-        }
-        return false;
-    }
-
     /**
      * array_merge_recursive_distinct does not change the datatypes of the values in the arrays.
      * @param array $array1
