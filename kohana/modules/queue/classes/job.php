@@ -12,9 +12,9 @@ class Job{
     /**
      * Returns a new Job_Add() instance to add a job to the queue
      *
-     * @param string|MongoID $document_id
-     * @param string $document_type
-     * @param string|MongoID optional $user_id
+     * @param string|MongoID $doc_id the document id that acted upon
+     * @param string $doc_type the document type
+     * @param string|MongoID optional $user_id the user performing the action
      * */
     public static function add($doc_id, $doc_type, $user_id)
     {
@@ -24,7 +24,7 @@ class Job{
     public static function process($delivery = 'immediate')
     {
         $processor = 'Job_Processor' . strtolower(ucfirst($delivery));
-        return new $processor(Model::factory('job')->get_next($delivery));
+        return new $processor(Document::factory('job')->get_next($delivery));
     }
 }
 

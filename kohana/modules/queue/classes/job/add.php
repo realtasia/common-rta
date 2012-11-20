@@ -10,7 +10,7 @@
  * @version 0.9
  * @copyright 2012 Realtasia Pte Ltd
  */
-class Job_Add{
+class Job_Add {
 
     /** @var string|MongoID the document object's id that an interaction was performed on. */
     public $document_id;
@@ -31,10 +31,11 @@ class Job_Add{
      * @param string $document_type
      * @param string|MongoID optional $user_id
      * */
+
     public function __construct($document_id, $document_type, $user_id = NULL)
     {
-        $this->document_id = Model::check_id($document_id);
-        $this->user_id = !is_null($user_id) ? Model::check_id($user_id) : $user_id;
+        $this->document_id   = Model::check_id($document_id);
+        $this->user_id       = !is_null($user_id) ? Model::check_id($user_id) : $user_id;
         $this->document_type = $document_type;
     }
 
@@ -49,86 +50,11 @@ class Job_Add{
         $this->key = 'comment';
 
         return $this->create(array(
-                 'user_id' => $this->user_id,
-                 'date' => time(),
-                 'priority' => 1,
-                 'comment_id' => $comment_id
-              ));
-    }
-
-    /**
-     * Add a new user registered Job to the queue. This job sends an admin and
-     * user email. Priority is automatically set to a higher 2.
-     *
-     * @param string $email We directly use an email for these jobs
-     * @uses self::single_generic()
-     * @return bool
-     */
-    public function register($email)
-    {
-        $this->key = 'register';
-
-        return $this->single_generic($email);
-    }
-
-    /**
-     * Add a new interested-in-beta user Job to the queue. This job sends an
-     * admin email. Priority is automatically set to a higher 2.
-     *
-     * @param string $email We directly use an email for these jobs
-     * @uses self::single_generic()
-     * @return bool
-     */
-    public function joined_beta($email)
-    {
-        $this->key = 'joined-beta';
-        $this->is_single = TRUE;
-
-        return $this->single_generic($email);
-    }
-
-    /**
-     * If an administrator approves a new beta wannabe, this job sends out a
-     * Welcome email to the user. No admin emails are sent at this stage
-     *
-     * @param string $email We directly use an email for these jobs
-     * @uses self::single_generic()
-     * @return bool
-     */
-    public function welcome_beta($email)
-    {
-        $this->key = 'welcome-beta';
-
-        return $this->single_generic($email);
-    }
-
-    /**
-     * An email sent to the user if he fills up the lost password form.
-     *
-     * @param string $email We directly use an email for these jobs
-     * @uses self::single_generic()
-     * @return bool
-     */
-    public function lost_password($email)
-    {
-        $this->key = 'lost-password';
-
-        return $this->single_generic($email);
-    }
-
-    /**
-     * This is a new user feedback. Sends admin email and user email to confirm
-     * receipt. Priority is set to 3.
-     *
-     * @param string $email We directly use an email for these jobs
-     * @uses self::single_generic()
-     * @return bool
-     */
-    public function feedback($email)
-    {
-        $this->key = 'feedback';
-
-        return $this->single_generic($email, 3);
+                    'user_id'    => $this->user_id,
+                    'date'       => time(),
+                    'priority'   => 1,
+                    'comment_id' => $comment_id
+                ));
     }
 
     /**
@@ -180,7 +106,7 @@ class Job_Add{
      */
     public function testimonial($profile_user_id)
     {
-        $this->key = 'testimonial';
+        $this->key       = 'testimonial';
         $this->is_single = TRUE;
         return $this->double_generic($profile_user_id);
     }
@@ -195,9 +121,10 @@ class Job_Add{
      */
     public function approve_testimonial($writer_user_id)
     {
-        $this->key = 'approve-testimonial';
+        $this->key       = 'approve-testimonial';
         $this->is_single = TRUE;
-        return $this->double_generic($writer_user_id);
+        $this->user_id = Document::check_id($writer_user_id);
+        return $this->generic();
     }
 
     /**
@@ -209,12 +136,32 @@ class Job_Add{
      */
     public function wallpost($profile_user_id)
     {
-        $this->key = 'wallpost';
+        $this->key       = 'wallpost';
         $this->is_single = TRUE;
         return $this->double_generic($profile_user_id);
     }
 
-    /***************** PROTECTED METHODS *********** */
+    /**
+     * Wallposts like testimonials are written on a user's profile page
+     *
+     * @param string|mongoID $profile_user_id the id of the user whose profile was written on
+     * @uses Job_Add->create()
+     * @return bool
+     */
+    public function private_message($comment_id)
+    {
+        $this->key       = 'private-message';
+
+        return $this->create(array(
+                    'user_id'    => $this->user_id,
+                    'date'       => time(),
+                    'priority'   => 1,
+                    'comment_id' => $comment_id
+        ));
+    }
+
+
+    /*     * *************** PROTECTED METHODS *********** */
 
     /**
      * Add a generic Job to the queue
@@ -230,9 +177,9 @@ class Job_Add{
     protected function generic()
     {
         return $this->create(array(
-                 'user_id' => $this->user_id,
-                 'date' => time(),
-              ), 1);
+                    'user_id' => $this->user_id,
+                    'date'    => time(),
+                        ), 1);
     }
 
     /**
@@ -250,9 +197,9 @@ class Job_Add{
     protected function single_generic($email, $priority = 2)
     {
         return $this->create(array(
-                 'user_email' => $email,
-                 'date' => time()
-              ), $priority);
+                    'user_email' => $email,
+                    'date'       => time()
+                        ), $priority);
     }
 
     /**
@@ -267,16 +214,16 @@ class Job_Add{
      */
     protected function double_generic($mentionee_id)
     {
-        if(is_array($mentionee_id))
-            $mentionee_id = array_map ('Model::check_id', $mentionee_id);
+        if (is_array($mentionee_id))
+            $mentionee_id = array_map('Model::check_id', $mentionee_id);
         else
-            $mentionee_id = Model::check_id ($mentionee_id);
+            $mentionee_id = Model::check_id($mentionee_id);
 
         return $this->create(array(
-                 'user_id' => $this->user_id, //mentioner
-                 'mentionee_ids' => $mentionee_id, // mentionees
-                 'date' => time(),
-              ), 1);
+                    'user_id'       => $this->user_id, //mentioner
+                    'mentionee_ids' => $mentionee_id, // mentionees
+                    'date'          => time(),
+                        ), 1);
     }
 
     /**
@@ -286,9 +233,9 @@ class Job_Add{
      */
     protected function create($message, $priority = 1)
     {
+        $Job = Document::factory('job');
         // if user id is set then we ought to check for existing jobs and update
         // or create a new one
-
         // in this case, these are singular emails, and we should create a new job
         if ($this->is_single)
         {
@@ -297,15 +244,13 @@ class Job_Add{
         else
         {
             // check if this job exists
-            $document = Model::factory('job')->check_exists($this->document_id, $this->document_type);
+            $old_job = $Job->check_exists($this->document_id, $this->document_type);
 
             // if it does exist, add the message to the document and return
-            if ($document)
+            if ($old_job)
             {
-                // format the message to a Mongo array
-                $message = self::mongo_message_array($this->key, $message);
-
-                return Model::factory('job')->add_to_existing_queue($this->document_id, $message);
+                return $Job
+                        ->add_to_existing_queue($old_job['_id'], $this->key, $message);
             }
 
             // document doesn't exist so need to create a new job
@@ -317,7 +262,7 @@ class Job_Add{
         $new_job['messages'][$this->key][] = $message;
 
         // insert it into the db and return
-        return Model::factory('job')->add_to_queue($new_job);
+        return $Job->add_to_queue($new_job);
     }
 
     /*     * **************** PROTECTED  METHODS *********** */
@@ -332,38 +277,23 @@ class Job_Add{
     protected function get_job_defaults($priority = 1, $single = FALSE, $delivery = 'immediate')
     {
         if ($single)
-            $message_array = array($this->key => array());
+            $message_array = [$this->key => []];
         else
-            $message_array = array(
-               'like'        => array(),
-               'comment'     => array(),
-               'subscribe'   => array(),
-            );
+            $message_array = [
+                'like'      => [],
+                'comment'   => [],
+                'subscribe' => []
+            ];
 
-        return array(
-           'document_id'   => $this->document_id,
-           'document_type' => $this->document_type,
-           'in_progress'   => 0,
-           'is_single'     => (int) $single,
-           'status'        => 1,
-           'priority'      => $priority,
-           'delivery'      => $delivery,
-           'messages'      => $message_array
-        );
+        return [
+            'document_id'   => Document::check_id($this->document_id),
+            'document_type' => $this->document_type,
+            'in_progress'   => 0,
+            'is_single'     => (int) $single,
+            'status'        => 1,
+            'priority'      => $priority,
+            'delivery'      => $delivery,
+            'messages'      => $message_array
+        ];
     }
-
-    /*     * **************** PROTECTED STATIC METHODS *********** */
-
-    /**
-     * Formats a message array Mongo style so we can add to an existing collection
-     *
-     * @param string $key
-     * @param array $message
-     * @return array
-     */
-    protected static function mongo_message_array($key, $message)
-    {
-        return array('messages.' . $key => $message);
-    }
-
 }

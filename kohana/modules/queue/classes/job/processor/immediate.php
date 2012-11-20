@@ -9,8 +9,7 @@
  * @version 0.9
  * @copyright 2012 Realtasia Pte Ltd
  */
-class Job_Processor_Immediate
-{
+class Job_Processor_Immediate {
 
     public $job;
     public $recipients;
@@ -21,15 +20,14 @@ class Job_Processor_Immediate
 
     /** @var bool  if false, performs batch operations. */
     public $is_single = FALSE;
-
     public static $types = array(
-       'single' => array(
-          'register', 'joined-beta', 'welcome-beta', 'lost-password', 'feedback',
-          'mention', 'testimonial', 'wallpost', 'approve-testimonial'
-       ),
-       'group' => array(
-          'comment',  'like', 'subscribe'
-       )
+        'single' => array(
+            'mention', 'testimonial', 'wallpost', 'approve-testimonial',
+            'private-message'
+        ),
+        'group' => array(
+            'comment', 'like', 'subscribe'
+        )
     );
 
     /**
@@ -39,7 +37,7 @@ class Job_Processor_Immediate
      */
     public function __construct($job)
     {
-        $this->job = (object) $job;
+        $this->job      = (object) $job;
         $this->messages = $this->job->messages;
         return $this->process();
     }
@@ -59,10 +57,10 @@ class Job_Processor_Immediate
         // set the author
         $this->document_owner = static::string_id($this->original_document->user_id);
 
-        if($this->job->is_single)
+        if ($this->job->is_single)
         {
             $this->is_single = TRUE;
-            foreach (self::$types['single'] as $k => $type)
+            foreach (self::$types['single'] as $type)
             {
                 if (isset($this->messages[$type]) AND !empty($this->messages[$type]))
                 {
@@ -80,7 +78,7 @@ class Job_Processor_Immediate
         {
             if (isset($this->messages[$type]) AND !empty($this->messages[$type]))
             {
-                foreach($this->recipients as $recipient_id => $recipient)
+                foreach ($this->recipients as $recipient_id => $recipient)
                 {
                     // check notifications before building emails.
                     $notifications = Notifications::factory($recipient);
@@ -90,7 +88,6 @@ class Job_Processor_Immediate
         }
 
         return $this;
-
     }
 
     /**
@@ -103,13 +100,9 @@ class Job_Processor_Immediate
     public function set_users($recipients = NULL, $interactors = NULL)
     {
 
-        $recipients = is_null($recipients)
-                       ? $this->extract_recipients($this->original_document)
-                       : array($recipients);
+        $recipients = is_null($recipients) ? $this->extract_recipients($this->original_document) : [$recipients];
 
-        $interactors = is_null($interactors)
-                       ? $this->extract_interactors($this->messages)
-                       : array($interactors);
+        $interactors = is_null($interactors) ? $this->extract_interactors($this->messages) : [$interactors];
 
         $user_ids = array_unique(Arr::merge($recipients, $interactors));
 
@@ -122,11 +115,11 @@ class Job_Processor_Immediate
 
             //echo debug::vars($u['_id'], $recipients, in_array($u['_id'], $recipients));
 
-            if(in_array($u['_id'], $recipients))
-                  $this->recipients[$u['_id']->__toString()] = $u;
+            if (in_array($u['_id'], $recipients))
+                (string) $this->recipients[$u['_id']] = $u;
 
-            if(in_array($u['_id'], $interactors))
-                  $this->interactors[$u['_id']->__toString()] = $u;
+            if (in_array($u['_id'], $interactors))
+                (string) $this->interactors[$u['_id']] = $u;
         }
 
         return $this;
@@ -144,16 +137,16 @@ class Job_Processor_Immediate
     {
         // check if recipient is document owner and would like notifications
         // from his own post
-        if($this->document_owner == $receip_id)
+        if ($this->document_owner == $receip_id)
         {
-            if(!$notifications->own_post_comments())
+            if (!$notifications->own_post_comments())
                 return;
         }
 
         // check if this recipient wants notifications from other user's posts
-        if($this->document_owner !== $receip_id)
+        if ($this->document_owner !== $receip_id)
         {
-            if(!$notifications->other_post_comments())
+            if (!$notifications->other_post_comments())
                 return;
         }
         //echo Debug::vars(Model::factory('comment')->get($items[0]['comment_id']));
@@ -171,27 +164,25 @@ class Job_Processor_Immediate
      */
     public function like($items, $receip_id, $notifications)
     {
-        $doc_id = static::string_id($this->original_document->_id);
-
         // check if recipient is document owner and would like notifications
         // from his own post
-        if($this->document_owner == $receip_id)
+        if ($this->document_owner === $receip_id)
         {
-            if(!$notifications->own_post_likes())
+            if (!$notifications->own_post_likes())
                 return;
         }
 
         // check if this recipient wants notifications from other user's posts
-        if($this->original_document !== $receip_id)
+        if ($this->original_document !== $receip_id)
         {
-            if(!$notifications->other_post_likes())
+            if (!$notifications->other_post_likes())
                 return;
         }
 
         // check if this is a profile like and see if user wants to be notified
-        if($doc_id == $receip_id)
+        if ((string) $this->original_document->_id === $receip_id)
         {
-            if(!$notifications->profile_likes())
+            if (!$notifications->profile_likes())
                 return;
         }
 
@@ -208,27 +199,25 @@ class Job_Processor_Immediate
      */
     public function subscribe($items, $receip_id, $notifications)
     {
-        $doc_id = static::string_id($this->original_document->_id);
-
         // check if recipient is document owner and would like notifications
         // from his own post
-        if($this->document_owner == $receip_id)
+        if ($this->document_owner === $receip_id)
         {
-            if(!$notifications->own_post_subscribes())
+            if (!$notifications->own_post_subscribes())
                 return;
         }
 
         // check if this recipient wants notifications from other user's posts
-        if($this->document_owner !== $receip_id)
+        if ($this->document_owner !== $receip_id)
         {
-            if(!$notifications->profile_subscribes())
+            if (!$notifications->profile_subscribes())
                 return;
         }
 
         // check if profile subscription and see if user wants to be notified
-        if($doc_id == $receip_id)
+        if ((string) $this->original_document->_id === $receip_id)
         {
-            if(!$notifications->profile_subscribes())
+            if (!$notifications->profile_subscribes())
                 return;
         }
 
@@ -246,10 +235,33 @@ class Job_Processor_Immediate
     public function mention($items, $receip_id, $notifications)
     {
         // check if recipient wants to receive emails for his mentions
-        if(!$notifications->mention())
+        if (!$notifications->mention())
             return;
 
         return $this->recipient_emails($items, $receip_id, 'mention');
+    }
+
+    /**
+     * sets possible 'private-message' email messages for each recipient. This is a
+     * little different because we send an email to the person's page where the
+     * post is written, not to the writer. As usual, only if their
+     * notifications settings allow it.
+     *
+     * @param array $items this job message
+     * @return Queue_Processer
+     */
+    public function private_message($item)
+    {
+        $notifications = Notifications::factory($item['mentionee_ids']);
+        // check if recipient wants to receive emails for posts written on his wall
+        if (!$notifications->messages())
+            return;
+
+        $this->set_users($item['mentionee_ids'], $item['user_id']);
+
+        return $this->single_recipient_emails(
+                        $item, $item['mentionee_ids'], $item['user_id'], 'private-message'
+        );
     }
 
     /**
@@ -265,20 +277,21 @@ class Job_Processor_Immediate
     {
         $notifications = Notifications::factory($item['mentionee_ids']);
         // check if recipient wants to receive emails for posts written on his wall
-        if(!$notifications->wallpost())
+        if (!$notifications->wallpost())
             return;
 
         $this->set_users($item['mentionee_ids'], $item['user_id']);
 
         return $this->single_recipient_emails(
-              $item, $item['mentionee_ids'], $item['user_id'], 'wallpost'
+                        $item, $item['mentionee_ids'], $item['user_id'], 'wallpost'
         );
     }
+
 
     /**
      * sets possible 'testimonial' email messages for each recipient. This is a
      * little different because we send an email to the person whose page the
-     * testimonial was written, not to the writer. As usual, only if their
+     * testimonial was written on, not to the writer. As usual, only if their
      * notifications settings allow it.
      *
      * @param array $item this job message
@@ -289,13 +302,13 @@ class Job_Processor_Immediate
         $notifications = Notifications::factory($item['mentionee_ids']);
         // check if recipient wants to receive emails for testimonials written
         // about him
-        if(!$notifications->testimonial())
+        if (!$notifications->testimonial())
             return;
 
         $this->set_users($item['mentionee_ids'], $item['user_id']);
 
         return $this->single_recipient_emails(
-              $item, $item['mentionee_ids'], $item['user_id'], 'testimonial'
+                        $item, $item['mentionee_ids'], $item['user_id'], 'testimonial'
         );
     }
 
@@ -312,43 +325,9 @@ class Job_Processor_Immediate
         $this->set_users($item['user_id'], $item['mentionee_ids']);
 
         return $this->single_recipient_emails(
-              $item, $item['user_id'], $item['mentionee_ids'], 'approve-testimonial'
+                        $item, $item['user_id'], $item['mentionee_ids'], 'approve-testimonial'
         );
     }
-
-    /**
-     *
-     * @param type $item
-     */
-    public function register($item)
-    {
-        ;
-    }
-
-
-    public function joined_beta($item)
-    {
-        ;
-    }
-
-
-    public function welcome_beta($item)
-    {
-        ;
-    }
-
-
-    public function lost_password($item)
-    {
-        ;
-    }
-
-
-    public function feedback($item)
-    {
-        ;
-    }
-
 
     /**
      * Utility method that adds qualified recipient emails to the email property
@@ -361,7 +340,7 @@ class Job_Processor_Immediate
     protected function recipient_emails($items, $receip_id, $type)
     {
         // loops through all the items.
-        foreach($items as $key => $item)
+        foreach ($items as $key => $item)
         {
             $item_uid = static::string_id($item['user_id']);
             // this is the decision making process. Document owner does not
@@ -369,10 +348,10 @@ class Job_Processor_Immediate
             // not get his own interaction emails.
             if ($item_uid !== $receip_id)
             {
-                $item['user'] = $this->interactors[static::string_id($item['user_id'])];
+                $item['user']    = $this->interactors[(string) $item['user_id']];
                 //just for comments, retrieve the comment
-                if($type == 'comment')
-                    $item['comment'] = Model::factory('comment')->get($item['comment_id']);
+                if ($type === 'comment')
+                    $item['comment'] = Document::factory('comment')->get($item['comment_id']);
 
                 unset($item['comment_id'], $item['user_id']);
 
@@ -394,7 +373,7 @@ class Job_Processor_Immediate
      */
     protected function single_recipient_emails($item, $receip_id, $interact_id, $type)
     {
-        $item['user'] = $this->interactors[static::string_id($item['user_id'])];
+        $item['user'] = $this->interactors[(string) $item['user_id']];
 
         unset($item['user_id']);
 
@@ -405,17 +384,22 @@ class Job_Processor_Immediate
     }
 
     /**
-     * extracts all subscribers and likers from the original document. Removes
-     * duplicates and merges them into an array of user_ids
+     * extracts all subscribers from the original document.
      *
      * @param MongoDocument $document the extracted original document
      * @return array of user_ids
      */
     protected static function extract_recipients($document)
     {
-        $s = Arr::get((array) $document, 'subscribers', array());
+        $args = [
+            'object_id'   => $document->_id,
+            'object_type' => (string) $document->collection(),
+            'limit'       => NULL,
+            'skip'        => NULL,
+            'interaction' => 'subscribe'
+        ];
 
-        return array_unique($s);
+        return Collection::factory('interaction')->fetch($args, 'user');
     }
 
     /**
@@ -427,11 +411,11 @@ class Job_Processor_Immediate
      */
     protected static function extract_interactors($messages)
     {
-        foreach ($messages as $key => $types)
+        foreach ($messages as $types)
         {
-            foreach ($types as $type => $message)
+            foreach ($types as $message)
             {
-                $ids[] = $message['user_id'];
+                $ids[] = (string) $message['user_id'];
             }
         }
 
@@ -447,12 +431,7 @@ class Job_Processor_Immediate
      */
     protected static function get_original_document($job)
     {
-        $fields = array(
-           'user_id', 'user_full_name','subscribers', 'likers', 'counts',
-           'page_title', 'page_uri', 'uri', 'content'
-        );
-        return Model::factory($job->document_type)
-                    ->get_selective($job->document_id, $fields);
+        return Document::factory($job->document_type, $job->document_id)->job_fields();
     }
 
     /**
@@ -463,7 +442,7 @@ class Job_Processor_Immediate
      */
     protected static function string_id($id)
     {
-        return $id instanceof MongoID ? $id->__toString() : $id;
+        return (string) $id;
     }
 
     /**
@@ -475,15 +454,24 @@ class Job_Processor_Immediate
     protected static function _get_users($user_ids)
     {
         $query['status'] = 'active';
-        $query['_id'] = is_array($user_ids)
-                        ? array('$in' => array_map('Model::check_id', $user_ids))
-                        : Model::check_id($user_ids);
+        $query['_id']    = is_array($user_ids)
+                            ? array('$in' => array_map('Document::check_id', $user_ids))
+                            : Model::check_id($user_ids);
 
-        return Model::factory('user')->collection->find($query,
-              array(
-                 '_id' => 1, 'email' => 1, 'first_name' => 1,
-                 'display_name' => 1, 'avatar' => 1, 'notifications' => 1
-              ));
+        $users = Document::factory('user')->collection()
+                ->find($query)
+                ->fields([
+                    '_id'                    => 1,
+                    'email'                  => 1,
+                    'first_name'             => 1,
+                    'name'                   => 1,
+                    'avatar'                 => 1,
+                    'settings.notifications' => 1
+        ]);
+        if($users->hasNext())
+        {
+            return iterator_to_array($users);
+        }
     }
 
     /**
@@ -495,7 +483,7 @@ class Job_Processor_Immediate
         $mail_adder = Mail_Add::factory($this->original_document, $this->job);
 
         //return debug::vars($this->emails);
-        foreach($this->emails as $r => $messages)
+        foreach ($this->emails as $r => $messages)
         {
             // loop through the message types.
             foreach (self::$types[$type_key] as $k => $type)

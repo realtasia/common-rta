@@ -75,7 +75,7 @@ CFCredentials::set(array(
 		// will use that.
 		//
 		// Leave this set to `false` if you're not sure.
-		'certificate_authority' => false
+		'certificate_authority' => TRUE
 	),
 
 	// Specify a default credential set to use if there are more than one.

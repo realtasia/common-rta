@@ -46,7 +46,7 @@ class Model_Mail extends Model
     public static function is_user_active_now($user_id)
     {
         $t = time();
-        $m = Model::factory('user')->findOne(
+        $m = Document::factory('user')->findOne(
               array(
                  '_id' => Model::check_id($user_id),
                  'active' => array('$lt' => $t)

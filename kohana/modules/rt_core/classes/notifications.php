@@ -84,6 +84,22 @@ class Notifications{
     }
 
     /**
+     * Sets or gets notification setting for likes on a comment
+     *
+     * @param bool $set if param is given, sets this notification.
+     * @return bool
+     */
+    public function comment_likes($set = NULL)
+    {
+        if ($set === NULL)
+            return (bool) $this->notifications->likers['comments'];
+
+        $this->notifications->likers['comments'] = (bool) $set;
+        return TRUE;
+
+    }
+
+    /**
      * Sets or gets notification setting when a another user subscribes to a post
      *
      * @param bool $set if param is given, sets this notification.
@@ -97,6 +113,23 @@ class Notifications{
         $this->notifications->subscribers['own_post'] = (bool) $set;
         return TRUE;
     }
+
+    /**
+     * Sets or gets notification setting when a another user subscribes to
+     * some other user's post
+     *
+     * @param bool $set if param is given, sets this notification.
+     * @return bool
+     */
+    public function other_posts_subscribes($set = NULL)
+    {
+        if ($set === NULL)
+            return (bool) $this->notifications->subscribers['other_posts'];
+
+        $this->notifications->subscribers['other_posts'] = (bool) $set;
+        return TRUE;
+    }
+
 
     /**
      * Sets or gets notification setting for subscribes on a user's profile
@@ -192,6 +225,40 @@ class Notifications{
     }
 
     /**
+     * Sets or gets notification setting for a new post in profile page
+     *
+     * @param bool $set if param is given, sets this notification
+     * @return bool
+     */
+    public function messages($set = NULL)
+    {
+        if ($set === NULL)
+            return (bool) $this->notifications->messages;
+
+        $this->notifications->messages = (bool) $set;
+        return TRUE;
+    }
+
+    /**
+     * Sets or gets notification setting for a new post in profile page
+     *
+     * @param bool $set if param is given, sets this notification
+     * @return bool
+     */
+    public function pages($set = NULL)
+    {
+        if ($set === NULL)
+            return (bool) $this->notifications->pages;
+
+        if(in_array($set, ['daily', 'weekly']))
+        {
+            $this->notifications->messages = $set;
+        }
+
+        return TRUE;
+    }
+
+    /**
      * Decides what input was given in the factory method and sets the static
      * notification property
      *
@@ -202,17 +269,18 @@ class Notifications{
     {
         if((is_object($input) AND $input instanceof MongoID) OR is_string($input))
         {
-            $u = Model::factory('user')->get_selective($input, array('notifications'));
-            return (object) $u->notifications;
+            $u = Document::factory('user');
+            $u->load($input, ['settings' => 1]);
+            return (object) $u->as_array()['notifications'];
 
         }
-        if(isset($input['notifications']) AND !empty($input['notifications']))
-            return (object) $input['notifications'];
+        if(isset($input['settings']['notifications']) AND !empty($input['settings']['notifications']))
+            return (object) $input['settings']['notifications'];
 
         if(isset($input['wallpost']))
             return (object) $input;
 
-        return false;
+        return null;
     }
 
     public function as_array()

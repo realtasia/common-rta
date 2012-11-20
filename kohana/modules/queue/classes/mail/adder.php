@@ -187,7 +187,7 @@ class Mail_Add{
         if(empty($this->emails))
               throw new Mail_Processor_Exception('There are no generated emails to add');
 
-        Model::factory('email')->add($this->emails, $priority);
+        Document::factory('email')->add($this->emails, $priority);
 
         return $this;
     }

@@ -1,4 +1,6 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php
+
+defined('SYSPATH') or die('No direct script access.');
 /**
  * Mongo Job Model.
  *
@@ -15,45 +17,36 @@
  * In Progress -> BOOL TRUE/FALSE,
  * Status      -> INT 0 = Success, 1 = Pending, 2 = Failed,
   Messages (array)[
-      Type (array) [
-          (optional) User ID       -> MongoID,
-          (optional) User Email    -> STRING,
-          (optional) Mentionee Ids -> array,
-          Date                     -> INT timestamp,
-          Prority                  -> INT 1 = Lowest
-      ]
+  Type (array) [
+  (optional) User ID       -> MongoID,
+  (optional) User Email    -> STRING,
+  (optional) Mentionee Ids -> array,
+  Date                     -> INT timestamp,
+  Prority                  -> INT 1 = Lowest
+  ]
   ]
  */
-class Model_Job extends Model{
-
+class Model_Job extends Document {
 
     public function get_next($delivery = 'immediate', $tries = 1)
     {
-        $table = Inflector::plural($this->collname);
-        $query = array(
-            'in_progress' => FALSE,
-            'delivery' => $delivery,
-            'status' => array('$gte' => $tries)
-        );
         try
         {
-            $result = $this->db->command(
-              array(
-                 'findandmodify' => $table,
-                 'query'         => $query,
-                 'sort'          => array('status' => 1),
-                 'update'        => array('$set' => array('in_progress' => (int) TRUE)),
-                 'upsert'        => FALSE,
-                 'limit'         => 1
-              ));
-
-            if(isset($result['value']))
-                return (object) $result['value'];
+            return (object) $this->collection()->findAndModify([
+                        'query' => [
+                            'in_progress' => FALSE,
+                            'delivery'    => $delivery,
+                            'status'      => ['$gte' => $tries]
+                        ],
+                        'sort' => array('status' => 1),
+                        'update' => array('$set' => array('in_progress' => TRUE)),
+                        'upsert'      => FALSE,
+                    ]);
         }
         catch (MongoCursorException $e)
         {
             Debug::error('Error retrieving next job to process -> :e', array(
-               ':e' => $e->getMessage()
+                ':e' => $e->getMessage()
             ));
         }
 
@@ -62,95 +55,78 @@ class Model_Job extends Model{
 
     public function update_status($job_id, $status)
     {
-        $job_id = parent::check_id($job_id);
-        try{
-            $this->collection->update(
-                  array('_id'  => $job_id),
-                  array('$set' => array('in_progress' => (int) FALSE, 'status' => $status)),
-                  array('safe' => TRUE)
-            );
-            return TRUE;
-        }
-        catch (MongoCursorException $e)
-        {
-            Debug::error('Error updating job:id status -> :e', array(
-               ':id' => $job_id->__toString(),
-               ':e' => $e->getMessage()
-            ));
-        }
-
-        return FALSE;
+        $this->atomic($job_id);
+        $this->in_progress = FALSE;
+        $this->status      = $status;
+        $this->save();
+        return TRUE;
     }
-
 
     public function check_exists($document_id, $document_type)
     {
         try
         {
-            $jobitem = $this->db->command(
-                  array(
-                     'findandmodify' => 'jobs',
-                     'query' => array(
-                        'document_id' => parent::check_id($document_id),
-                        'document_type' => $document_type,
-                        'in_progress' => (int) FALSE,
-                        'in_single' => (int) FALSE,
-                     ),
-                     'update' => array('$set' => array('in_progress' => (int) TRUE)),
-                     'upsert' => FALSE,
-                  ));
-            if (isset($jobitem['value']))
-                return $jobitem['value'];
-        }
-        catch (MongoCursorException $e)
+            return $this->collection()->findAndModify([
+                        'query' => array(
+                            'document_id'   => parent::check_id($document_id),
+                            'document_type' => $document_type,
+                            'in_progress'   => FALSE,
+                            'in_single'     => FALSE,
+                        ),
+                        'update'        => array('$set' => array('in_progress' => TRUE)),
+                        'upsert'      => FALSE
+                    ]);
+        } catch (MongoCursorException $e)
         {
             Debug::error('Error while checking for existing job :id -> :e', array(
-               ':id' => $document_id,
-               ':e' => $e->getMessage()
+                ':id' => $document_id,
+                ':e'  => $e->getMessage()
             ));
         }
 
         return FALSE;
     }
 
-    public function add_to_existing_queue($document_id, $message)
+    public function add_to_existing_queue($job_id, $key, $message)
     {
+        $this->clear();
         try
         {
-            $this->collection->update(
-                  array('document_id' => parent::check_id($document_id)), array('$set' => array('in_progress' => (int) FALSE), '$addToSet' => $message), array('safe' => TRUE)
-            );
-        }
-        catch (MongoCursorException $e)
+            $this->atomic($job_id);
+            $this->in_progress = FALSE;
+            $this->addToSet('messages.' . $key, $message);
+            $this->save();
+        } catch (MongoException $e)
         {
             Debug::error('Error adding to existing queue job:id status -> :e', array(
-               ':id' => $document_id,
-               ':e' => $e->getMessage()
+                ':id' => $job_id,
+                ':e'  => $e->getMessage()
             ));
 
             return FALSE;
         }
 
-        return $document_id;
+        return $job_id;
     }
 
     public function add_to_queue($document)
     {
+        $this->clear();
         try
         {
-            $this->collection->save($document, array('safe' => TRUE));
-        }
-        catch (MongoCursorException $e)
+            $this->load_values($document);
+            $this->save();
+        } catch (MongoException $e)
         {
             Debug::error('Error adding a new job job :id status -> :e', array(
-               ':id' => $document,
-               ':e' => $e->getMessage()
+                ':id' => $document,
+                ':e'  => $e->getMessage()
             ));
 
             return FALSE;
         }
 
-        return $document['_id'];
+        return $this->id;
     }
 
 }

@@ -85,7 +85,7 @@ class Controller_Daemon extends Controller
             while (!$this->_sigterm)
             {
                 // Find first task that is not being executed
-                $job = Model::factory('job')->collection->findOne(array('_id' => new MongoID('4f16d263f68e597005000003')));
+                $job = Document::factory('job')->collection->findOne(array('_id' => new MongoID('4f16d263f68e597005000003')));
 
                 if (($job) && count($this->_pids) < $this->_config['max'])
                 {

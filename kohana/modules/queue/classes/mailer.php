@@ -16,7 +16,7 @@ class Mailer
 
     public static function get_next($tries = self::NOATTEMPT)
     {
-        return Model::factory('queue')->get_next($tries);
+        return Document::factory('queue')->get_next($tries);
     }
 
     public static function update_delivered($job)
@@ -31,7 +31,7 @@ class Mailer
 
     protected static function update_status($job_id, $status)
     {
-        return Model::factory('queue')->update_status($job_id, $status);
+        return Document::factory('queue')->update_status($job_id, $status);
     }
 }
 

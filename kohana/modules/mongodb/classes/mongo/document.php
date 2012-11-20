@@ -952,6 +952,7 @@ abstract class Mongo_Document {
      */
     public function load($criteria = array(), array $fields = array())
     {
+        //print_r($fields);
         // Use of json for querying is allowed
         if (is_string($criteria) && $criteria[0] == "{")
         {
@@ -990,6 +991,7 @@ abstract class Mongo_Document {
 
         // Translate field aliases
         $fields = array_map(array($this, 'get_field_name'), $fields);
+
 
         $values = $this->collection()->__call('findOne', array($criteria, $fields));
 
