@@ -44,7 +44,7 @@ class SMS {
      */
     public function __construct($to = NULL, $message = NULL, $config = [])
     {
-        $config     = Arr::merge(Kohana::$config->load('sms')->as_array(), $config);
+        $config = Arr::merge(Kohana::$config->load('sms')->as_array(), $config);
         // Create a new message
 
         $this->_sms = new NexmoMessage($config['api_key'], $config['api_secret']);
@@ -76,7 +76,7 @@ class SMS {
      */
     public function to($to)
     {
-        if ($number = $this->check_number($to))
+        if ($number = static::valid($to))
         {
             $this->to = $number;
         }
@@ -119,7 +119,7 @@ class SMS {
         if (!$this->to || !$this->from || !$this->message)
         {
             Debug::log('Error invoked in MODPATH/classes/sms. Empty params');
-            return $this->error((object)['errortext' => 'Invalid params, please set a valid $to, $from & $message']);
+            return $this->error((object) ['errortext' => 'Invalid params, please set a valid $to, $from & $message']);
         }
 
         $result = $this->_sms->sendText($this->to, $this->from, $this->message);
@@ -133,23 +133,25 @@ class SMS {
      * @param string $code
      * @return boolean|string
      */
-    protected function check_number($number, $code = '+65')
+    public static function valid($number, $code = '+65')
     {
-        // if 11 characters & starts with '+', it's okay (erm... really??)
-        if (strlen($number) === 11 && strpos($number, '+') === 0)
+        // if 11 characters & starts with '+65', it's okay (erm... really??)
+        if (strlen($number) === 11 && strpos($number, $code) === 0)
         {
-            return $number;
+                // sg mobile numbers start with 8 or 9. so remove the code and check
+                if ((int) substr($number, strlen($code)) > 80000000)
+                    return $number;
         }
 
         // if we've got 8 chars and doesn't start with +, add the code. (right..)
-        if (strlen($number) === 8 && strpos($number, '+') !== 0)
+        if (strlen($number) === 8 && strpos($number, $code) !== 0 && (int) $number > 80000000)
         {
             return $code . $number;
         }
 
         // nope, didn't validate!!
         Debug::log('Error invoked in MODPATH/classes/sms. invalid number');
-        return $this->error((object)['errortext' => 'Invalid $to number. Must be a valid SG mobile number with or without "+65" ']);
+        return false;
     }
 
     /**
@@ -159,11 +161,11 @@ class SMS {
     {
         $result = json_decode($from_nexmo);
 
-        if($result)
+        if ($result)
         {
-            foreach($result->messages as $message)
+            foreach ($result->messages as $message)
             {
-                if($message->status == 0)
+                if ($message->status == 0)
                 {
                     return $this->success($message);
                 }
@@ -190,7 +192,7 @@ class SMS {
                 'to'                => $message->to,
                 'remaining_balance' => $message->remainingbalance,
                 'message_price'     => $message->messageprice,
-                'state'             => isset($message->clientref)? $message->clientref : null,
+                'state'             => isset($message->clientref) ? $message->clientref : null,
             ]
         ];
     }
@@ -210,4 +212,5 @@ class SMS {
             ]
         ];
     }
+
 }
