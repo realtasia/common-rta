@@ -2,34 +2,34 @@
 /**
  * [Kohana Cache](api/Kohana_Cache) APC driver. Provides an opcode based
  * driver for the Kohana Cache library.
- * 
+ *
  * ### Configuration example
- * 
+ *
  * Below is an example of an _apc_ server configuration.
- * 
+ *
  *     return array(
  *          'apc' => array(                          // Driver group
  *                  'driver'         => 'apc',         // using APC driver
  *           ),
  *     )
- * 
+ *
  * In cases where only one cache group is required, if the group is named `default` there is
  * no need to pass the group name when instantiating a cache instance.
- * 
+ *
  * #### General cache group configuration settings
- * 
+ *
  * Below are the settings available to all types of cache driver.
- * 
+ *
  * Name           | Required | Description
  * -------------- | -------- | ---------------------------------------------------------------
  * driver         | __YES__  | (_string_) The driver type to use
- * 
+ *
  * ### System requirements
- * 
+ *
  * *  Kohana 3.0.x
  * *  PHP 5.2.4 or greater
  * *  APC PHP extension
- * 
+ *
  * @package    Kohana/Cache
  * @category   Base
  * @author     Kohana Team
@@ -57,10 +57,10 @@ class Kohana_Cache_Apc extends Cache implements Cache_Arithmetic {
 
 	/**
 	 * Retrieve a cached value entry by id.
-	 * 
+	 *
 	 *     // Retrieve cache entry from apc group
 	 *     $data = Cache::instance('apc')->get('foo');
-	 * 
+	 *
 	 *     // Retrieve cache entry from apc group and return 'bar' if miss
 	 *     $data = Cache::instance('apc')->get('foo', 'bar');
 	 *
@@ -78,12 +78,12 @@ class Kohana_Cache_Apc extends Cache implements Cache_Arithmetic {
 
 	/**
 	 * Set a value to cache with id and lifetime
-	 * 
+	 *
 	 *     $data = 'bar';
-	 * 
+	 *
 	 *     // Set 'bar' to 'foo' in apc group, using default expiry
 	 *     Cache::instance('apc')->set('foo', $data);
-	 * 
+	 *
 	 *     // Set 'bar' to 'foo' in apc group for 30 seconds
 	 *     Cache::instance('apc')->set('foo', $data, 30);
 	 *
@@ -104,7 +104,7 @@ class Kohana_Cache_Apc extends Cache implements Cache_Arithmetic {
 
 	/**
 	 * Delete a cache entry based on id
-	 * 
+	 *
 	 *     // Delete 'foo' entry from the apc group
 	 *     Cache::instance('apc')->delete('foo');
 	 *
@@ -118,11 +118,11 @@ class Kohana_Cache_Apc extends Cache implements Cache_Arithmetic {
 
 	/**
 	 * Delete all cache entries.
-	 * 
+	 *
 	 * Beware of using this method when
 	 * using shared memory cache systems, as it will wipe every
 	 * entry within the system for all clients.
-	 * 
+	 *
 	 *     // Delete all cache entries in the apc group
 	 *     Cache::instance('apc')->delete_all();
 	 *

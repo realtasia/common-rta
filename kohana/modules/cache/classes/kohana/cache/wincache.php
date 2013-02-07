@@ -2,30 +2,30 @@
 /**
  * [Kohana Cache](api/Kohana_Cache) Wincache driver. Provides an opcode based
  * driver for the Kohana Cache library.
- * 
+ *
  * ### Configuration example
- * 
+ *
  * Below is an example of an _wincache_ server configuration.
- * 
+ *
  *     return array(
  *          'wincache' => array(                     // Driver group
  *                  'driver'         => 'wincache',  // using wincache driver
  *           ),
  *     )
- * 
+ *
  * In cases where only one cache group is required, if the group is named `default` there is
  * no need to pass the group name when instantiating a cache instance.
- * 
+ *
  * #### General cache group configuration settings
- * 
+ *
  * Below are the settings available to all types of cache driver.
- * 
+ *
  * Name           | Required | Description
  * -------------- | -------- | ---------------------------------------------------------------
  * driver         | __YES__  | (_string_) The driver type to use
- * 
+ *
  * ### System requirements
- * 
+ *
  * *  Windows XP SP3 with IIS 5.1 and » FastCGI Extension
  * *  Windows Server 2003 with IIS 6.0 and » FastCGI Extension
  * *  Windows Vista SP1 with IIS 7.0 and FastCGI Module
@@ -34,7 +34,7 @@
  * *  Windows Server 2008 R2 with IIS 7.5 and FastCGI Module
  * *  PHP 5.2.X, Non-thread-safe build
  * *  PHP 5.3 X86, Non-thread-safe VC9 build
- * 
+ *
  * @package    Kohana/Cache
  * @category   Base
  * @author     Kohana Team
@@ -62,10 +62,10 @@ class Kohana_Cache_Wincache extends Cache {
 
 	/**
 	 * Retrieve a cached value entry by id.
-	 * 
+	 *
 	 *     // Retrieve cache entry from wincache group
 	 *     $data = Cache::instance('wincache')->get('foo');
-	 * 
+	 *
 	 *     // Retrieve cache entry from wincache group and return 'bar' if miss
 	 *     $data = Cache::instance('wincache')->get('foo', 'bar');
 	 *
@@ -83,12 +83,12 @@ class Kohana_Cache_Wincache extends Cache {
 
 	/**
 	 * Set a value to cache with id and lifetime
-	 * 
+	 *
 	 *     $data = 'bar';
-	 * 
+	 *
 	 *     // Set 'bar' to 'foo' in wincache group, using default expiry
 	 *     Cache::instance('wincache')->set('foo', $data);
-	 * 
+	 *
 	 *     // Set 'bar' to 'foo' in wincache group for 30 seconds
 	 *     Cache::instance('wincache')->set('foo', $data, 30);
 	 *
@@ -109,7 +109,7 @@ class Kohana_Cache_Wincache extends Cache {
 
 	/**
 	 * Delete a cache entry based on id
-	 * 
+	 *
 	 *     // Delete 'foo' entry from the wincache group
 	 *     Cache::instance('wincache')->delete('foo');
 	 *
@@ -123,11 +123,11 @@ class Kohana_Cache_Wincache extends Cache {
 
 	/**
 	 * Delete all cache entries.
-	 * 
+	 *
 	 * Beware of using this method when
 	 * using shared memory cache systems, as it will wipe every
 	 * entry within the system for all clients.
-	 * 
+	 *
 	 *     // Delete all cache entries in the wincache group
 	 *     Cache::instance('wincache')->delete_all();
 	 *

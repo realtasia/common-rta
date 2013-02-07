@@ -20,7 +20,7 @@ var amplify = {
 		/// &#10;&#09;resourceId: Identifier string for the resource.
 		/// &#10;&#09;&#09;data (optional): Data associated with the request.
 		/// &#10;&#09;&#09;success (optional): Function to invoke on success.
-		/// &#10;&#09;&#09;error (optional): Function to invoke on error.		
+		/// &#10;&#09;&#09;error (optional): Function to invoke on error.
 		/// &#10;&#09;}
 		///</param>
 		/// <returns type="Object">An object containing an 'abort' method</returns>
@@ -48,7 +48,7 @@ amplify.request.define = function( resourceId, requestType, settings ) {
 	/// &#10;&#09;}
 	/// </param>
 	///	<param name="resourceId*" type="String">* This parameter is only used with the #1 additional signature. Identifier string for the resource.</param>
-	///	<param name="resource*" type="Function"> 
+	///	<param name="resource*" type="Function">
 	/// * This parameter is only used with the #1 additional signature. Function to handle requests. Receives a hash with the following properties:
 	/// &#10;&#09;{
 	/// &#10;&#09;&#09;resourceId: Identifier string for the resource.
@@ -93,7 +93,7 @@ amplify.subscribe = function( topic, callback ) {
 	/// <param name="callback" type="Function">Function to invoke when the message is published.</param>
 	/// <param name="priority" type="Number" optional="true">Priority relative to other subscriptions for the same message. Lower values have higher priority. Default is 10.</param>
 };
- 
+
 amplify.unsubscribe = function( topic, callback ) {
 	/// <summary>Remove a subscription.</summary>
 	/// <param name="topic" type="String">The topic being unsubscribed from.</param>

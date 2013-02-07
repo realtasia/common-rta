@@ -287,7 +287,7 @@ class Kohana_Database_Query_Builder_Select extends Database_Query_Builder_Where 
 
 	/**
 	 * Adds an other UNION clause.
-	 * 
+	 *
 	 * @param mixed $select if string, it must be the name of a table. Else
 	 *  must be an instance of Database_Query_Builder_Select
 	 * @param boolean $all decides if it's an UNION or UNION ALL clause
@@ -303,7 +303,7 @@ class Kohana_Database_Query_Builder_Select extends Database_Query_Builder_Where 
 			throw new Kohana_Exception('first parameter must be a string or an instance of Database_Query_Builder_Select');
 		$this->_union []= array('select' => $select, 'all' => $all);
 		return $this;
-	}	
+	}
 
 	/**
 	 * Start returning results after "OFFSET ..."
@@ -399,7 +399,7 @@ class Kohana_Database_Query_Builder_Select extends Database_Query_Builder_Where 
 			// Add offsets
 			$query .= ' OFFSET '.$this->_offset;
 		}
-		
+
 		if ( ! empty($this->_union))
 		{
 			foreach ($this->_union as $u) {

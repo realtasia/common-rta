@@ -1,7 +1,7 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
  * See [Kohana_Cache_Memcache]
- * 
+ *
 * @package    Kohana/Cache
 * @category   Base
 * @version    2.0
@@ -11,7 +11,7 @@
  */
 class Kohana_Cache_MemcacheTag extends Cache_Memcache implements Cache_Tagging {
 
-	/** 
+	/**
 	 * Constructs the memcache object
 	 *
 	 * @param  array     configuration
@@ -29,9 +29,9 @@ class Kohana_Cache_MemcacheTag extends Cache_Memcache implements Cache_Tagging {
 
 	/**
 	 * Set a value based on an id with tags
-	 * 
-	 * @param   string   id 
-	 * @param   mixed    data 
+	 *
+	 * @param   string   id
+	 * @param   mixed    data
 	 * @param   integer  lifetime [Optional]
 	 * @param   array    tags [Optional]
 	 * @return  boolean
@@ -56,7 +56,7 @@ class Kohana_Cache_MemcacheTag extends Cache_Memcache implements Cache_Tagging {
 	/**
 	 * Delete cache entries based on a tag
 	 *
-	 * @param   string   tag 
+	 * @param   string   tag
 	 * @return  boolean
 	 */
 	public function delete_tag($tag)
@@ -67,12 +67,12 @@ class Kohana_Cache_MemcacheTag extends Cache_Memcache implements Cache_Tagging {
 	/**
 	 * Find cache entries based on a tag
 	 *
-	 * @param   string   tag 
+	 * @param   string   tag
 	 * @return  void
 	 * @throws  Cache_Exception
 	 */
 	public function find($tag)
 	{
 		throw new Cache_Exception('Memcached-tags does not support finding by tag');
-	}	
+	}
 }

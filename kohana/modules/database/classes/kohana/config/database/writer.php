@@ -36,7 +36,7 @@ class Kohana_Config_Database_Writer extends Config_Database_Reader implements Ko
 	/**
 	 * Writes the passed config for $group
 	 *
-	 * Returns chainable instance on success or throws 
+	 * Returns chainable instance on success or throws
 	 * Kohana_Config_Exception on failure
 	 *
 	 * @param string      $group  The config group

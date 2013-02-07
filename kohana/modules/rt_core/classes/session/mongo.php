@@ -40,10 +40,10 @@ class Session_Mongo extends Session {
     {
         if (!isset($config['group']))
             $config['group'] = 'default';
-        
+
         if (!isset($config['name']))
             $config['name'] = 'oauth2';
-        
+
         // Load the database
         $this->_db = Mongo_Database::instance($config['group'])->db()->{$this->_collection};
 

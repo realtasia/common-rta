@@ -58,7 +58,7 @@ abstract class Kohana_Unittest_Database_TestCase extends PHPUnit_Extensions_Data
 
 			self::$_assert_type_compatability = version_compare(PHPUnit_Runner_Version::id(), '3.5.0', '<=');
 		}
-		
+
 		$this->_helpers = new Kohana_Unittest_Helpers;
 
 		$this->setEnvironment($this->environmentDefault);
@@ -97,8 +97,8 @@ abstract class Kohana_Unittest_Database_TestCase extends PHPUnit_Extensions_Data
 		}
 
 		$pdo = new PDO(
-			$config['connection']['dsn'], 
-			$config['connection']['username'], 
+			$config['connection']['dsn'],
+			$config['connection']['username'],
 			$config['connection']['password']
 		);
 
@@ -178,7 +178,7 @@ abstract class Kohana_Unittest_Database_TestCase extends PHPUnit_Extensions_Data
 
 		return parent::assertInstanceOf($expected, $actual, $message);
 	}
-	
+
 	/**
 	 * Asserts that an attribute is of a given type.
 	 *
@@ -249,7 +249,7 @@ abstract class Kohana_Unittest_Database_TestCase extends PHPUnit_Extensions_Data
 		{
 			return self::assertType($expected, $actual, $message);
 		}
-		
+
 		return parent::assertInternalType($expected, $actual, $message);
 	}
 

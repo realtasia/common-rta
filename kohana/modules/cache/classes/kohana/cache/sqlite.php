@@ -1,9 +1,9 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
  * Kohana Cache Sqlite Driver
- * 
+ *
  * Requires SQLite3 and PDO
- * 
+ *
  * @package    Kohana/Cache
  * @category   Base
  * @author     Kohana Team
@@ -68,7 +68,7 @@ class Kohana_Cache_Sqlite extends Cache implements Cache_Tagging, Cache_GarbageC
 	/**
 	 * Retrieve a value based on an id
 	 *
-	 * @param   string   id 
+	 * @param   string   id
 	 * @param   string   default [Optional] Default value to return if id not found
 	 * @return  mixed
 	 * @throws  Cache_Exception
@@ -105,7 +105,7 @@ class Kohana_Cache_Sqlite extends Cache implements Cache_Tagging, Cache_GarbageC
 		{
 			// Disable notices for unserializing
 			$ER = error_reporting(~E_NOTICE);
-			
+
 			// Return the valid cache data
 			$data = unserialize($result->cache);
 
@@ -120,8 +120,8 @@ class Kohana_Cache_Sqlite extends Cache implements Cache_Tagging, Cache_GarbageC
 	/**
 	 * Set a value based on an id. Optionally add tags.
 	 *
-	 * @param   string   id 
-	 * @param   mixed    data 
+	 * @param   string   id
+	 * @param   mixed    data
 	 * @param   integer  lifetime [Optional]
 	 * @return  boolean
 	 */
@@ -133,7 +133,7 @@ class Kohana_Cache_Sqlite extends Cache implements Cache_Tagging, Cache_GarbageC
 	/**
 	 * Delete a cache entry based on id
 	 *
-	 * @param   string   id 
+	 * @param   string   id
 	 * @param   integer  timeout [Optional]
 	 * @return  boolean
 	 * @throws  Cache_Exception
@@ -181,9 +181,9 @@ class Kohana_Cache_Sqlite extends Cache implements Cache_Tagging, Cache_GarbageC
 
 	/**
 	 * Set a value based on an id. Optionally add tags.
-	 * 
-	 * @param   string   id 
-	 * @param   mixed    data 
+	 *
+	 * @param   string   id
+	 * @param   mixed    data
 	 * @param   integer  lifetime [Optional]
 	 * @param   array    tags [Optional]
 	 * @return  boolean
@@ -227,7 +227,7 @@ class Kohana_Cache_Sqlite extends Cache implements Cache_Tagging, Cache_GarbageC
 	/**
 	 * Delete cache entries based on a tag
 	 *
-	 * @param   string   tag 
+	 * @param   string   tag
 	 * @param   integer  timeout [Optional]
 	 * @return  boolean
 	 * @throws  Cache_Exception
@@ -253,7 +253,7 @@ class Kohana_Cache_Sqlite extends Cache implements Cache_Tagging, Cache_GarbageC
 	/**
 	 * Find cache entries based on a tag
 	 *
-	 * @param   string   tag 
+	 * @param   string   tag
 	 * @return  array
 	 * @throws  Cache_Exception
 	 */
@@ -315,7 +315,7 @@ class Kohana_Cache_Sqlite extends Cache implements Cache_Tagging, Cache_GarbageC
 	/**
 	 * Tests whether an id exists or not
 	 *
-	 * @param   string   id 
+	 * @param   string   id
 	 * @return  boolean
 	 * @throws  Cache_Exception
 	 */

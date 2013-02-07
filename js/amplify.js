@@ -1,19 +1,19 @@
 /*!
  * AmplifyJS 1.1.0 - Core, Store, Request
- * 
+ *
  * Copyright 2011 appendTo LLC. (http://appendto.com/team)
  * Dual licensed under the MIT or GPL licenses.
  * http://appendto.com/open-source-licenses
- * 
+ *
  * http://amplifyjs.com
  */
 /*!
  * Amplify Core 1.1.0
- * 
+ *
  * Copyright 2011 appendTo LLC. (http://appendto.com/team)
  * Dual licensed under the MIT or GPL licenses.
  * http://appendto.com/open-source-licenses
- * 
+ *
  * http://amplifyjs.com
  */
 (function( global, undefined ) {
@@ -67,14 +67,14 @@ var amplify = global.amplify = {
 			if ( !subscriptions[ topic ] ) {
 				subscriptions[ topic ] = [];
 			}
-	
+
 			var i = subscriptions[ topic ].length - 1,
 				subscriptionInfo = {
 					callback: callback,
 					context: context,
 					priority: priority
 				};
-	
+
 			for ( ; i >= 0; i-- ) {
 				if ( subscriptions[ topic ][ i ].priority <= priority ) {
 					subscriptions[ topic ].splice( i + 1, 0, subscriptionInfo );
@@ -111,11 +111,11 @@ var amplify = global.amplify = {
 }( this ) );
 /*!
  * Amplify Store - Persistent Client-Side Storage 1.1.0
- * 
+ *
  * Copyright 2011 appendTo LLC. (http://appendto.com/team)
  * Dual licensed under the MIT or GPL licenses.
  * http://appendto.com/open-source-licenses
- * 
+ *
  * http://amplifyjs.com
  */
 (function( amplify, undefined ) {
@@ -143,7 +143,7 @@ store.addType = function( type, storage ) {
 	};
 }
 store.error = function() {
-	return "amplify.store quota exceeded"; 
+	return "amplify.store quota exceeded";
 };
 
 var rprefix = /^__amplify__/;
@@ -404,11 +404,11 @@ if ( window.globalStorage ) {
 }( this.amplify = this.amplify || {} ) );
 /*!
  * Amplify Request 1.1.0
- * 
+ *
  * Copyright 2011 appendTo LLC. (http://appendto.com/team)
  * Dual licensed under the MIT or GPL licenses.
  * http://appendto.com/open-source-licenses
- * 
+ *
  * http://amplifyjs.com
  */
 (function( amplify, undefined ) {
@@ -723,7 +723,7 @@ if ( amplify.store ) {
 				return false;
 			}
 			var success = ampXHR.success;
-			ampXHR.success = function( data ) {	
+			ampXHR.success = function( data ) {
 				amplify.store[ type ]( cacheKey, data, { expires: resource.cache.expires } );
 				success.apply( this, arguments );
 			};
