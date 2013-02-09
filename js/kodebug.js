@@ -1978,3 +1978,162 @@ var f=b.data("precompiled");f||(f=b.text()||"",f=F.template(p,"{{ko_with $item.k
 
     //#endregion
 }));
+
+/*
+ ko.editables v0.9 for KnockoutJS
+ https://github.com/romanych/ko.editables/
+ http://romanych.github.com/ko.editables/
+ editable extender and ko.editable plugin for viewModels
+ (c) Roman Gomolko - rgomolko@gmail.com
+ License: MIT (http://www.opensource.org/licenses/mit-license.php)
+ Exports:
+ ko.extenders.editable: ko.observable().extend({editable: true|false});
+ ko.editable: ko.editable(objectWithObservables, boolean autoInit);
+
+ Editable adds following methods into observables and objects:
+ - beginEdit()
+ - commit()
+ - rollback()
+ - hasChanges() - observable
+ */
+(function(c, i) {
+    function k() {
+        return"_scope" + ++k.counter;
+    }
+    function j(a, b, d, e) {
+        var e = e || [], g;
+        for (g in a) {
+            var h = a[g];
+            c.isWriteableObservable(h) && !1 !== h.editable && (h.extend({editable: {enable: !0, scope: b}}), d.push(h));
+            if (!(-1 < c.utils.arrayIndexOf(e, h))) {
+                e.push(h);
+                var f = c.utils.unwrapObservable(h);
+                if ("object" === typeof f) {
+                    if (c.isObservable(h)) {
+                        if (-1 < c.utils.arrayIndexOf(e, f))
+                            continue;
+                        e.push(f);
+                    }
+                    j(f, b, d, e);
+                }
+            }
+        }
+    }
+    var l = function(a) {
+        return c.dependentObservable({read: a, deferEvaluation: !0});
+    }, f = {_observables:{}, add:function(a, b) {
+        this._observables.hasOwnProperty(a) || (this._observables[a] = c.observableArray());
+        this._observables[a].push(b);
+    }, get:function(a) {
+        a = a === i ? "" : a;
+        if (!this._observables.hasOwnProperty(a))
+            throw Error("Unknown scope " + a);
+        return c.utils.unwrapObservable(this._observables[a]);
+    }};
+    f._observables[""] = c.observableArray();
+    k.counter = 0;
+    var m = {scalar: function(a, b) {
+            return a === b;
+        }, array: function(a, b) {
+            a = a || [];
+            b = b || [];
+            if (a.length !== b.length)
+                return!1;
+            for (var c = 0; c < a.length; c++)
+                if (a[c] !== b[c])
+                    return!1;
+            return !0;
+        }}, n = {enable:!0, scope:""};
+    c.extenders.editable = function(a, b) {
+        if (a.hasOwnProperty("editable"))
+            return a;
+        b = "object" !== typeof b ? {enable: b === i ? !0 : b, scope: ""} : c.utils.extend(c.utils.extend({}, n), b);
+        a.editable = b.enable;
+        if (!a.editable)
+            return a;
+        var d, e = m.scalar, g = a.inTransaction = c.observable(!1);
+        a.beginEdit = function() {
+            if (!g()) {
+                var b = a();
+                b instanceof Array && (b = b.slice(), e = m.array);
+                d = b;
+                g(!0);
+            }
+        };
+        a.commit = function() {
+            g(!1);
+        };
+        a.rollback = function() {
+            g() && (a(d), g(!1));
+        };
+        a.oldValue = function() {
+            return d;
+        };
+        a.hasChanges = l(function() {
+            return g() && !e(a(), d);
+        });
+        !1 !== b.scope && f.add(b.scope, a);
+        return a;
+    };
+    c.editable = function(a, b) {
+        if ("function" !== typeof a.beginEdit) {
+            var b = b === i ? !0 : b, d = c.observableArray();
+            a.beginEdit = function() {
+                c.utils.arrayForEach(d(), function(a) {
+                    a.beginEdit();
+                });
+            };
+            a.commit = function() {
+                c.utils.arrayForEach(d(), function(a) {
+                    a.commit();
+                });
+            };
+            a.rollback = function() {
+                c.utils.arrayForEach(d(), function(a) {
+                    a.rollback();
+                });
+            };
+            a.hasChanges = l(function() {
+                return null !== c.utils.arrayFirst(d(), function(a) {
+                    return a.hasChanges();
+                });
+            });
+            var e = k();
+            a.addEditable = function(a) {
+                j(a, e, d, []);
+            };
+            b && j(a, e, d, []);
+        }
+    };
+    c.editable.enable = function(a, b) {
+        b === i && (b = "");
+        j(a, b, []);
+    };
+    c.editable.beginEdit = function(a) {
+        c.utils.arrayForEach(f.get(a), function(a) {
+            a.beginEdit();
+        });
+    };
+    c.editable.commit = function(a) {
+        c.utils.arrayForEach(f.get(a), function(a) {
+            a.commit();
+        });
+    };
+    c.editable.rollback = function(a) {
+        c.utils.arrayForEach(f.get(a), function(a) {
+            a.rollback();
+        });
+    };
+    c.editable.hasChanges = function(a) {
+        for (var a = f.get(a), b = 0, c = a.length; b < c; b++)
+            if (a[b].hasChanges())
+                return!0;
+        return !1;
+    };
+    c.editable._editables = f;
+    c.editable.getHasChangesFlag = function(a) {
+        return l(function() {
+            return c.editable.hasChanges(a);
+        }).extend({throttle: 100});
+    };
+})(ko);
