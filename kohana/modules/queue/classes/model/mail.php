@@ -11,7 +11,7 @@
 
 class Model_Mail extends Model
 {
-    public function get_next($tries, $limit)
+    public function get_next($tries, $limit = 100)
     {
         $query = array(
             'in_progress' => FALSE,

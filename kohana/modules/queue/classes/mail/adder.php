@@ -352,7 +352,7 @@ class Mail_Add{
      */
     protected static function _adj_or_noun($recipient, $adjective = 'your')
     {
-        if(static::_string_id(static::$doc->user_id) == static::_string_id($recipient['_id']))
+        if((string) static::$doc->user_id == (string) $recipient['_id'])
             return "$adjective ";
 
         return $pre_post = static::$doc->user_full_name . '\'s ';
@@ -386,17 +386,4 @@ class Mail_Add{
 
         return $greetings[array_rand($greetings)] . $name . ', ';
     }
-
-    /**
-     * a small utility to cnvert MongoIDs to strings. useful for comaprisons
-     * and content generation.
-     *
-     * @param MongoID $id
-     * @return string
-     */
-    protected static function _string_id($id)
-    {
-        return $id instanceof MongoID ? $id->__toString() : $id;
-    }
-
 }

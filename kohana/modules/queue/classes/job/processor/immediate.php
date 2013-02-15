@@ -12,22 +12,22 @@
 class Job_Processor_Immediate {
 
     public $job;
-    public $recipients;
-    public $interactors;
-    public $emails;
+    public $recipients = [];
+    public $interactors = [];
+    public $emails = [];
     public $original_document;
     public $document_owner;
 
     /** @var bool  if false, performs batch operations. */
     public $is_single = FALSE;
     public static $types = array(
-        'single' => array(
+        'single' => [
             'mention', 'testimonial', 'wallpost', 'approve-testimonial',
             'private-message'
-        ),
-        'group' => array(
+        ],
+        'group' => [
             'comment', 'like', 'subscribe'
-        )
+        ]
     );
 
     /**
@@ -53,19 +53,20 @@ class Job_Processor_Immediate {
     {
         // fetch the document
         $this->original_document = static::get_original_document($this->job);
+        //die(Debug::vars($this->original_document));
 
         // set the author
-        $this->document_owner = static::string_id($this->original_document->user_id);
+        $this->document_owner = (string) $this->original_document->user['_id'];
+        //echo Debug::vars($this->messages['comment']);
 
         if ($this->job->is_single)
         {
             $this->is_single = TRUE;
             foreach (self::$types['single'] as $type)
             {
-                if (isset($this->messages[$type]) AND !empty($this->messages[$type]))
-                {
-                    $this->{str_replace('-', '_', $type)}($this->messages[$type][0]);
-                }
+                $m = \Arr::get($this->messages, $type);
+                if ($m)
+                    $this->{str_replace('-', '_', $type)}($m[0]);
             }
 
             return $this;
@@ -73,16 +74,20 @@ class Job_Processor_Immediate {
 
         $this->set_users();
 
+
+
         // loop through the message types.
-        foreach (self::$types['group'] as $k => $type)
+        foreach (self::$types['group'] as $type)
         {
-            if (isset($this->messages[$type]) AND !empty($this->messages[$type]))
+            $m = \Arr::get($this->messages, $type);
+            if ($m)
             {
                 foreach ($this->recipients as $recipient_id => $recipient)
                 {
+                    //print_r([$this->messages[$type], array_reverse($this->messages[$type])]);
                     // check notifications before building emails.
                     $notifications = Notifications::factory($recipient);
-                    $this->{$type}(array_reverse($this->messages[$type]), $recipient_id, $notifications);
+                    $this->{$type}($m, $recipient_id, $notifications);
                 }
             }
         }
@@ -100,26 +105,29 @@ class Job_Processor_Immediate {
     public function set_users($recipients = NULL, $interactors = NULL)
     {
 
-        $recipients = is_null($recipients) ? $this->extract_recipients($this->original_document) : [$recipients];
+        $recipients = is_null($recipients) ? $this->extract_recipients($this->original_document) : [];
 
         $interactors = is_null($interactors) ? $this->extract_interactors($this->messages) : [$interactors];
 
+        $recipients = Arr::path($recipients, '*._id');
+
         $user_ids = array_unique(Arr::merge($recipients, $interactors));
+
+        //echo Debug::vars(\Arr::path($recipients, '*._id'));
 
         $cursor = static::_get_users($user_ids);
         // we put the retrieved users back into the recipients and interactor
         // properties
         while ($cursor->hasNext())
         {
-            $u = $cursor->getNext();
+            $u = $cursor->getNext()->as_array();
+            $uid = (string) $u['_id'];
 
-            //echo debug::vars($u['_id'], $recipients, in_array($u['_id'], $recipients));
+            if (in_array($uid, $recipients))
+                $this->recipients[$uid] = $u;
 
-            if (in_array($u['_id'], $recipients))
-                (string) $this->recipients[$u['_id']] = $u;
-
-            if (in_array($u['_id'], $interactors))
-                (string) $this->interactors[$u['_id']] = $u;
+            if (in_array($uid, $interactors))
+                $this->interactors[$uid] = $u;
         }
 
         return $this;
@@ -135,22 +143,22 @@ class Job_Processor_Immediate {
      */
     public function comment($items, $receip_id, $notifications)
     {
+        //print_r([$items, $receip_id, $notifications]);
         // check if recipient is document owner and would like notifications
         // from his own post
-        if ($this->document_owner == $receip_id)
+        if ((string) $this->document_owner === (string) $receip_id)
         {
             if (!$notifications->own_post_comments())
                 return;
         }
 
         // check if this recipient wants notifications from other user's posts
-        if ($this->document_owner !== $receip_id)
+        if ((string) $this->document_owner !== (string) $receip_id)
         {
             if (!$notifications->other_post_comments())
                 return;
         }
         //echo Debug::vars(Model::factory('comment')->get($items[0]['comment_id']));
-
         return $this->recipient_emails($items, $receip_id, 'comment');
     }
 
@@ -340,9 +348,10 @@ class Job_Processor_Immediate {
     protected function recipient_emails($items, $receip_id, $type)
     {
         // loops through all the items.
-        foreach ($items as $key => $item)
+        foreach ($items as $item)
         {
-            $item_uid = static::string_id($item['user_id']);
+            echo Debug::vars($item);
+            $item_uid = (string) $item['user_id'];
             // this is the decision making process. Document owner does not
             // get emails for his own interactions. And each recipient does
             // not get his own interaction emails.
@@ -351,12 +360,17 @@ class Job_Processor_Immediate {
                 $item['user']    = $this->interactors[(string) $item['user_id']];
                 //just for comments, retrieve the comment
                 if ($type === 'comment')
-                    $item['comment'] = Document::factory('comment')->get($item['comment_id']);
+                {
+                    $c = Document::factory('comment', $item['comment_id']);
+                    $c->load();
+                    $item['comment'] = $c;
+                }
 
                 unset($item['comment_id'], $item['user_id']);
 
                 // add to the final array and build templates.
-                $this->emails[static::string_id($receip_id)][$type][] = $item;
+                                //echo Debug::vars($item);
+                $this->emails[(string) $receip_id][$type][] = $item;
             }
         }
 
@@ -371,14 +385,14 @@ class Job_Processor_Immediate {
      * @param string|mongoID $recipient
      * @return Queue_Processer
      */
-    protected function single_recipient_emails($item, $receip_id, $interact_id, $type)
+    protected function single_recipient_emails($item, $receip_id, $type)
     {
         $item['user'] = $this->interactors[(string) $item['user_id']];
 
         unset($item['user_id']);
 
         // add to the final array and build templates.
-        $this->emails[static::string_id($receip_id)][$type][] = $item;
+        $this->emails[(string) $receip_id][$type][] = $item;
 
         return $this;
     }
@@ -393,12 +407,11 @@ class Job_Processor_Immediate {
     {
         $args = [
             'object_id'   => $document->_id,
-            'object_type' => (string) $document->collection(),
-            'limit'       => NULL,
-            'skip'        => NULL,
+            'object_type' => Inflector::singular((string) $document->collection()),
+            'limit'       => 100,
+            'skip'        => 0,
             'interaction' => 'subscribe'
         ];
-
         return Collection::factory('interaction')->fetch($args, 'user');
     }
 
@@ -419,7 +432,7 @@ class Job_Processor_Immediate {
             }
         }
 
-        return array_unique($ids);
+        return array_unique(array_values($ids));
     }
 
     /**
@@ -431,18 +444,9 @@ class Job_Processor_Immediate {
      */
     protected static function get_original_document($job)
     {
-        return Document::factory($job->document_type, $job->document_id)->job_fields();
-    }
-
-    /**
-     * Utility to convert mongoids to string for comparisons
-     *
-     * @param MongoID $id
-     * @return string
-     */
-    protected static function string_id($id)
-    {
-        return (string) $id;
+        $d = Document::factory($job->document_type, $job->document_id);
+        $d->load();
+        return $d;
     }
 
     /**
@@ -456,21 +460,15 @@ class Job_Processor_Immediate {
         $query['status'] = 'active';
         $query['_id']    = is_array($user_ids)
                             ? array('$in' => array_map('Document::check_id', $user_ids))
-                            : Model::check_id($user_ids);
+                            : Document::check_id((string)$user_ids);
 
-        $users = Document::factory('user')->collection()
+        $users = Collection::factory('user')
                 ->find($query)
-                ->fields([
-                    '_id'                    => 1,
-                    'email'                  => 1,
-                    'first_name'             => 1,
-                    'name'                   => 1,
-                    'avatar'                 => 1,
-                    'settings.notifications' => 1
-        ]);
+                ->fields(array_fill_keys(['_id','email','first_name','name','avatar','settings.notifications'],1));
+
         if($users->hasNext())
         {
-            return iterator_to_array($users);
+            return $users;
         }
     }
 
@@ -482,17 +480,22 @@ class Job_Processor_Immediate {
     {
         $mail_adder = Mail_Add::factory($this->original_document, $this->job);
 
-        //return debug::vars($this->emails);
+        //echo debug::vars($this);
+        echo "<pre>";
+        //print_r($this->emails);
         foreach ($this->emails as $r => $messages)
         {
+            //print_r($t);
             // loop through the message types.
-            foreach (self::$types[$type_key] as $k => $type)
+            foreach (self::$types[$type_key] as $type)
             {
 
-                if (isset($messages[$type]) AND !empty($messages[$type]))
+                $t = \Arr::get($messages, $type);
+                //die(Debug::vars($t));
+                if ($t)
                 {
-                    //echo Debug::vars($r);
-                    $mail_adder->process($this->recipients[$r], $type, $messages[$type]);
+                    //echo Debug::vars($t);
+                    $mail_adder->process($this->recipients[$r], $type, $t);
                 }
             }
         }

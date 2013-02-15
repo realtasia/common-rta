@@ -1,6 +1,4 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 /**
  * Mongo Job Model.
  *
@@ -62,20 +60,28 @@ class Model_Job extends Document {
         return TRUE;
     }
 
-    public function check_exists($document_id, $document_type)
+    public function check_exists($document_id)
     {
+
         try
         {
-            return $this->collection()->findAndModify([
-                        'query' => array(
+//            $this->load([
+//                'document_id'   => parent::check_id($document_id),
+//                'in_progress'   => FALSE,
+//                'is_single'     => FALSE,
+//            ]);
+            $doc = $this->collection()->collection()->findAndModify([
                             'document_id'   => parent::check_id($document_id),
-                            'document_type' => $document_type,
                             'in_progress'   => FALSE,
-                            'in_single'     => FALSE,
-                        ),
-                        'update'        => array('$set' => array('in_progress' => TRUE)),
-                        'upsert'      => FALSE
-                    ]);
+                            'is_single'     => FALSE,
+                        ], ['$set' => ['in_progress' => TRUE]]);
+
+            $_id = \Arr::get($doc, '_id');
+
+            if($_id)
+                $this->load($_id);
+
+            return $this;
         } catch (MongoCursorException $e)
         {
             Debug::error('Error while checking for existing job :id -> :e', array(
@@ -87,12 +93,10 @@ class Model_Job extends Document {
         return FALSE;
     }
 
-    public function add_to_existing_queue($job_id, $key, $message)
+    public function add_to_existing_queue($key, $message)
     {
-        $this->clear();
         try
         {
-            $this->atomic($job_id);
             $this->in_progress = FALSE;
             $this->addToSet('messages.' . $key, $message);
             $this->save();

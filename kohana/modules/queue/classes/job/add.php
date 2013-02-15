@@ -35,7 +35,7 @@ class Job_Add {
     public function __construct($document_id, $document_type, $user_id = NULL)
     {
         $this->document_id   = Model::check_id($document_id);
-        $this->user_id       = !is_null($user_id) ? Model::check_id($user_id) : $user_id;
+        $this->user_id       = !is_null($user_id) ? Document::check_id($user_id) : $user_id;
         $this->document_type = $document_type;
     }
 
@@ -244,14 +244,11 @@ class Job_Add {
         else
         {
             // check if this job exists
-            $old_job = $Job->check_exists($this->document_id, $this->document_type);
+            $Job->check_exists($this->document_id, $this->document_type);
 
             // if it does exist, add the message to the document and return
-            if ($old_job)
-            {
-                return $Job
-                        ->add_to_existing_queue($old_job['_id'], $this->key, $message);
-            }
+            if (isset($Job->_id))
+                return $Job->add_to_existing_queue($this->key, $message);
 
             // document doesn't exist so need to create a new job
             // create a new default job array from defaults
@@ -265,7 +262,7 @@ class Job_Add {
         return $Job->add_to_queue($new_job);
     }
 
-    /*     * **************** PROTECTED  METHODS *********** */
+    /************************* PROTECTED  METHODS ************************* */
 
     /**
      * Creates and returns a default schema array for a Job Document in Mongo
@@ -288,8 +285,8 @@ class Job_Add {
         return [
             'document_id'   => Document::check_id($this->document_id),
             'document_type' => $this->document_type,
-            'in_progress'   => 0,
-            'is_single'     => (int) $single,
+            'in_progress'   => FALSE,
+            'is_single'     => (bool) $single,
             'status'        => 1,
             'priority'      => $priority,
             'delivery'      => $delivery,

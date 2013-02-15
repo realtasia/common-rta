@@ -1,0 +1,3 @@
+[submodule "kohana/modules/koaws"]
+	path = kohana/modules/koaws
+	url = git://github.com/AlexC/kohana-aws.git

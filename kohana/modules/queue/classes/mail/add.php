@@ -15,11 +15,11 @@ class Mail_Add{
     /** @var string The url to use to build links.
      * @todo move this out to a config file.
      */
-    public static $url = 'http://beta.realtasia.com.sg/';
+    public static $url = 'http://beta.realtasia.com.sg';
 
     /** @var array The generated list of emails to add to the db
      */
-    public $emails;
+    public $emails = [];
 
     /** @var MongoDocument object the original job from the job queue
      */
@@ -59,6 +59,7 @@ class Mail_Add{
     {
         $content  = $this->{$type}($recipient, $items);
         $notification_url = static::_notification_url($recipient['_id']);
+        $email = new AmazonSES();
 
         $view = View::factory('emails/email')
               ->set('title', $content['header_plain'])
@@ -77,8 +78,8 @@ class Mail_Add{
 
         $this->emails[] = Email::factory($content['header_plain'], $plainview)
               ->message($view, 'text/html')
-              //->to($recipient['email'][0], $recipient['display_name'])
-              ->to('jason.nathan@realtasia.com', 'Jason Nathan')
+              ->to($recipient['email'][0], $recipient['name'])
+              //->to('jason.nathan@realtasia.com', 'Jason Nathan')
               ->from('support@realtasia.com', 'Realtasia Notifications')
               ->raw_message();
 
@@ -100,8 +101,8 @@ class Mail_Add{
     {
         $content_message  = static::_build_interaction_summary($recipient, $items, 'commented on ');
         $comment  = View::factory('emails/content/comment')
-                        ->set('name', $items[0]['comment']->author)
-                        ->set('comment', $items[0]['comment']->content);
+                        ->set('name', $items[0]['comment']->user['name'])
+                        ->set('comment', $items[0]['comment']->excerpt);
 
         $content_message = $content_message . "\n" . $comment;
 
@@ -283,7 +284,7 @@ class Mail_Add{
      * @param MongoDocument $recipient the user object for the recipient
      * @param array $items the items by interaction type
      * @uses static::_greeting to generate content
-     * @return NULL
+     * @return array
      */
     protected static function _generic($content_message, $recipient)
     {
@@ -296,11 +297,11 @@ class Mail_Add{
                        ->set('content_message', $content_message)
                        ->render();
 
-        return array(
+        return [
            'header_plain' => $greeting,
            'message_plain' => Inflector::br2nl($content_message),
            'message' => $content,
-        );
+        ];
     }
 
     /**
@@ -334,8 +335,8 @@ class Mail_Add{
     protected static function _extract_user($message, $set_owner = FALSE)
     {
         $message = (array) $message;
-        $info = isset($message['user']) ? $message['user'] : $message;
-        return $set_owner ? $info['display_name'] . "'s" : $info['display_name'];
+        $info = \Arr::get($message, 'user', $message);
+        return $set_owner ? $info['name'] . "'s" : $info['name'];
     }
 
     /**
@@ -346,10 +347,7 @@ class Mail_Add{
      */
     protected static function _notification_url($recipient_id)
     {
-        return static::$url . Route::get('browse')
-                    ->uri(
-                          array('action' => 'notifications', 'format' => 'php')
-                    ) . '?id=' . $recipient_id;
+        return static::$url . '/' . $recipient_id . '/settings';
     }
 
     /**
@@ -359,8 +357,7 @@ class Mail_Add{
      */
     protected static function _post_uri($post_type = 'post')
     {
-        return Route::get('browse')
-                    ->uri(array('action' => $post_type, 'format' => 'php')) . '?id=' . static::$job->document_id;
+        return '/post/' . static::$job->document_id;
     }
 
     /**
@@ -368,10 +365,10 @@ class Mail_Add{
      *
      * @return string the generated HTML link
      */
-    protected static function _post_link($type = FALSE, $post_type = 'post')
+    protected static function _post_link($type = NULL)
     {
         $type = ($type) ? $type : static::$job->document_type;
-        return static::_anchor(static::_post_uri($post_type), $type);
+        return static::_anchor('/post/' . static::$job->document_id, $type);
     }
 
     /**
@@ -381,8 +378,9 @@ class Mail_Add{
      */
     protected static function _page_link($noun = NULL)
     {
-        $page = property_exists(static::$doc, 'page_uri')
-              ? ' in ' . static::_anchor(static::$doc->page_uri, static::$doc->page_title)
+        $uri = \Arr::get(static::$doc->page, 'uri');
+        $page = $uri
+              ? ' in ' . static::_anchor($uri, static::$doc->page['name'])
               : '';
 
         return ($noun) ? $page . " $noun" : $page;
@@ -398,10 +396,10 @@ class Mail_Add{
      */
     protected static function _adj_or_noun($recipient, $adjective = 'your')
     {
-        if(static::_string_id(static::$doc->user_id) == static::_string_id($recipient['_id']))
+        if((string) static::$doc->user['_id'] === (string) $recipient['_id'])
             return "$adjective ";
 
-        return $pre_post = static::$doc->user_full_name . '\'s ';
+        return static::$doc->user['name'] . '\'s ';
     }
 
     /**
@@ -415,7 +413,7 @@ class Mail_Add{
      */
     protected static function _anchor($uri, $name)
     {
-        return HTML::anchor(static::$url . $uri, $name, array('target' => '_blank'));
+        return HTML::anchor(static::$url . $uri, $name, ['target' => '_blank']);
     }
 
     /**
@@ -432,17 +430,4 @@ class Mail_Add{
 
         return $greetings[array_rand($greetings)] . $name . ', ';
     }
-
-    /**
-     * a small utility to cnvert MongoIDs to strings. useful for comaprisons
-     * and content generation.
-     *
-     * @param MongoID $id
-     * @return string
-     */
-    protected static function _string_id($id)
-    {
-        return $id instanceof MongoID ? $id->__toString() : $id;
-    }
-
 }
