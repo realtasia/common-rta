@@ -266,12 +266,13 @@ class Notifications{
      * @return object|bool a notification object or false
      */
     protected static function parse_input($input)
-    {
+    {        
         if((is_object($input) AND $input instanceof MongoID) OR is_string($input))
         {
-            $u = Document::factory('user');
-            $u->load($input, ['settings' => 1]);
-            return (object) $u->as_array()['notifications'];
+            $u = Document::factory('user', $input);
+            $u->load(null, ['settings' => 1]);
+           // echo Debug::vars($u->as_array());
+            return (object) $u->as_array()['settings']['notifications'];
 
         }
         if(isset($input['settings']['notifications']) AND !empty($input['settings']['notifications']))
@@ -280,7 +281,7 @@ class Notifications{
         if(isset($input['wallpost']))
             return (object) $input;
 
-        return null;
+        return false;
     }
 
     public function as_array()

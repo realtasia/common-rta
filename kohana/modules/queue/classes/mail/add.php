@@ -59,7 +59,7 @@ class Mail_Add{
     {
         $content  = $this->{$type}($recipient, $items);
         $notification_url = static::_notification_url($recipient['_id']);
-        $email = new AmazonSES();
+        $email = AmazonSDK::SES();
 
         $view = View::factory('emails/email')
               ->set('title', $content['header_plain'])
@@ -76,12 +76,23 @@ class Mail_Add{
               ->set('content_header', $content['header_plain'])
               ->set('content_message', $content['message_plain']);
 
-        $this->emails[] = Email::factory($content['header_plain'], $plainview)
-              ->message($view, 'text/html')
-              ->to($recipient['email'][0], $recipient['name'])
-              //->to('jason.nathan@realtasia.com', 'Jason Nathan')
-              ->from('support@realtasia.com', 'Realtasia Notifications')
-              ->raw_message();
+        $this->emails[] = $email->send_email(
+                'Realtasia Notifications <support@realtasia.com>', [
+                    'ToAddresses' => [
+                        $recipient['name'] . "<" . $recipient['email'] . ">"
+                    ]
+                ], [
+                    'Subject.Data' => $content['header_plain'],
+                    'Body.Text.Data' => $plainview->render(),
+                    'Body.Html.Data' => $view->render(),
+                ], [
+                    'returnCurlHandle' => true
+                ]);
+//              ->message($view, 'text/html')
+//              ->to($recipient['email'][0], $recipient['name'])
+//              //->to('jason.nathan@realtasia.com', 'Jason Nathan')
+//              ->from('support@realtasia.com', 'Realtasia Notifications <support@realtasia.com>')
+//              ->raw_message();
 
         //$this->emails[] = $view . $plainview;
         return $this;
@@ -367,7 +378,7 @@ class Mail_Add{
      */
     protected static function _post_link($type = NULL)
     {
-        $type = ($type) ? $type : static::$job->document_type;
+        $type = ($type) ? $type : static::$doc->type;
         return static::_anchor('/post/' . static::$job->document_id, $type);
     }
 

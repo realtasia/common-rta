@@ -26,20 +26,48 @@
  */
 class Model_Job extends Document {
 
-    public function get_next($delivery = 'immediate', $tries = 1)
+    /**
+     * The job got sent successfully
+     */
+    const SUCCESS = 0;
+    /**
+     * The job is pending.
+     */
+    const PENDING = 1;
+    /**
+     * The job failed.
+     */
+    const FAILED = 2;
+
+
+    /**
+     * Get the next job in the line to process...
+     *
+     * @param string $delivery
+     * @param INT $tries
+     * @return mixed
+     */
+    public function get_next($delivery = 'immediate', $tries = self::PENDING)
     {
+        $this->collection()->ensureIndex([
+            'in_progress' => 1,
+            'delivery' => 1,
+            'status' => 1
+        ]);
+        $this->collection()->ensureIndex([
+            'document_id' => 1
+        ]);
         try
         {
-            return (object) $this->collection()->findAndModify([
-                        'query' => [
+            return $this->collection()->collection()->findAndModify([
                             'in_progress' => FALSE,
                             'delivery'    => $delivery,
                             'status'      => ['$gte' => $tries]
-                        ],
-                        'sort' => array('status' => 1),
-                        'update' => array('$set' => array('in_progress' => TRUE)),
-                        'upsert'      => FALSE,
-                    ]);
+                        ], [
+                            '$set' => ['in_progress' => TRUE]
+                        ], null, [
+                            'sort'   => ['status' => 1],
+                        ]);
         }
         catch (MongoCursorException $e)
         {
@@ -51,15 +79,28 @@ class Model_Job extends Document {
         return FALSE;
     }
 
-    public function update_status($job_id, $status)
+    /**
+     * Update a Job's status
+     *
+     * @param INT $status
+     * @return \Model_Job|boolean
+     */
+    public function update_status($status = self::SUCCESS)
     {
-        $this->atomic($job_id);
         $this->in_progress = FALSE;
         $this->status      = $status;
-        $this->save();
-        return TRUE;
+        if($this->save());
+            return this;
+
+        return false;
     }
 
+    /**
+     * Check if there is an unsent JOB so we can add to it instead.
+     *
+     * @param string|MongoID $document_id
+     * @return \Model_Job|boolean
+     */
     public function check_exists($document_id)
     {
 
@@ -74,6 +115,7 @@ class Model_Job extends Document {
                             'document_id'   => parent::check_id($document_id),
                             'in_progress'   => FALSE,
                             'is_single'     => FALSE,
+                            'status'        => ['$ne' => 0]
                         ], ['$set' => ['in_progress' => TRUE]]);
 
             $_id = \Arr::get($doc, '_id');
@@ -93,13 +135,21 @@ class Model_Job extends Document {
         return FALSE;
     }
 
+    /**
+     * Add another interaction to an exisitng Job
+     *
+     * @param string $key the interaction , 'comment', 'like' etc.
+     * @param array $message
+     * @return boolean
+     */
     public function add_to_existing_queue($key, $message)
     {
         try
         {
             $this->in_progress = FALSE;
             $this->addToSet('messages.' . $key, $message);
-            $this->save();
+            if($this->save());
+                return this;
         } catch (MongoException $e)
         {
             Debug::error('Error adding to existing queue job:id status -> :e', array(
@@ -113,6 +163,12 @@ class Model_Job extends Document {
         return $job_id;
     }
 
+    /**
+     * Create a new Job
+     *
+     * @param array $document the jobb to add
+     * @return boolean
+     */
     public function add_to_queue($document)
     {
         $this->clear();
@@ -132,5 +188,4 @@ class Model_Job extends Document {
 
         return $this->id;
     }
-
 }

@@ -14,7 +14,7 @@ class Controller_Daemon extends Controller
 
     public function before()
     {
-        die(phpinfo());
+        //die(phpinfo());
         parent::before();
 
 // Setup
@@ -85,48 +85,41 @@ class Controller_Daemon extends Controller
             while (!$this->_sigterm)
             {
                 // Find first task that is not being executed
-                $job = Document::factory('job')->collection->findOne(array('_id' => new MongoID('4f16d263f68e597005000003')));
+                $job = Document::factory('job');
+                $j = $job->get_next();
 
-                if (($job) && count($this->_pids) < $this->_config['max'])
+                if (($j) && count($this->_pids) < $this->_config['max'])
                 {
                     // Task found
                     // Write log to prevent memory issues
                     Kohana::$log->write();
 
-                    $pro = new Job_Processor_Immediate($job);
-                    $mail_adder = $pro->add();
+                    if ($j['is_single'])
+                        $e = $pro->add('single');
+                    else
+                        $e = $pro->add();
 
-                    $mailer = Email::mailer();
+                    $queue = new CFBatchRequest(100);
 
-                    foreach($mail_adder::$emails as $mail)
+                    foreach($e->emails as $email)
                     {
-                        // Fork process to execute task
-                        $pid = pcntl_fork();
+                        $queue->add($email);
+                    }                    
+                    
+                    // Fork process to execute task
+                    $pid = pcntl_fork();
 
-                        if ($pid == -1)
-                        {
-                            Kohana::$log->add('error', 'Queue. Could not spawn child task process.');
-                            exit;
-                        }
-                        elseif ($pid)
-                        {
-                            // Parent - add the child's PID to the running list
-                            $this->_pids[$pid] = time();
-                        }
-                        else
-                        {
-                            try
-                            {
-                                print_r($mailer->send($mail));
-                            }
-                            catch (Exception $e)
-                            {
-                                Debug::log('Could not send email');
-                            }
-                            // update task
-
-                            exit;
-                        }
+                    try
+                    {
+                        //$token = Profiler::start('email', 'Send Email');
+                        $res = $queue->send();
+                        //Profiler::stop($token);
+                        print($res);
+                        //echo View::factory('profiler/stats');
+                    }
+                    catch (Exception $e)
+                    {
+                        Debug::log('Could not send email');
                     }
                 }
                 else

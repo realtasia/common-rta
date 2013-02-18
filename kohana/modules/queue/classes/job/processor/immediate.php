@@ -75,7 +75,6 @@ class Job_Processor_Immediate {
         $this->set_users();
 
 
-
         // loop through the message types.
         foreach (self::$types['group'] as $type)
         {
@@ -350,7 +349,7 @@ class Job_Processor_Immediate {
         // loops through all the items.
         foreach ($items as $item)
         {
-            echo Debug::vars($item);
+            //echo Debug::vars($item);
             $item_uid = (string) $item['user_id'];
             // this is the decision making process. Document owner does not
             // get emails for his own interactions. And each recipient does
@@ -481,7 +480,7 @@ class Job_Processor_Immediate {
         $mail_adder = Mail_Add::factory($this->original_document, $this->job);
 
         //echo debug::vars($this);
-        echo "<pre>";
+        //echo "<pre>";
         //print_r($this->emails);
         foreach ($this->emails as $r => $messages)
         {
