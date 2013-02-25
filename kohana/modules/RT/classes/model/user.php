@@ -217,7 +217,7 @@ class Model_User extends Document {
      * @param array $arr
      * @return array
      */
-    public function stringify($arr = [])
+    public function stringify(array $arr = [])
     {
         $arr = parent::stringify($arr);
         $arr['connections']  = static::get_public_connection_routes($arr['_id']);

@@ -199,7 +199,7 @@ class Model_Comment extends Document {
         return $this;
     }
 
-    public function stringify($arr = [])
+    public function stringify(array $arr = [])
     {
         // get the current user
         $cu    = $this->current_user ? $this->get_default_user_fields() : false;

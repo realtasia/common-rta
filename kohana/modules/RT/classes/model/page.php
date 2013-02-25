@@ -184,7 +184,7 @@ class Model_Page extends Document {
      * Checks and sets current user attributes. (if user returned is the user logged in)
      * Otherwise, checks current user's interaction with the returned user
      */
-    public function stringify($arr = [])
+    public function stringify(array $arr = [])
     {
         // get the current user
         $cu                   = $this->current_user ? $this->get_default_user_fields() : false;
