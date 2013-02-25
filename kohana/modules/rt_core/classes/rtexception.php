@@ -1,5 +1,14 @@
-<?php
-
+<?php defined('SYSPATH') or die('No direct script access.');
+/**
+ * Realtasia user notifications. Contains helper functions to aid in user
+ * notifications
+ *
+ * @author Jason Nathan
+ * @category RealtAsia
+ * @package RT_Exception
+ * @version 1.0
+ * @copyright 2012 Realtasia Pte Ltd
+ */
 class Rtexception extends Kohana_Kohana_Exception
 {
 

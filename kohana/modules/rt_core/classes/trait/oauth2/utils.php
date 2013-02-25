@@ -1,15 +1,25 @@
 <?php defined('SYSPATH') or die('No direct script access.');
+
 /**
- * Description of utils
+ * Some helper methods used by many subclasses
  *
  * @author Jason Nathan
- * @package RealtAsia API
- * @subpackage /Trait/oAuth2/Utils
+ * @category RealtAsia
+ * @package RT_Oauth2
+ * @subpackage Utils
+ * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */
+
 trait Trait_Oauth2_Utils {
 
-    public function stringify($arr = [])
+    /**
+     * Loops through and array and converts all Mongo Object Ids to strings
+     * 
+     * @param array $arr
+     * @return array
+     */
+    public function stringify( array $arr = [])
     {
         foreach($arr as $k => $v)
         {
@@ -26,7 +36,12 @@ trait Trait_Oauth2_Utils {
         return $arr;
     }
 
-
+    /**
+     * Returns a properly formatted user array for use in embedding in documents. Retrieves user information
+     * from the $current_user property
+     * 
+     * @return array
+     */
     protected function get_default_user_fields()
     {
         if(isset($this->current_user))
@@ -36,6 +51,12 @@ trait Trait_Oauth2_Utils {
         }
     }
 
+    /**
+     * Returns a properly formatted page document array for use in embedding in documents. Retrieves the
+     * info by querying the db with an id
+     * 
+     * @return array
+     */    
     protected function get_default_page_fields($_id)
     {
         $fields = ['_id' => '', 'name' => ''];

@@ -4,8 +4,9 @@
  * Description of user
  *
  * @author Jason Nathan
- * @package RealtAsia API
- * @subpackage /Model/User/
+ * @category Realtasia
+ * @package RT_Document
+ * @subpackage User
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */

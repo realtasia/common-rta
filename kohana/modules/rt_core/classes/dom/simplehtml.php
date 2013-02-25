@@ -31,8 +31,9 @@
  * @author John Schlick
  * @author Rus Carroll
  * @version 1.11 ($Rev: 184 $)
- * @package PlaceLocalInclude
- * @subpackage DOM_SimpleHTML
+ * @category Helpers
+ * @package RT_DOM
+ * @subpackage SimpleHTML
  */
 
 /**
@@ -64,7 +65,7 @@ define('DEFAULT_BR_TEXT', "\r\n");
  * PaperG - added ability for "find" routine to lowercase the value of the selector.
  * PaperG - added $tag_start to track the start position of the tag in the total byte index
  *
- * @package PlaceLocalInclude
+ * @package RT_PlaceLocalInclude
  */
 class DOM_Node {
     public $nodetype = HDOM_TYPE_TEXT;
@@ -715,7 +716,7 @@ class DOM_Node {
  * Paperg - change $size from protected to public so we can easily access it
  * Paperg - added ForceTagsClosed in the constructor which tells us whether we trust the html or not.  Default is to NOT trust it.
  *
- * @package PlaceLocalInclude
+ * @package RT_PlaceLocalInclude
  */
 class DOM_SimpleHTML {
     public $root = null;

@@ -1,24 +1,12 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
-
+<?php defined('SYSPATH') or die('No direct script access.');
 /**
- * Mongo-based session class.
- *
- * Sample schema:
- *
- *     CREATE TABLE  `sessions` (
- *         `_id` VARCHAR( 24 ) NOT NULL,
- *         `last_active` INT UNSIGNED NOT NULL,
- *         `contents` TEXT NOT NULL,
- *         PRIMARY KEY ( `_id` ),
- *         INDEX ( `last_active` )
- *     ) ENGINE = MYISAM ;
- *
- * @package    Realtasia/Mongo
- * @category   Session
- * @author     Jason Nathan
- * @copyright  (c)2012
+ * 
+ * @author Jason Nathan
+ * @category Helpers
+ * @package RT_Session
+ * @subpackage Mongo
+ * @version 1.0
+ * @copyright 2012 Realtasia Pte Ltd
  */
 class Session_Mongo extends Session {
 

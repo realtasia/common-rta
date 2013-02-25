@@ -1,13 +1,12 @@
 <?php defined('SYSPATH') or die('No direct script access.');
-
 /**
  * Realtasia user notifications. Contains helper functions to aid in user
  * notifications
  *
  * @author Jason Nathan
- * @package RTA Core
- * @subpackage Modules/RTA Core/Notifications
- * @version 0.9
+ * @category Helpers
+ * @package RT_Notifications
+ * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */
 class Notifications{

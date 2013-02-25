@@ -1,4 +1,15 @@
-<?php defined('SYSPATH') or die('No direct access allowed.');
+<?php defined('SYSPATH') or die('No direct script access.');
+
+/**
+ * A simple helper class that validates an access token
+ *
+ * @author Jason Nathan
+ * @category RealtAsia
+ * @package RT_Oauth2
+ * @subpackage Resource
+ * @version 1.0
+ * @copyright 2012 Realtasia Pte Ltd
+ */
 
 trait Trait_Oauth2_Resource {
     // the session mongo model

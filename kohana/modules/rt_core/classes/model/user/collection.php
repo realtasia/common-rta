@@ -1,10 +1,11 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
- * Description of collection
+ * Description of User_Collection
  *
  * @author Jason Nathan
- * @package RealtAsia API
- * @subpackage /Model/User/Collection
+ * @category Realtasia
+ * @package RT_Collection
+ * @subpackage User
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */

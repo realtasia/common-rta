@@ -1,10 +1,6 @@
-<?php defined('SYSPATH') or die('No direct access allowed.');
+<?php defined('SYSPATH') or die('No direct script access.');
 /**
  * OAuth 2.0 Authentication Class
- *
- * @author              Jason Nathan | www.jasonnathan.com
- * @copyright   	Copyright (c) 2012, Realtasia Pte Ltd.
- *
  * OK, there are lot's more requirements for oAuth2, but we're on a deadline &
  * I oughta rush this. The only thing missing from the current grant_types are
  * scopes. Since our internal app doesn't need scopes (i.e., we use em' all!), I
@@ -21,6 +17,12 @@
  *          b. If no stored session or access_token expired, create a new one &
  *             return it.
  *
+ * @author Jason Nathan
+ * @category Helpers
+ * @package RT_Oauth2
+ * @subpackage Authentication
+ * @version 1.0
+ * @copyright 2012 Realtasia Pte Ltd
  */
 class Oauth2_Authentication {
     // oAuth instances

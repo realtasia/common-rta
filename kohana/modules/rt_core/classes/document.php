@@ -1,13 +1,9 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
-
+<?php defined('SYSPATH') or die('No direct script access.');
 /**
- * Description of document
- *
+ * 
  * @author Jason Nathan
- * @package RealtAsia API
- * @subpackage /Model/Document
+ * @category Realtasia
+ * @package RT_Mongo_Document
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */

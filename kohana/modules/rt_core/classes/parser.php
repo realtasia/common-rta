@@ -1,6 +1,15 @@
-<?php
-    class parser
-    {
+<?php defined('SYSPATH') or die('No direct script access.');
+/**
+ * Realtasia user notifications. Contains helper functions to aid in user
+ * notifications
+ *
+ * @author Jason Nathan
+ * @category Helpers
+ * @package RT_Parser
+ * @version 1.0
+ * @copyright 2012 Realtasia Pte Ltd
+ */
+    class parser {
         public $data = null;
 
         public $types = array(

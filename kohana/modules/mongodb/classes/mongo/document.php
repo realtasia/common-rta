@@ -140,8 +140,9 @@
  *   // "colin@mollenhour.com" - now the user document was loaded as well.
  * </code>
  *
- * @author  Colin Mollenhour
- * @package Mongo_Database
+ * @author Colin Mollenhour
+ * @category Mongo
+ * @package Mongo_Document
  */
 abstract class Mongo_Document {
 

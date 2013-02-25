@@ -6,8 +6,9 @@ defined('SYSPATH') or die('No direct script access.');
  * Description of comment
  *
  * @author Jason Nathan
- * @package RealtAsia API
- * @subpackage /Model/Comment/Document
+ * @category Realtasia
+ * @package RT_Document
+ * @subpackage Comment
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */

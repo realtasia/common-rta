@@ -1,10 +1,15 @@
-<?php
-
-defined('SYSPATH') or die('No direct access allowed.');
-/*
+<?php defined('SYSPATH') or die('No direct script access.');
+/**
+ * Description of collection
+ *
+ * @author Jason Nathan
+ * @category Realtasia
+ * @package RT_Document
+ * @subpackage Oauth2_Client
+ * @version 1.0
+ * @copyright 2012 Realtasia Pte Ltd
  *   db.oauth_clients.insert({name :, client_id :, client_secret :, redirect_uri :, status :, auto_approve :});
  */
-
 class Model_Oauth2_Client extends Document {
     protected $name = 'oauth2_clients';
 

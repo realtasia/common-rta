@@ -3,8 +3,9 @@
  * Description of media
  *
  * @author Jason Nathan
- * @package RealtAsia API
- * @subpackage /Model/Media/Document
+ * @category Realtasia
+ * @package RT_Document
+ * @subpackage Media
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */

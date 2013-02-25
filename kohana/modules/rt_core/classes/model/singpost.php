@@ -10,8 +10,10 @@
  *          name        => The name of the user, for ease.
  *
  * @author Jason Nathan
- * @package RealtAsia API
- * @subpackage Model/Interaction
+ * @category Realtasia
+ * @package RT_Document
+ * @subpackage Singpost
+ * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */
 class Model_Singpost extends Document {

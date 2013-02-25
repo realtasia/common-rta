@@ -3,8 +3,9 @@
  * Description of collection
  *
  * @author Jason Nathan
- * @package RealtAsia API
- * @subpackage /Model/Media/Collection
+ * @category Realtasia
+ * @package RT_Collection
+ * @subpackage Media
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */

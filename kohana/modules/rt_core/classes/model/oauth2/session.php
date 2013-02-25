@@ -1,6 +1,14 @@
-<?php defined('SYSPATH') or die('No direct access allowed.');
-
-
+<?php defined('SYSPATH') or die('No direct script access.');
+/**
+ * Description of collection
+ *
+ * @author Jason Nathan
+ * @category Realtasia
+ * @package RT_Document
+ * @subpackage Oauth2_Session
+ * @version 1.0
+ * @copyright 2012 Realtasia Pte Ltd
+ */
 class Model_Oauth2_Session extends Document {
     protected $name = 'oauth2_sessions';
 

@@ -1,8 +1,12 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
- * Description of Log_Mongo
- *
- * @author jason
+ * 
+ * @author Jason Nathan
+ * @category Helpers
+ * @package RT_Log
+ * @subpackage Mongo
+ * @version 1.0
+ * @copyright 2012 Realtasia Pte Ltd
  */
 class Log_Mongo extends Log_Writer {
 
@@ -22,5 +26,3 @@ class Log_Mongo extends Log_Writer {
         return;
     }
 }
-
-?>

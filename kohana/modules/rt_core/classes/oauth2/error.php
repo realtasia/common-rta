@@ -1,8 +1,12 @@
-<?php
+<?php defined('SYSPATH') or die('No direct script access.');
 /**
- * Description of error
- *
- * @author jj
+ * 
+ * @author Jason Nathan
+ * @category Helpers
+ * @package RT_Oauth2
+ * @subpackage Error
+ * @version 1.0
+ * @copyright 2012 Realtasia Pte Ltd
  */
 class Oauth2_Error {
 

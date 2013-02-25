@@ -1,15 +1,13 @@
 <?php defined('SYSPATH') or die('No direct script access.');
-
 /**
- * DOM parser
- * Controller.
+ * Realtasia user notifications. Contains helper functions to aid in user
+ * notifications
  *
  * @author Jason Nathan
- * @package Realtasia
- * @subpackage Controller
- * @version 0.8
- * @copyright 2011 Realtasia Pte Ltd
- * @link Kohana_Controller_Template
+ * @category Helpers
+ * @package RT_SimpleHTML
+ * @version 1.0
+ * @copyright 2012 Realtasia Pte Ltd
  */
 class SimpleHTML extends DOM_SimpleHTML
 {

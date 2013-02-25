@@ -2,9 +2,10 @@
 /**
  * Description of collection
  *
- * @author jj
- * @package RealtAsia API
- * @subpackage /Model/Interaction
+ * @author Jason Nathan
+ * @category Realtasia
+ * @package RT_Collection
+ * @subpackage Interaction
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */

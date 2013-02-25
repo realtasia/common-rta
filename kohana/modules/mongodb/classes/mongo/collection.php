@@ -55,7 +55,9 @@
  * @method array validate(bool $scan_data = false)
  *
  * @author  Colin Mollenhour
- * @package Mongo_Database
+ * @category Mongo
+ * @package Mongo_Collection
+ * 
  */
 class Mongo_Collection implements Iterator, Countable {
 

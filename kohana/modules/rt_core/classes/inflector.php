@@ -2,15 +2,13 @@
 /**
  * Part of the Fuel framework.
  *
- * @package    Fuel
+ * @package RT_   Fuel
  * @version    1.0
  * @author     Fuel Development Team
  * @license    MIT License
  * @copyright  2010 - 2011 Fuel Development Team
  * @link       http://fuelphp.com
- */
 
-/**
  * Some of this code was written by Flinn Mueller.
  *
  * @package		Fuel
