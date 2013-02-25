@@ -3086,7 +3086,7 @@ license: http://www.opensource.org/licenses/mit-license.php
             e = e.target || e;
             // find content length and box width
             var vlen = e.value.length,
-                    ewidth = e.offsetWidth;
+                    ewidth = e.offsetWidth, cb = jQuery('#colorbox');
             if (vlen !== e.valLength || ewidth !== e.boxWidth) {
                 if (hCheck && (vlen < e.valLength || ewidth !== e.boxWidth))
                     e.style.height = "0px";
@@ -3095,6 +3095,7 @@ license: http://www.opensource.org/licenses/mit-license.php
                 e.style.height = h + "px";
                 e.valLength = vlen;
                 e.boxWidth = ewidth;
+                cb && cb.css('display') !== "none" && $.colorbox.resize();
             }
             return true;
         }
@@ -3231,3 +3232,4 @@ license: http://www.opensource.org/licenses/mit-license.php
     });
 
 })(jQuery);
+

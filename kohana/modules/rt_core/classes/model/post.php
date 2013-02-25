@@ -119,16 +119,8 @@ class Model_Post extends Document {
     public function create_album(array $params)
     {
         $defaults = [
-            'name'      => '',
-            'mediainfo' => [],
-            'picture'   => '',
-            'privacy'   => ['is' => 'PUBLIC'],
-            'user'      => [],
-            'message'   => '',
-            'excerpt'   => '',
-            'page'      => [],
-            'subtype'   => null,
-            'type'      => 'album',
+             'name'  => '', 'mediainfo' => [], 'picture' => '', 'privacy' => ['is' => 'PUBLIC'],  'user' => [],
+             'message' => '', 'excerpt' => '', 'page' => [], 'subtype'   => null, 'type'  => 'album',
         ];
 
         return $this->create(Arr::merge($defaults, $params));
@@ -144,17 +136,8 @@ class Model_Post extends Document {
     public function create_attachment(array $params)
     {
         $defaults = [
-            'name'        => '',
-            'mediainfo'   => [],
-            'picture'     => '',
-            'privacy'     => ['is' => 'PUBLIC'],
-            'user'        => [],
-            'message'     => '',
-            'excerpt'     => '',
-            'page'        => [],
-            'page_parent' => [],
-            'subtype'     => null,
-            'type'        => 'attachment',
+             'name'  => '', 'mediainfo' => [], 'picture' => '', 'privacy' => ['is' => 'PUBLIC'],  'user' => [],
+             'message' => '', 'excerpt' => '', 'page' => [], 'subtype'   => null,  'type'   => 'attachment',
         ];
 
         return $this->create(Arr::merge($defaults, $params));
