@@ -13,6 +13,7 @@
 class Model_Post extends Document {
 
     protected static $after_delete_processing;
+    public $is_single = false;
 
     /**
      * Create a default post with new values.
@@ -31,33 +32,31 @@ class Model_Post extends Document {
         ]);
         $this->collection()->ensureIndex(['keywords' => 1]);
         $this->collection()->ensureIndex(['page_parent._id' => 1]);
+        $this->collection()->ensureIndex(['company._id' => 1]);
         $this->collection()->ensureIndex(['page._id' => 1]);
+        $this->collection()->ensureIndex(['page.subtype' => 1]);        
         $this->collection()->ensureIndex(['to._id' => 1]);
         $this->collection()->ensureIndex(['type' => 1]);
         $this->collection()->ensureIndex(['listing.unit' => 1]);
         $this->collection()->ensureIndex(array_fill_keys([
-            'listing.type', 'listing.price', 'listing.rooms',
-            'listing.built_size', 'listing.property_type'
+            'listing.type', 'listing.price', 'listing.rooms', 'listing.built_size', 'listing.leaseSpace'
         ], 1));
+
         // overwrite defaults
         $type = \Arr::get($params, 'type', 'post') . '_fields';
-        $type = 'wallpost_fields' ? 'post_fields' : $type;
-        $data = Arr::overwrite(static::$type(), static::validate_ids($params));
+        $type = $type === 'wallpost_fields' ? 'post_fields' : $type;
         // merge with defaults
-        $data = Arr::merge(static::$type(), $data);
-
-        // sort - for some sanity in debugging.. :-)
-        ksort($data);
-
-        // if an id is present, this is an update.
-        if (isset($params['_id']))
+        $data = Arr::merge(static::$type(), Arr::overwrite(static::$type(), static::validate_ids($params)));
+        
+        if(isset($data['listing']))
         {
-            $this->atomic($params['_id']);
+            // sort fields so it matches DB index
+            $data['listing'] = static::sort_listing_fields($data['listing']);
         }
 
         // load the document
         $this->load_values($data);
-
+        //return $this;
         try
         {
             // save
@@ -290,6 +289,7 @@ class Model_Post extends Document {
 
         if($arr['type'] === 'album')
         {
+            $limit = $this->is_single ? 12 : 6;
             $arr['connections']['attachments'] = Router::post('attachments', $arr['_id']);
             $subdocs = Collection::factory('post')
                     ->find(['type' => 'attachment', 'page._id' => Document::check_id($arr['_id'])])
@@ -297,7 +297,7 @@ class Model_Post extends Document {
                         'picture', 'excerpt', 'type', 'subtype', 'mediainfo', 
                         'user', 'page', 'uri', 'counts', 'link', 'status', 'name'
                       ])
-                    ->limit(6)
+                    ->limit($limit)
                     ->sort_desc('_id');
             while($subdocs->hasNext())
             {
@@ -306,13 +306,33 @@ class Model_Post extends Document {
                 $arr['attachments'][] = $doc->stringify($doc->as_array());
             }
         }
-
+        if($arr['type'] === 'listing')
+        {
+            if($arr['showAddress'])
+            {
+                $add = strtolower($arr['address']);
+                $postal = parent::factory('singpost');
+                $postal->load([
+                    'keywords' => $add
+                ], ['geo' => 1]);
+                if(!empty($postal->geo))
+                {
+                    $arr['geo'] = $postal->geo;
+                }
+            }
+            $arr['connections']['attachments'] = Router::listing('attachments');
+            $arr['addedMedia'] = parent::stringify((array) $arr['addedMedia']);
+            $arr['attachments'] = [];
+        }
         // we should trigger the comment model's formatting so each comment in
         // this post is properly formatted.
+        $limit = $this->is_single ? 50 : 2;
+        $skip = $this->is_single ? 0 : static::get_initial_comment_skip($arr['counts']['comments']);
         $arr['comments'] = Collection::factory('comment')->fetch([
             'post_id' => $arr['_id'], 'status'  => 'active', 'type'    => 'comment',
-            'skip'    => static::get_initial_comment_skip($arr['counts']['comments'])
-                ], $this->current_user, $arr);
+            'limit'   => $limit,
+            'skip'    => $skip
+        ], $this->current_user, $arr);
 
         return $arr;
     }
@@ -780,8 +800,7 @@ class Model_Post extends Document {
             'page_parent'  => [], // '_id', 'name', 'type' the page's parent (estate or library)
             'company'      => [], // '_id', 'name', 'type' the user's company if available
             'listing'      => array_fill_keys([
-                'type', 'price', 'rooms', 'built_size', 'property_type', 'tenure',
-                'land_size', 'value', 'cobroke', 'unit', 'cov'
+                'type', 'price', 'rooms', 'built_size', 'land_size', 'cov', 'valuation', 'leaseSpace', 'cobroke', 'unit', 'property_type', 'baths'
              ], 0),
             'name'         => '', // the content
             'excerpt'      => '', // the content summary (truncated)
@@ -790,16 +809,19 @@ class Model_Post extends Document {
             'mediainfo'    => [], // if this post has an image, this will be the url
             'link'         => [], // 'name', 'description', 'source' the original link if there is one.
             'type'         => 'post', // wallpost, testimonial, conversation, listing, checkin, event, album
-            'subtype'      => '', // wallpost, testimonial, conversation, listing, checkin, event, album
             'status'       => 'active', // pending, active, expired,
             'uri'          => '',
             'modified'     => 0,
             'privacy'      => ['is' => 'PUBLIC'],
             'counts'       => array_fill_keys(['attachments', 'comments', 'events', 'likers', 'subscribers'], 0),
-            'comments'     => [],
+            'addedMedia'   => [],
             'subscribers'  => [],
             'likers'       => [],
-            'keywords'     => []
+            'keywords'     => [],
+            'subtype' => "",
+            'address' => "",
+            'showAddress' => true,
+            'expiry' => 0,
         ];
     }    
         
@@ -823,7 +845,6 @@ class Model_Post extends Document {
             'modified'     => 0,
             'privacy'      => ['is' => 'PUBLIC'],
             'counts'       => array_fill_keys([ 'attachments', 'comments', 'likers', 'subscribers'], 0),
-            'comments'     => [],
             'subscribers'  => [],
             'likers'       => []
         ];
@@ -849,7 +870,6 @@ class Model_Post extends Document {
             'modified'     => 0,
             'privacy'      => ['is' => 'PUBLIC'],
             'counts'       => array_fill_keys(['comments', 'likers', 'subscribers'], 0),
-            'comments'     => [],
             'subscribers'  => [],
             'likers'       => []
         ];
@@ -914,5 +934,12 @@ class Model_Post extends Document {
         }
 
         return $this->excerpt . $link;
+    }
+    
+    
+    protected static function sort_listing_fields(array $listing)
+    {
+        $keys = ['type', 'price', 'rooms', 'built_size', 'leaseSpace'];
+        return \Arr::order($listing, $keys);        
     }
 }

@@ -21,12 +21,11 @@ class Model_Post_Collection extends Collection {
      */
     public function search($args = array(), $uid = NULL)
     {
-        $this->ensureIndex(['company._id' => 1], ['sparse' => true]);
         $defaults = [
            'status' => null, 'skip' => 0, 'limit' => 11, 'sort' => 'active',
            's' => '', 'include_ids' => [], 'page_id' => null, 'parent_id' => null,
            'user_id' => null, 'type' => null, 'listing' => [], 'to_id' => null,
-           'privacy' => NULL, 'company_id' => null,
+           'privacy' => NULL, 'company_id' => null, 'listing' => null
         ];
 
         // set some empty arrays
