@@ -60,14 +60,14 @@ class Model_Job extends Document {
         try
         {
             return $this->collection()->collection()->findAndModify([
-                            'in_progress' => FALSE,
-                            'delivery'    => $delivery,
-                            'status'      => ['$gte' => $tries]
-                        ], [
-                            '$set' => ['in_progress' => TRUE]
-                        ], null, [
-                            'sort'   => ['status' => 1],
-                        ]);
+                'in_progress' => FALSE,
+                'delivery'    => $delivery,
+                'status'      => ['$gte' => $tries]
+            ], [
+                '$set' => ['in_progress' => TRUE]
+            ], null, [
+                'sort'   => ['status' => 1],
+            ]);
         }
         catch (MongoCursorException $e)
         {

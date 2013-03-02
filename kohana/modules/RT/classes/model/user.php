@@ -235,7 +235,7 @@ class Model_User extends Document {
                     'can_like'         => false,
                     'can_subscribe'    => false,
                 ];
-                $arr['connections'] = static::get_all_connection_routes($arr);
+                $arr['connections']  = static::get_all_connection_routes($arr);
                 $arr['actions']      = static::get_action_routes($arr['_id']);
                 return $arr;
             }
@@ -438,15 +438,16 @@ class Model_User extends Document {
     protected static function get_all_connection_routes($user)
     {
         $actions = [];
-        $uid = $user['_id'];
-        $lid = Arr::path($user, 'library._id');
+        $uid = \Arr::get($user, '_id');
+        $lid = \Arr::path($user, 'library._id');
 
         foreach (['privacy', 'notifications', 'inbox', 'subscriptions'] as $v)
         {
-            $actions[$v] = Router::user($v, $user_id);
+            $actions[$v] = Router::user($v, $uid);
         }
 
         $actions['library'] = Router::user('library', $lid);
+        $actions['user'] = $uid;
         return Arr::merge($actions, static::get_public_connection_routes($uid));
     }
 

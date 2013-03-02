@@ -79,7 +79,6 @@ class Model_Page_Collection extends Collection {
         if ($object_id)
         {
             $query['parent._id'] = Document::check_id($object_id);
-            $query['_id']['$ne'] = Document::check_id($object_id);
         }
 
 
@@ -166,5 +165,3 @@ class Model_Page_Collection extends Collection {
     }
 
 }
-
-?>

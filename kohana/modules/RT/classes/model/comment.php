@@ -207,16 +207,24 @@ class Model_Comment extends Document {
         $arr   = parent::stringify($arr);
         $post  = $this->current_post;
         if (!$post)
-            $post  = Document::factory('post', $arr['_id'])->load(null, ['user' => 1, 'page' => 1]);
+        {
+            $post  = Document::factory('post', $arr['_id']);
+            $post->load(null, ['user' => 1, 'page' => 1]); 
+            $post = $post->as_array();
+        }
 
-        $u_id = Arr::get($arr['user'], '_id');
+        $u_id = (string) Arr::get($arr['user'], '_id');
+        $arr['post'] = \Arr::merge(\Arr::get($arr, 'post', []), \Arr::extract($post, ['user', 'page'], []));
 
         $arr['is_owner']      = $cu_id && $u_id && ($u_id === $cu_id);
-        $arr['is_post_owner'] = $cu_id && $u_id && ((string) $post->_id === $cu_id);
-        $arr['is_user_page']  = $cu_id && $u_id && ((string) $post->page['_id'] === $cu_id);
+        $arr['is_post_owner'] = $cu_id && $u_id && ((string) $post['user']['_id'] === $cu_id);
+        $arr['is_user_page']  = $cu_id && $u_id && ((string) $post['page']['_id'] === $cu_id);
         $arr['actions']       = $arr['is_owner'] || $arr['is_post_owner'] || $arr['is_user_page'] ? static::get_all_action_routes($arr) : static::get_action_routes($arr);
 
-        $arr['connections'] = ['likers' => Router::comment('likers', $arr['_id'])];
+        $arr['connections'] = [
+            'likers' => Router::comment('likers', $arr['_id']),
+            'fullContent' => Router::comment('fullContent', $arr['_id'])
+        ];
 
         if ($cu)
         {
@@ -290,14 +298,7 @@ class Model_Comment extends Document {
         {
             if(strlen($this->message) !== strlen($this->excerpt))
             {
-                if(strlen($this->message) >= 10000)
-                {
-                    $link = '&nbsp;&hellip;'.HTML::anchor($this->uri, '<small class="muted"><br><br>Continue Reading</small>');
-                }
-                else
-                {
-                    $link = '&nbsp;&hellip;'.HTML::anchor($this->uri, '<small class="muted"><br><br>Continue Reading</small>', ['class' => 'comment_read_more']);
-                }
+                $link = '&nbsp;&hellip;'.HTML::anchor($this->uri, '<small class="muted"><br>Continue Reading</small>', ['class' => 'comment_read_more']);
             }
         }
 

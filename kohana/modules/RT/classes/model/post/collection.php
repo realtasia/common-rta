@@ -13,8 +13,6 @@ class Model_Post_Collection extends Collection {
     protected $name = 'posts';
 
     /**
-     * 'price' => 0, 'rooms' => 1, 'built_size' => 0, 'property_type' => 0, 'tenure' => 0,
-     * 'land_size' => 0, 'value' => 0, 'description' => 0, 'cobroke' => 0,
      *
      * @param array $args
      * @return self Sets the $cursor property and returns itself
@@ -25,7 +23,7 @@ class Model_Post_Collection extends Collection {
            'status' => null, 'skip' => 0, 'limit' => 11, 'sort' => 'active',
            's' => '', 'include_ids' => [], 'page_id' => null, 'parent_id' => null,
            'user_id' => null, 'type' => null, 'listing' => [], 'to_id' => null,
-           'privacy' => NULL, 'company_id' => null, 'listing' => null
+           'privacy' => NULL, 'company_id' => null, 'filter' => null
         ];
 
         // set some empty arrays
@@ -86,6 +84,16 @@ class Model_Post_Collection extends Collection {
         // iterate through the $ids and make sure they're all MongoID objects
         if (!empty($ids))
             $query['_id']['$in'] = Arr::map('Document::check_id', $ids);
+        
+        if (in_array($filter, ['Private Apartments', 'Serviced Apartments', 'Private Landed', 'HDB']))
+        {
+            $query['page.subtype'] = $filter;
+        }     
+        
+        if(!empty($listing))
+        {
+            $query = \Arr::merge($query, self::process_listing($listing));
+        }
 
         if(!is_array($sort))
         {
@@ -98,7 +106,7 @@ class Model_Post_Collection extends Collection {
         }
 
         unset($fields['message']);
-        //return $query;
+        // $query;
         $results = $this
                 ->find($query)
                 ->fields(['message' => 0])
@@ -227,56 +235,61 @@ class Model_Post_Collection extends Collection {
     }
 
     /**
-     * Multi keys (Compound indexes) in MongoDB need an exact order that was
-     * previously prescribed by ensureIndex() for it properly search by index
-     *
-     * e.g
-     *
-     * key = [status => 1, userid => 1, pageid => 1];
-     *
-     * // will use index because the order is correct
-     * $query = [status => 1, userid => 1, pageid => 1];
-     *
-     * // no index usage, because the first param should be 'status'
-     * $query = [userid => 1, pageid => 1, status => 1];
-     *
-     * So, here's a method that ensures that the query params are in the correct
-     * order
-     *
-     * @param array $args
-     * @uses parent::sorter
-     * @return array properly sorted args
+     * 
+        [type] => Sale
+        [price] => 5000000
+        [rooms] => 3
+        [built_size] => 5
+        [leaseSpace] => 
+        [land_size] => 0
+        [cov] => 0
+        [valuation] => 0
+        [cobroke] => These are only seen by other agents
+        [unit] => 10-80
+        [property_type] => 4STD (Standard)
+        [baths] => 3
      */
-    protected static function ensure_order(array $args)
-    {
-        usort($args, 'parent::sorter');
-        return $args;
-    }
-
-    /**
-     * Just to make sure a sort field is in the proper format for mongo.
-     *
-     * @param array $sort
-     * @return boolean
-     */
-    protected function validate_listing_sort(array $sort)
-    {
-        foreach ($sort as $key => $value)
+    public static function process_listing($q)
+    {   
+        $query = [
+            'listing.type' => ucfirst(strtolower(\Arr::get($q, 'type', 'Sale'))),
+            'listing.built_size' => ['$gte' => (int) \Arr::get($q, 'builtLow', 0)],
+            'listing.price' => ['$gte' => (int) \Arr::get($q, 'priceLow', 0)],
+            'listing.rooms' => ['$gte' => (int) \Arr::get($q, 'roomsLow', 0)],
+        ];                 
+        
+        $builtHigh = \Arr::get($q, 'builtHigh');
+        if($builtHigh && (int) $builtHigh !== 9000)
         {
-            if(array_key_exists($key, static::$listing_fields) && ( (int) $value === 1 || (int) $value === -1))
-            {
-                return true;
-            }
+            $query['listing.built_size']['$lte'] = (int) $builtHigh;
         }
 
-        return false;
+        $priceHigh = \Arr::get($q, 'priceHigh');
+        if($priceHigh)
+        {
+            $query['listing.price']['$lte'] = (int) $priceHigh;
+        }      
+        
+        $roomsHigh = \Arr::get($q, 'roomsHigh');
+        if($roomsHigh && (int) $roomsHigh !== 9)
+        {
+            $query['listing.rooms']['$lte'] = (int) $roomsHigh;
+        }
+        
+        $s = \Arr::get($q, 's');
+        if($s)
+        {
+            $query['keywords'] = new MongoRegex("/^" . strtolower($s) . "/");
+        }
+        
+        return $query;    
     }
-
+    
     protected static $listing_fields = [
-            'listing.type' => 'sale', 'listing.price' => 0, 'listing.rooms' => 1, 'listing.built_size' => 0,
-            'listing.property_type' => '', 'listing.tenure' => 0, 'listing.land_size' => 0,
-            'listing.value' => 0, 'listing.description' => 0, 'listing.cobroke' => 0
-        ];
+        'type' => 'Sale', 'price' => 0, 'rooms' => 1,   'built_size' => 0, 
+        'leaseSpace' => '', 'land_size' => 0, 'cov' => 0, 'valuation' => 0,  
+        'cobroke' => 0, 'unit' => 0, 'property_type' => 0, 'baths' => 0
+    ];
 
     protected static $sort = [
         'status', 'user._id', 'page._id, privacy.is', 'modified', 'listing.type',

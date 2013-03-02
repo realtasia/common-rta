@@ -241,15 +241,7 @@ class Model_Post extends Document {
      */
     public function after_load()
     {
-        if($this->_id)
-        {
-            $id = parent::check_id($this->_id);
 
-            $this->created = $id->getTimestamp();
-            // if there is no current user, no further formatting required.
-
-            return $this;
-        }
     }
 
     /**
@@ -262,8 +254,10 @@ class Model_Post extends Document {
         // get the current user
         $cu                     = $this->current_user ? $this->get_default_user_fields() : false;
         $cu_id                  = $cu ? (string) $cu['_id'] : false;
+        $pid                    = parent::check_id($arr['_id']);
         $arr                    = parent::stringify($arr);
         $u_id                   = Arr::get($arr['user'], '_id');
+        $arr['created']         = $pid->getTimestamp();        
         $arr['generated_title'] = static::generate_title($arr);
         $arr['is_owner']        = $cu_id && $u_id && ($u_id === $cu_id);
         $arr['is_page_owner']   = $cu_id && $u_id && ((string) Arr::get($arr['page'], '_id') === $cu_id);
@@ -614,7 +608,7 @@ class Model_Post extends Document {
      */
     protected static function get_connection_routes($_id)
     {
-        foreach (['likers', 'subscribers'] as $k => $v)
+        foreach (['likers', 'subscribers', 'fullContent'] as $k => $v)
         {
             $actions[$v]         = Router::post($v, $_id);
         }
@@ -922,14 +916,7 @@ class Model_Post extends Document {
         {
             if (strlen($this->message) !== strlen($this->excerpt))
             {
-                if (strlen($this->message) >= 10000)
-                {
-                    $link = '&nbsp;&hellip;' . HTML::anchor($this->uri, '<small class="muted"><br><br>Continue Reading</small>');
-                }
-                else
-                {
-                    $link = '&nbsp;&hellip;' . HTML::anchor($this->uri, '<small class="muted"><br><br>Continue Reading</small>', ['class' => 'post_read_more']);
-                }
+                $link = '&nbsp;&hellip;' . HTML::anchor($this->uri, '<small class="muted"><br>Continue Reading</small>', ['class' => 'post_read_more']);
             }
         }
 

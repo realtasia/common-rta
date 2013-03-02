@@ -189,16 +189,19 @@ class Model_Page extends Document {
         // get the current user
         $cu                   = $this->current_user ? $this->get_default_user_fields() : false;
         $cu_id                = $cu ? (string) $cu['_id'] : false;
+        $pid                  = parent::check_id($arr['_id']);
         $arr                  = parent::stringify($arr);
         $u_id                 = Arr::get($arr['user'], '_id');
+        $arr['created']       = $pid->getTimestamp();
         $arr['is_owner']      = $cu_id && $u_id && ($u_id === $cu_id);
         $arr['is_page_owner'] = $cu_id && $u_id && ((string) Arr::get($arr['page'], '_id') === $cu_id);
         $arr['connections']   = static::get_connection_routes($arr['_id'], $arr['type'], $arr['subtype']);
 
         if ($cu)
         {
-            $arr['interactions'] = parent::factory('interaction', NULL, $cu_id)->interacting($arr['_id'], 'page');
-            $arr['actions']      = static::get_action_routes($arr);
+            $arr['interactions']    = parent::factory('interaction', NULL, $cu_id)->interacting($arr['_id'], 'page');
+            $arr['actions']         = static::get_action_routes($arr);
+            $arr['actions']['post'] = Router::post('update', $cu_id);
         }
 
         return $arr;
@@ -232,12 +235,12 @@ class Model_Page extends Document {
      * @param string|MongoID $user_id
      * @return array
      */
-    protected static function get_action_routes($post)
+    protected static function get_action_routes($page)
     {
         $a = ['like', 'unlike'];
         $actions = [];
 
-        if(strtolower($post['type']) !== 'company' && strtolower($post['subtype']) !== 'estate')
+        if(strtolower($page['type']) !== 'company' && strtolower($page['subtype']) !== 'estate')
         {
             $a[] = 'subscribe';
             $a[] = 'unsubscribe';
@@ -245,9 +248,9 @@ class Model_Page extends Document {
 
         foreach ($a as $v)
         {
-            $actions[$v] = Router::page($v, $post['_id']);
-        }
-
+            $actions[$v] = Router::page($v, $page['_id']);
+        }       
+        
         return $actions;
     }
 
