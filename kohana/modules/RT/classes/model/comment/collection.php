@@ -58,4 +58,3 @@ class Model_Comment_Collection extends Mongo_Collection {
         return $return;
     }
 }
-?>

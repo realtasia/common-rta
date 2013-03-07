@@ -203,11 +203,6 @@ class Model_User extends Document {
      */
     public function after_load()
     {
-        $id = parent::check_id($this->_id);
-
-        // add a created
-        $this->created = $id instanceof MongoID ? $id->getTimestamp() : 0;
-
         return $this;
     }
 
@@ -219,7 +214,9 @@ class Model_User extends Document {
      */
     public function stringify(array $arr = [])
     {
-        $arr = parent::stringify($arr);
+        $pid                    = parent::check_id($arr['_id']);
+        $arr                    = parent::stringify($arr);
+        $arr['created']         = $pid->getTimestamp();
         $arr['connections']  = static::get_public_connection_routes($arr['_id']);
 
         if ($this->current_user && isset($arr['_id']))

@@ -1,6 +1,4 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 
 /**
  * Description of Page
@@ -89,7 +87,8 @@ class Model_Page extends Document {
         {
             // save
             $this->save();
-        } catch (MongoException $e)
+        }
+        catch (MongoException $e)
         {
             Debug::error(
                     "MongoException while trying to create page: :page \n"
@@ -169,13 +168,6 @@ class Model_Page extends Document {
      */
     public function after_load()
     {
-        $id = parent::check_id($this->_id);
-
-        if($id instanceof MongoID)
-        {
-            $this->created = $id->getTimestamp();
-        }
-
         return $this;
     }
 
@@ -237,10 +229,10 @@ class Model_Page extends Document {
      */
     protected static function get_action_routes($page)
     {
-        $a = ['like', 'unlike'];
+        $a       = ['like', 'unlike'];
         $actions = [];
 
-        if(strtolower($page['type']) !== 'company' && strtolower($page['subtype']) !== 'estate')
+        if (strtolower($page['type']) !== 'company' && strtolower($page['subtype']) !== 'estate')
         {
             $a[] = 'subscribe';
             $a[] = 'unsubscribe';
@@ -249,8 +241,8 @@ class Model_Page extends Document {
         foreach ($a as $v)
         {
             $actions[$v] = Router::page($v, $page['_id']);
-        }       
-        
+        }
+
         return $actions;
     }
 
@@ -299,7 +291,7 @@ class Model_Page extends Document {
         {
             $counts['locations'] = 0;
         }
-        $defaults = array(
+        $defaults            = array(
             'content'     => '',
             'counts'      => $counts,
             'likers'      => [],
@@ -321,7 +313,7 @@ class Model_Page extends Document {
         switch ($type)
         {
             case 'location':
-                return Arr::merge($defaults, ['attachments' => [], 'sector' => '']);
+                return Arr::merge($defaults, ['attachments' => [], 'sector'      => '']);
             case 'company' : return Arr::merge($defaults, static::_company_defaults());
             default: return $defaults;
         }
@@ -363,19 +355,19 @@ class Model_Page extends Document {
     protected function get_keywords()
     {
         $keywords = [];
-        foreach($this->_object as $k=>$v)
+        foreach ($this->_object as $k => $v)
         {
-            switch($k)
+            switch ($k)
             {
                 case 'parent':
                 case 'page':
-                    if(is_array($v))
+                    if (is_array($v))
                     {
                         $keywords[] = Arr::get($v, 'name');
                     }
                     break;
                 case 'name':
-                    if($type !== 'library')
+                    if ($type !== 'library')
                     {
                         $keywords[] = $v;
                     }

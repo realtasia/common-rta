@@ -1,9 +1,7 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 
 /**
- * Description of comment
+ * RealtAsia's comment Model
  *
  * @author Jason Nathan
  * @category Realtasia
@@ -46,7 +44,7 @@ class Model_Comment extends Document {
 
         if ($this->save())
         {
-            $this->uri = '/comment.php?id=' . (string) $this->_id;
+            $this->uri     = '/comment.php?id=' . (string) $this->_id;
             $this->excerpt = $this->get_excerpt_link();
             $this->save();
             return $this;
@@ -115,7 +113,7 @@ class Model_Comment extends Document {
      */
     public function before_delete()
     {
-        if(!$this->loaded())
+        if (!$this->loaded())
             $this->load();
 
         $this->after_delete_fields = $this->as_array();
@@ -191,29 +189,26 @@ class Model_Comment extends Document {
      */
     public function after_load()
     {
-
-        $id = parent::check_id($this->_id);
-
-        $this->created = $id->getTimestamp();
-
         return $this;
     }
 
     public function stringify(array $arr = [])
     {
         // get the current user
-        $cu    = $this->current_user ? $this->get_default_user_fields() : false;
-        $cu_id = $cu ? (string) $cu['_id'] : false;
-        $arr   = parent::stringify($arr);
-        $post  = $this->current_post;
+        $cu             = $this->current_user ? $this->get_default_user_fields() : false;
+        $cu_id          = $cu ? (string) $cu['_id'] : false;
+        $pid            = parent::check_id($arr['_id']);
+        $arr            = parent::stringify($arr);
+        $arr['created'] = $pid->getTimestamp();
+        $post           = $this->current_post;
         if (!$post)
         {
-            $post  = Document::factory('post', $arr['_id']);
-            $post->load(null, ['user' => 1, 'page' => 1]); 
+            $post = Document::factory('post', $arr['_id']);
+            $post->load(null, ['user' => 1, 'page' => 1]);
             $post = $post->as_array();
         }
 
-        $u_id = (string) Arr::get($arr['user'], '_id');
+        $u_id        = (string) Arr::get($arr['user'], '_id');
         $arr['post'] = \Arr::merge(\Arr::get($arr, 'post', []), \Arr::extract($post, ['user', 'page'], []));
 
         $arr['is_owner']      = $cu_id && $u_id && ($u_id === $cu_id);
@@ -222,7 +217,7 @@ class Model_Comment extends Document {
         $arr['actions']       = $arr['is_owner'] || $arr['is_post_owner'] || $arr['is_user_page'] ? static::get_all_action_routes($arr) : static::get_action_routes($arr);
 
         $arr['connections'] = [
-            'likers' => Router::comment('likers', $arr['_id']),
+            'likers'      => Router::comment('likers', $arr['_id']),
             'fullContent' => Router::comment('fullContent', $arr['_id'])
         ];
 
@@ -294,11 +289,11 @@ class Model_Comment extends Document {
     protected function get_excerpt_link()
     {
         $link = '';
-        if($this->message)
+        if ($this->message)
         {
-            if(strlen($this->message) !== strlen($this->excerpt))
+            if (strlen($this->message) !== strlen($this->excerpt))
             {
-                $link = '&nbsp;&hellip;'.HTML::anchor($this->uri, '<small class="muted"><br>Continue Reading</small>', ['class' => 'comment_read_more']);
+                $link = '&nbsp;&hellip;' . HTML::anchor($this->uri, '<small class="muted"><br>Continue Reading</small>', ['class' => 'comment_read_more']);
             }
         }
 

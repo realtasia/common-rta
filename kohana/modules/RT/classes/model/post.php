@@ -25,30 +25,30 @@ class Model_Post extends Document {
     {
 //        $sparse = array_fill_keys(['sparse', 'safe'], true);
         $this->collection()->deleteIndexes();
-        
-        $this->collection()->ensureIndex(array_fill_keys([ 
-            'status', 'user._id', 'privacy.is', 'modified'], 1), [
-                'name' => 'post_id_fields', 'safe' => true
+
+        $this->collection()->ensureIndex(array_fill_keys([
+                    'status', 'user._id', 'privacy.is', 'modified'], 1), [
+            'name' => 'post_id_fields', 'safe' => true
         ]);
         $this->collection()->ensureIndex(['keywords' => 1]);
         $this->collection()->ensureIndex(['page_parent._id' => 1]);
         $this->collection()->ensureIndex(['company._id' => 1]);
         $this->collection()->ensureIndex(['page._id' => 1]);
-        $this->collection()->ensureIndex(['page.subtype' => 1]);        
+        $this->collection()->ensureIndex(['page.subtype' => 1]);
         $this->collection()->ensureIndex(['to._id' => 1]);
         $this->collection()->ensureIndex(['type' => 1]);
         $this->collection()->ensureIndex(['listing.unit' => 1]);
         $this->collection()->ensureIndex(array_fill_keys([
-            'listing.type', 'listing.price', 'listing.rooms', 'listing.built_size', 'listing.leaseSpace'
-        ], 1));
+                    'listing.type', 'listing.price', 'listing.rooms', 'listing.built_size', 'listing.leaseSpace'
+                        ], 1));
 
         // overwrite defaults
         $type = \Arr::get($params, 'type', 'post') . '_fields';
         $type = $type === 'wallpost_fields' ? 'post_fields' : $type;
         // merge with defaults
         $data = Arr::merge(static::$type(), Arr::overwrite(static::$type(), static::validate_ids($params)));
-        
-        if(isset($data['listing']))
+
+        if (isset($data['listing']))
         {
             // sort fields so it matches DB index
             $data['listing'] = static::sort_listing_fields($data['listing']);
@@ -67,7 +67,8 @@ class Model_Post extends Document {
                 $this->excerpt = $this->get_excerpt_link();
             }
             $this->save();
-        } catch (MongoException $e)
+        }
+        catch (MongoException $e)
         {
             Debug::error(
                     "MongoException while trying to create post: :post \n"
@@ -119,8 +120,8 @@ class Model_Post extends Document {
     public function create_album(array $params)
     {
         $defaults = [
-             'name'  => '', 'mediainfo' => [], 'picture' => '', 'privacy' => ['is' => 'PUBLIC'],  'user' => [],
-             'message' => '', 'excerpt' => '', 'page' => [], 'subtype'   => null, 'type'  => 'album',
+            'name'      => '', 'mediainfo' => [], 'picture'   => '', 'privacy'   => ['is' => 'PUBLIC'], 'user'      => [],
+            'message'   => '', 'excerpt'   => '', 'page'      => [], 'subtype'   => null, 'type'      => 'album',
         ];
 
         return $this->create(Arr::merge($defaults, $params));
@@ -136,8 +137,8 @@ class Model_Post extends Document {
     public function create_attachment(array $params)
     {
         $defaults = [
-             'name'  => '', 'mediainfo' => [], 'picture' => '', 'privacy' => ['is' => 'PUBLIC'],  'user' => [],
-             'message' => '', 'excerpt' => '', 'page' => [], 'subtype'   => null,  'type'   => 'attachment',
+            'name'      => '', 'mediainfo' => [], 'picture'   => '', 'privacy'   => ['is' => 'PUBLIC'], 'user'      => [],
+            'message'   => '', 'excerpt'   => '', 'page'      => [], 'subtype'   => null, 'type'      => 'attachment',
         ];
 
         return $this->create(Arr::merge($defaults, $params));
@@ -241,7 +242,7 @@ class Model_Post extends Document {
      */
     public function after_load()
     {
-
+        return $this;
     }
 
     /**
@@ -257,7 +258,7 @@ class Model_Post extends Document {
         $pid                    = parent::check_id($arr['_id']);
         $arr                    = parent::stringify($arr);
         $u_id                   = Arr::get($arr['user'], '_id');
-        $arr['created']         = $pid->getTimestamp();        
+        $arr['created']         = $pid->getTimestamp();
         $arr['generated_title'] = static::generate_title($arr);
         $arr['is_owner']        = $cu_id && $u_id && ($u_id === $cu_id);
         $arr['is_page_owner']   = $cu_id && $u_id && ((string) Arr::get($arr['page'], '_id') === $cu_id);
@@ -281,52 +282,52 @@ class Model_Post extends Document {
             $arr['interactions'] = parent::factory('interaction', NULL, $cu_id)->interacting($arr['_id'], 'post');
         }
 
-        if($arr['type'] === 'album')
+        if ($arr['type'] === 'album')
         {
-            $limit = $this->is_single ? 12 : 6;
+            $limit                             = $this->is_single ? 12 : 6;
             $arr['connections']['attachments'] = Router::post('attachments', $arr['_id']);
-            $subdocs = Collection::factory('post')
-                    ->find(['type' => 'attachment', 'page._id' => Document::check_id($arr['_id'])])
+            $subdocs                           = Collection::factory('post')
+                    ->find(['type'     => 'attachment', 'page._id' => Document::check_id($arr['_id'])])
                     ->fields([
-                        'picture', 'excerpt', 'type', 'subtype', 'mediainfo', 
+                        'picture', 'excerpt', 'type', 'subtype', 'mediainfo',
                         'user', 'page', 'uri', 'counts', 'link', 'status', 'name'
-                      ])
+                    ])
                     ->limit($limit)
                     ->sort_desc('_id');
-            while($subdocs->hasNext())
+            while ($subdocs->hasNext())
             {
-                $doc = $subdocs->getNext();
-                $doc->current_user = $this->current_user;
+                $doc                  = $subdocs->getNext();
+                $doc->current_user    = $this->current_user;
                 $arr['attachments'][] = $doc->stringify($doc->as_array());
             }
         }
-        if($arr['type'] === 'listing')
+        if ($arr['type'] === 'listing')
         {
-            if($arr['showAddress'])
+            if ($arr['showAddress'])
             {
-                $add = strtolower($arr['address']);
+                $add    = strtolower($arr['address']);
                 $postal = parent::factory('singpost');
                 $postal->load([
                     'keywords' => $add
-                ], ['geo' => 1]);
-                if(!empty($postal->geo))
+                        ], ['geo' => 1]);
+                if (!empty($postal->geo))
                 {
-                    $arr['geo'] = $postal->geo;
+                    $arr['geo']                        = $postal->geo;
                 }
             }
             $arr['connections']['attachments'] = Router::listing('attachments');
-            $arr['addedMedia'] = parent::stringify((array) $arr['addedMedia']);
-            $arr['attachments'] = [];
+            $arr['addedMedia']                 = parent::stringify((array) $arr['addedMedia']);
+            $arr['attachments']                = [];
         }
         // we should trigger the comment model's formatting so each comment in
         // this post is properly formatted.
-        $limit = $this->is_single ? 50 : 2;
-        $skip = $this->is_single ? 0 : static::get_initial_comment_skip($arr['counts']['comments']);
-        $arr['comments'] = Collection::factory('comment')->fetch([
+        $limit                             = $this->is_single ? 50 : 2;
+        $skip                              = $this->is_single ? 0 : static::get_initial_comment_skip($arr['counts']['comments']);
+        $arr['comments']                   = Collection::factory('comment')->fetch([
             'post_id' => $arr['_id'], 'status'  => 'active', 'type'    => 'comment',
             'limit'   => $limit,
             'skip'    => $skip
-        ], $this->current_user, $arr);
+                ], $this->current_user, $arr);
 
         return $arr;
     }
@@ -338,6 +339,7 @@ class Model_Post extends Document {
     public function before_delete()
     {
         $this->load();
+        Ticker::factory($this->_id)->delete();
         static::$after_delete_processing = $this->as_array();
     }
 
@@ -370,11 +372,11 @@ class Model_Post extends Document {
             }
         }
 
-        if($f['type'] === 'attachment' && $f['subtype'] === 'avatar')
+        if ($f['type'] === 'attachment' && $f['subtype'] === 'avatar')
         {
             $u = parent::factory('user', $f['user']['_id']);
             $u->load([], ['avatar' => 1]);
-            if($f['picture'] === $u->avatar)
+            if ($f['picture'] === $u->avatar)
             {
                 $u->set('avatar', null);
                 $u->save();
@@ -394,7 +396,7 @@ class Model_Post extends Document {
      */
     public function process_counts(array $params, $inc = 1)
     {
-        $pages     = array_filter(\Arr::extract($params, ['page','to','page_parent']));
+        $pages     = array_filter(\Arr::extract($params, ['page', 'to', 'page_parent']));
         $privacy   = \Arr::get($params, 'privacy');
         $type      = \Arr::get($params, 'type');
         $user      = \Arr::get($params, 'user');
@@ -554,13 +556,14 @@ class Model_Post extends Document {
      */
     protected static function get_action_routes($post)
     {
+        $defs = ['like', 'unlike', 'hide', 'unhide'];
         switch ($post['type'])
         {
             case 'testimonial' :
-                $all = ['like', 'unlike'];
+                $all = $defs;
                 break;
             default:
-                $all = ['like', 'unlike', 'subscribe', 'unsubscribe', 'comment', 'share'];
+                $all = $defs + ['subscribe', 'unsubscribe', 'comment', 'share'];
                 break;
         }
 
@@ -589,14 +592,16 @@ class Model_Post extends Document {
 
     /**
      * Gets all action links, including private ones that a logged in user
-     * can perform on this post
+     * can perform on this post -> on his page
      *
      * @param string|MongoID $user_id
      * @return array
      */
     protected static function get_page_owner_action_routes($post)
     {
-        $actions = ['delete' => Router::post('delete', $post['_id'])];
+        $actions = [
+            'delete' => Router::post('delete', $post['_id'])
+        ];
         return Arr::merge($actions, static::get_action_routes($post));
     }
 
@@ -650,7 +655,7 @@ class Model_Post extends Document {
         // boolean if the post was written on on the author's wall
         $own_wall = (string) $post['page']['_id'] === (string) $post['user']['_id'];
         // used in case it was wriiten on his wall
-        $ohw      = ' on his profile page.';
+        $ohw      = '.';
 
         if (isset($post['page']['uri']))
         {
@@ -671,7 +676,7 @@ class Model_Post extends Document {
             case "event": return "created an " . static::l($uri, 'event') . " in $page_link.";
             // because we don't show attachments...
             case "album":
-                if($post['counts']['attachments'] >= 1)
+                if ($post['counts']['attachments'] >= 1)
                     return "uploaded new media to " . static::l($uri, $post['name']) . ".";
                 else
                     return "created a new album " . static::l($uri, $post['name']) . ".";
@@ -709,166 +714,166 @@ class Model_Post extends Document {
     protected static function post_fields()
     {
         return [
-            'user'         => [], // '_id', 'name' of the user who created this           
-            'page'         => [], // '_id', 'name', 'type' the page it was written on (location, user profile, album etc...)
-            'page_parent'  => [], // '_id', 'name', 'type' the page's parent (estate or library)
-            'company'      => [], // '_id', 'name', 'type' the user's company if available
-            'name'         => '', // the content
-            'excerpt'      => '', // the content summary (truncated)
-            'message'      => '', // the content
-            'picture'      => null, // if this post has an image, this will be the url
-            'mediainfo'    => [], // if this post has an image, this will be the url
-            'link'         => [], // 'name', 'description', 'source' the original link if there is one.
-            'type'         => 'post', // wallpost, testimonial, conversation, listing, checkin, event, album
-            'subtype'      => '', // wallpost, testimonial, conversation, listing, checkin, event, album
-            'status'       => 'active', // pending, active, expired,
-            'uri'          => '',
-            'modified'     => 0,
-            'privacy'      => ['is' => 'PUBLIC'],
-            'counts'       => array_fill_keys([
+            'user'        => [], // '_id', 'name' of the user who created this
+            'page'        => [], // '_id', 'name', 'type' the page it was written on (location, user profile, album etc...)
+            'page_parent' => [], // '_id', 'name', 'type' the page's parent (estate or library)
+            'company'     => [], // '_id', 'name', 'type' the user's company if available
+            'name'        => '', // the content
+            'excerpt'     => '', // the content summary (truncated)
+            'message'     => '', // the content
+            'picture'     => null, // if this post has an image, this will be the url
+            'mediainfo'   => [], // if this post has an image, this will be the url
+            'link'        => [], // 'name', 'description', 'source' the original link if there is one.
+            'type'        => 'post', // wallpost, testimonial, conversation, listing, checkin, event, album
+            'subtype'     => '', // wallpost, testimonial, conversation, listing, checkin, event, album
+            'status'      => 'active', // pending, active, expired,
+            'uri'         => '',
+            'modified'    => 0,
+            'privacy'     => ['is' => 'PUBLIC'],
+            'counts'      => array_fill_keys([
                 'attachments', 'comments', 'events', 'likers', 'subscribers'
                     ], 0),
-            'subscribers'  => [],
-            'likers'       => []
+            'subscribers' => [],
+            'likers'      => []
         ];
     }
 
     protected static function conversation_fields()
     {
         return [
-            'user'         => [], // '_id', 'name' of the user who created this
-            'to'           => [], // '_id', 'name' of the user this message was sent to (for messages)
-            'page'         => [], // '_id', 'name', 'type' the page it was written on (location, user profile, album etc...)
-            'page_parent'  => [], // '_id', 'name', 'type' the page's parent (estate or library)
-            'company'      => [], // '_id', 'name', 'type' the user's company if available
-            'name'         => '', // the content
-            'excerpt'      => '', // the content summary (truncated)
-            'message'      => '', // the content
-            'picture'      => null, // if this post has an image, this will be the url
-            'mediainfo'    => [], // if this post has an image, this will be the url
-            'link'         => [], // 'name', 'description', 'source' the original link if there is one.
-            'type'         => 'post', // wallpost, testimonial, conversation, listing, checkin, event, album
-            'subtype'      => '', // wallpost, testimonial, conversation, listing, checkin, event, album
-            'status'       => 'active', // pending, active, expired,
-            'uri'          => '',
-            'modified'     => 0,
-            'privacy'      => ['is' => 'PUBLIC'],
-            'counts'       => array_fill_keys([
+            'user'        => [], // '_id', 'name' of the user who created this
+            'to'          => [], // '_id', 'name' of the user this message was sent to (for messages)
+            'page'        => [], // '_id', 'name', 'type' the page it was written on (location, user profile, album etc...)
+            'page_parent' => [], // '_id', 'name', 'type' the page's parent (estate or library)
+            'company'     => [], // '_id', 'name', 'type' the user's company if available
+            'name'        => '', // the content
+            'excerpt'     => '', // the content summary (truncated)
+            'message'     => '', // the content
+            'picture'     => null, // if this post has an image, this will be the url
+            'mediainfo'   => [], // if this post has an image, this will be the url
+            'link'        => [], // 'name', 'description', 'source' the original link if there is one.
+            'type'        => 'post', // wallpost, testimonial, conversation, listing, checkin, event, album
+            'subtype'     => '', // wallpost, testimonial, conversation, listing, checkin, event, album
+            'status'      => 'active', // pending, active, expired,
+            'uri'         => '',
+            'modified'    => 0,
+            'privacy'     => ['is' => 'PUBLIC'],
+            'counts'      => array_fill_keys([
                 'attachments', 'comments', 'events', 'likers', 'subscribers'
                     ], 0),
-            'subscribers'  => [],
-            'likers'       => []
+            'subscribers' => [],
+            'likers'      => []
         ];
-    }    
-    
+    }
+
     protected static function testimonial_fields()
     {
         return [
-            'user'         => [], // '_id', 'name' of the user who created this
-            'page'         => [], // '_id', 'name', 'type' the page it was written on (location, user profile, album etc...)
-            'page_parent'  => [], // '_id', 'name', 'type' the page's parent (estate or library)
-            'company'      => [], // '_id', 'name', 'type' the user's company if available
-            'name'         => '', // the content
-            'excerpt'      => '', // the content summary (truncated)
-            'message'      => '', // the content
-            'picture'      => null, // if this post has an image, this will be the url
-            'mediainfo'    => [], // if this post has an image, this will be the url
-            'link'         => [], // 'name', 'description', 'source' the original link if there is one.
-            'type'         => 'testimonial', // wallpost, testimonial, conversation, listing, checkin, event, album
-            'subtype'      => '', // wallpost, testimonial, conversation, listing, checkin, event, album
-            'status'       => 'pending', // pending, active, expired,
-            'uri'          => '',
-            'modified'     => 0,
-            'privacy'      => ['is' => 'PUBLIC'],
-            'counts'       => array_fill_keys([ 'attachments', 'comments', 'likers', 'subscribers'], 0),
-            'subscribers'  => [],
-            'likers'       => []
+            'user'        => [], // '_id', 'name' of the user who created this
+            'page'        => [], // '_id', 'name', 'type' the page it was written on (location, user profile, album etc...)
+            'page_parent' => [], // '_id', 'name', 'type' the page's parent (estate or library)
+            'company'     => [], // '_id', 'name', 'type' the user's company if available
+            'name'        => '', // the content
+            'excerpt'     => '', // the content summary (truncated)
+            'message'     => '', // the content
+            'picture'     => null, // if this post has an image, this will be the url
+            'mediainfo'   => [], // if this post has an image, this will be the url
+            'link'        => [], // 'name', 'description', 'source' the original link if there is one.
+            'type'        => 'testimonial', // wallpost, testimonial, conversation, listing, checkin, event, album
+            'subtype'     => '', // wallpost, testimonial, conversation, listing, checkin, event, album
+            'status'      => 'pending', // pending, active, expired,
+            'uri'         => '',
+            'modified'    => 0,
+            'privacy'     => ['is' => 'PUBLIC'],
+            'counts'      => array_fill_keys([ 'attachments', 'comments', 'likers', 'subscribers'], 0),
+            'subscribers' => [],
+            'likers'      => []
         ];
-    }    
+    }
 
     protected static function listing_fields()
     {
         return [
-            'user'         => [], // '_id', 'name' of the user who created this
-            'page'         => [], // '_id', 'name', 'type' the page it was written on (location, user profile, album etc...)
-            'page_parent'  => [], // '_id', 'name', 'type' the page's parent (estate or library)
-            'company'      => [], // '_id', 'name', 'type' the user's company if available
-            'listing'      => array_fill_keys([
+            'user'        => [], // '_id', 'name' of the user who created this
+            'page'        => [], // '_id', 'name', 'type' the page it was written on (location, user profile, album etc...)
+            'page_parent' => [], // '_id', 'name', 'type' the page's parent (estate or library)
+            'company'     => [], // '_id', 'name', 'type' the user's company if available
+            'listing'     => array_fill_keys([
                 'type', 'price', 'rooms', 'built_size', 'land_size', 'cov', 'valuation', 'leaseSpace', 'cobroke', 'unit', 'property_type', 'baths'
-             ], 0),
-            'name'         => '', // the content
-            'excerpt'      => '', // the content summary (truncated)
-            'message'      => '', // the content
-            'picture'      => null, // if this post has an image, this will be the url
-            'mediainfo'    => [], // if this post has an image, this will be the url
-            'link'         => [], // 'name', 'description', 'source' the original link if there is one.
-            'type'         => 'post', // wallpost, testimonial, conversation, listing, checkin, event, album
-            'status'       => 'active', // pending, active, expired,
-            'uri'          => '',
-            'modified'     => 0,
-            'privacy'      => ['is' => 'PUBLIC'],
-            'counts'       => array_fill_keys(['attachments', 'comments', 'events', 'likers', 'subscribers'], 0),
-            'addedMedia'   => [],
-            'subscribers'  => [],
-            'likers'       => [],
-            'keywords'     => [],
-            'subtype' => "",
-            'address' => "",
+                    ], 0),
+            'name'        => '', // the content
+            'excerpt'     => '', // the content summary (truncated)
+            'message'     => '', // the content
+            'picture'     => null, // if this post has an image, this will be the url
+            'mediainfo'   => [], // if this post has an image, this will be the url
+            'link'        => [], // 'name', 'description', 'source' the original link if there is one.
+            'type'        => 'post', // wallpost, testimonial, conversation, listing, checkin, event, album
+            'status'      => 'active', // pending, active, expired,
+            'uri'         => '',
+            'modified'    => 0,
+            'privacy'     => ['is' => 'PUBLIC'],
+            'counts'      => array_fill_keys(['attachments', 'comments', 'events', 'likers', 'subscribers'], 0),
+            'addedMedia'  => [],
+            'subscribers' => [],
+            'likers'      => [],
+            'keywords'    => [],
+            'subtype'     => "",
+            'address'     => "",
             'showAddress' => true,
-            'expiry' => 0,
+            'expiry'      => 0,
         ];
-    }    
-        
+    }
+
     protected static function album_fields()
     {
         return [
-            'user'         => [], // '_id', 'name' of the user who created this
-            'page'         => [], // '_id', 'name', 'type' the page it was written on (location, user profile, album etc...)
-            'page_parent'  => [], // '_id', 'name', 'type' the page's parent (estate or library)
-            'company'      => [], // '_id', 'name', 'type' the user's company if available
-            'name'         => '', // the content
-            'excerpt'      => '', // the content summary (truncated)
-            'message'      => '', // the content
-            'picture'      => null, // if this post has an image, this will be the url
-            'mediainfo'    => [], // if this post has an image, this will be the url
-            'link'         => [], // 'name', 'description', 'source' the original link if there is one.
-            'type'         => 'album', // wallpost, testimonial, conversation, listing, checkin, event, album
-            'subtype'      => '', // wallpost, testimonial, conversation, listing, checkin, event, album
-            'status'       => 'active', // pending, active, expired,
-            'uri'          => '',
-            'modified'     => 0,
-            'privacy'      => ['is' => 'PUBLIC'],
-            'counts'       => array_fill_keys([ 'attachments', 'comments', 'likers', 'subscribers'], 0),
-            'subscribers'  => [],
-            'likers'       => []
+            'user'        => [], // '_id', 'name' of the user who created this
+            'page'        => [], // '_id', 'name', 'type' the page it was written on (location, user profile, album etc...)
+            'page_parent' => [], // '_id', 'name', 'type' the page's parent (estate or library)
+            'company'     => [], // '_id', 'name', 'type' the user's company if available
+            'name'        => '', // the content
+            'excerpt'     => '', // the content summary (truncated)
+            'message'     => '', // the content
+            'picture'     => null, // if this post has an image, this will be the url
+            'mediainfo'   => [], // if this post has an image, this will be the url
+            'link'        => [], // 'name', 'description', 'source' the original link if there is one.
+            'type'        => 'album', // wallpost, testimonial, conversation, listing, checkin, event, album
+            'subtype'     => '', // wallpost, testimonial, conversation, listing, checkin, event, album
+            'status'      => 'active', // pending, active, expired,
+            'uri'         => '',
+            'modified'    => 0,
+            'privacy'     => ['is' => 'PUBLIC'],
+            'counts'      => array_fill_keys([ 'attachments', 'comments', 'likers', 'subscribers'], 0),
+            'subscribers' => [],
+            'likers'      => []
         ];
     }
-        
+
     protected static function attachment_fields()
     {
         return [
-            'user'         => [], // '_id', 'name' of the user who created this
-            'page'         => [], // '_id', 'name', 'type' the page it was written on (location, user profile, album etc...)
-            'page_parent'  => [], // '_id', 'name', 'type' the page's parent (estate or library)
-            'company'      => [], // '_id', 'name', 'type' the user's company if available
-            'name'         => '', // the content
-            'excerpt'      => '', // the content summary (truncated)
-            'message'      => '', // the content
-            'picture'      => null, // if this post has an image, this will be the url
-            'mediainfo'    => [], // if this post has an image, this will be the url
-            'link'         => [], // 'name', 'description', 'source' the original link if there is one.
-            'type'         => 'attachment', // wallpost, testimonial, conversation, listing, checkin, event, album
-            'subtype'      => '', // wallpost, testimonial, conversation, listing, checkin, event, album
-            'status'       => 'active', // pending, active, expired,
-            'uri'          => '',
-            'modified'     => 0,
-            'privacy'      => ['is' => 'PUBLIC'],
-            'counts'       => array_fill_keys(['comments', 'likers', 'subscribers'], 0),
-            'subscribers'  => [],
-            'likers'       => []
+            'user'        => [], // '_id', 'name' of the user who created this
+            'page'        => [], // '_id', 'name', 'type' the page it was written on (location, user profile, album etc...)
+            'page_parent' => [], // '_id', 'name', 'type' the page's parent (estate or library)
+            'company'     => [], // '_id', 'name', 'type' the user's company if available
+            'name'        => '', // the content
+            'excerpt'     => '', // the content summary (truncated)
+            'message'     => '', // the content
+            'picture'     => null, // if this post has an image, this will be the url
+            'mediainfo'   => [], // if this post has an image, this will be the url
+            'link'        => [], // 'name', 'description', 'source' the original link if there is one.
+            'type'        => 'attachment', // wallpost, testimonial, conversation, listing, checkin, event, album
+            'subtype'     => '', // wallpost, testimonial, conversation, listing, checkin, event, album
+            'status'      => 'active', // pending, active, expired,
+            'uri'         => '',
+            'modified'    => 0,
+            'privacy'     => ['is' => 'PUBLIC'],
+            'counts'      => array_fill_keys(['comments', 'likers', 'subscribers'], 0),
+            'subscribers' => [],
+            'likers'      => []
         ];
-    }    
-    
+    }
+
     protected static function validate_ids($data)
     {
         foreach ($data as $key => $value)
@@ -922,11 +927,11 @@ class Model_Post extends Document {
 
         return $this->excerpt . $link;
     }
-    
-    
+
     protected static function sort_listing_fields(array $listing)
     {
         $keys = ['type', 'price', 'rooms', 'built_size', 'leaseSpace'];
-        return \Arr::order($listing, $keys);        
+        return \Arr::order($listing, $keys);
     }
+
 }

@@ -1,7 +1,7 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
 /**
- * Description of model
+ * Description of log
  *
  * @author Jason Nathan
  * @category Realtasia
@@ -10,9 +10,4 @@
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */
-class Model_Log extends Model {
-
-
-}
-
-?>
+class Model_Log extends Model {}

@@ -1,16 +1,14 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
- * Description of media
+ * Description of ticker
  *
  * @author Jason Nathan
- * @category Realtasia
- * @package RT_Document
- * @subpackage Media
+ * @category RealtAsia
+ * @package RT_Model
+ * @subpackage Ticker
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */
-class Model_Media extends Document {
-
+class Model_Ticker extends Document {
     //put your code here
 }
-?>
