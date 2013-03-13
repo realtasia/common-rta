@@ -127,6 +127,36 @@ class Ticker {
         return $this;
     }
 
+    /**
+     * This method is only used for the person that interacted on the document
+     * New post, new comment, new like etc. This sets the hasInteracted field
+     * to true.
+     *
+     * @param mixed MongoID|string $user_id
+     * @param int $relevancy
+     * @uses \Document
+     * @return \Ticker
+     */
+    public function create_once($user_id, $relevancy = 1)
+    {
+        if($this->document && $this->owner)
+        {
+            $ticker = \Arr::merge(self::defaults($relevancy), [
+                'document_id'  => $this->document['_id'],
+                'user_id'  => Document::check_id($user_id),
+                'hasInteracted'  => true,
+                'owner_id' => $this->owner['_id']
+            ]);
+
+            $ticker = Document::factory('ticker')->load_values($ticker);
+
+            $ticker->save();
+        }
+
+        return $this;
+    }
+
+
     /** This utility method inserts a whole bunch of tickers into the db.
      * I think this data is not mission critical and as such, I have not set the
      * writeconcern option. Mostly this is a fire and forget method.
@@ -169,6 +199,32 @@ class Ticker {
         ]);
         return $this;
     }
+
+    /** This method is a special use case that must return a boolean. It is done
+     * once for each interactor. We update only if the document the 'hasInteracted'
+     * field is false
+     *
+     * @param array $query the query to find relevant documents
+     * @param int $relevancy modified is auto updated. this is the relevancy counter
+     * @return boolean
+     */
+    public function update_once(array $query = [], $relevancy = 1)
+    {
+        $update = $this->get_default_update_params($relevancy);
+        $update['$set']['hasInteracted'] = true;
+        $query = \Arr::merge($query, [
+            'document_id' => $this->document['_id'],
+            'hasInteracted' => false
+        ]);
+        $result = Collection::factory('ticker')->update_safe($query, $update);
+
+        if(is_array($result))
+        {
+            return (bool) \Arr::get($result, 'n');
+        }
+        return false;
+    }
+
 
     /**
      * Delete happens in one of 2 scenarios. When owner deletes a post or when
@@ -248,13 +304,14 @@ class Ticker {
         $privacy = \Arr::path($this->document, 'privacy.is');
 
         return [
-            'modified'    => time(),
-            'document_id' => \Arr::get($this->document, '_id'),
-            'user_id'     => '',
-            'owner_id'    => \Arr::get($this->owner, '_id'),
-            'relevancy'   => $relevancy,
-            'visibility'  => 'visible',
-            'privacy'     => ['is' => $privacy]
+            'modified'       => time(),
+            'document_id'    => \Arr::get($this->document, '_id'),
+            'user_id'        => '',
+            'owner_id'       => \Arr::get($this->owner, '_id'),
+            'relevancy'      => $relevancy,
+            'visibility'     => 'visible',
+            'hasInteracted'  => false,
+            'privacy'        => ['is' => $privacy]
         ];
     }
 

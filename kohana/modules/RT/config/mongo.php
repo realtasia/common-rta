@@ -1,11 +1,11 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');require_once MODPATH . 'RT/init.php';
 /*
  * See http://www.php.net/manual/en/mongo.construct.php for configuration options.
  */
 return [
     'default' => [
         'database'  => 'db',
-        'server'    => 'mongodb://mongo1:27017,mongo2:27017/?replicaSet=rtdbs',
+        'server'    => RT::MONGOS,
         'options'   => [],
         'profiling' => FALSE
     ]

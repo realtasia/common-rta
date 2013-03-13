@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
- * 
+ *
  * @author Jason Nathan
  * @category Realtasia
  * @package RT_Mongo_Document

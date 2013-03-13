@@ -563,7 +563,7 @@ class Model_Post extends Document {
                 $all = $defs;
                 break;
             default:
-                $all = $defs + ['subscribe', 'unsubscribe', 'comment', 'share'];
+                $all = \Arr::merge($defs, ['subscribe', 'unsubscribe', 'comment', 'share']);
                 break;
         }
 
@@ -659,12 +659,12 @@ class Model_Post extends Document {
 
         if (isset($post['page']['uri']))
         {
-            $page_link = html::anchor($post['page']['uri'], $post['page']['name'], ['title' => $page_title, 'class' => 'hoverCard']);
+            $page_link = html::anchor($post['page']['uri'], $post['page']['name'], ['title' => $page_title, 'class' => 'hoverCard', 'data-bind' => "title:'$page_title', qtip:getHoverCard"]);
         }
         else
         {
             // this is a user...
-            $page_link = html::anchor('/' . $post['page']['_id'], $post['page']['name'], ['title' => $page_title, 'class' => 'hoverCard']);
+            $page_link = html::anchor('/' . $post['page']['_id'], $post['page']['name'], ['title' => $page_title, 'class' => 'hoverCard', 'data-bind' => "title:'$page_title', qtip:getUserHoverCard"]);
         }
 
         switch ($post['type'])

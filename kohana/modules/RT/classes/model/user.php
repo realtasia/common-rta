@@ -18,13 +18,14 @@ class Model_User extends Document {
      * Retrieve a user by email, username or id
      *
      * @param MongoID|string $id
+     * @param array $fields an array of fields to retrieve (or not)
+     * @param boolean $object whether to return an object or array
      * @return array|null
      */
     public function get($id, array $fields = [], $object = TRUE)
     {
         if ($this->load(self::_get_one($id), $fields))
         {
-
             $ret = $this->stringify($this->as_array());
             return $object ? (object) $ret : $ret;
         }
@@ -33,12 +34,17 @@ class Model_User extends Document {
     }
 
     /**
-     * Retrieve only user public fields by email, username or id
+     * Retrieve only user public fields by email, username or id. Fields should
+     * ideally be exclude. i.e. <code>
+     * [field => false]
+     * </code>
+     * After which we merge with some protected fields that we don't want anyway.
      *
      * @param MongoID|string $id
+     * @param array $fields an array of fields to retrieve (or not)
      * @return array|null
      */
-    public function get_public($id)
+    public function get_public($id, array $fields = [])
     {
         return $this->get($id, static::$protected_fields);
     }
@@ -550,14 +556,18 @@ class Model_User extends Document {
             switch ($settings['privacy']['contacts']['is'])
             {
                 case 'SUBSCRIBERS':
-                    if ($arr->interactions['subscribe'])
+                    if ($arr['interactions']['subscribe'])
                     {
-                        unset($arr['info']['telephone'], $arr['info']['social'], $arr['email']);
+                        $arr['info']['telephone'] = null;
+                        $arr['info']['social'] = null;
+                        $arr['email'] = null;
                     }
                     break;
 
-                case 'SELF':
-                    unset($arr['info']['telephone'], $arr['info']['social'], $arr['email']);
+                case 'PRIVATE':
+                    $arr['info']['telephone'] = null;
+                    $arr['info']['social'] = null;
+                    $arr['email'] = null;
                     break;
 
                 case 'CUSTOM': //check if current user id is in this list
@@ -571,12 +581,14 @@ class Model_User extends Document {
                 case 'SUBSCRIBERS':
                     if (!$this->interactions['subscribe'])
                     {
-                        unset($arr['info']['gender'], $arr['info']['birthday']);
+                        $arr['info']['gender'] = null;
+                        $arr['info']['birthday'] = null;
                     }
                     break;
 
-                case 'SELF':
-                    unset($arr['info']['gender'], $arr['info']['birthday']);
+                case 'PRIVATE':
+                    $arr['info']['gender'] = null;
+                    $arr['info']['birthday'] = null;
                     break;
 
                 case 'CUSTOM': //check if current user id is in this list

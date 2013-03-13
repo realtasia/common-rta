@@ -87,6 +87,29 @@ class Model_Comment extends Document {
     }
 
     /**
+     * Feedback is a special comment type that does not have a post id.
+     *
+     * @param type $params
+     * @return \Model_Comment|boolean
+     */
+    public function create_feedback($params)
+    {
+        $args = [
+            'message'     => $params['message'],
+            'user'        => $params['user'],
+            'environment' => (array) $params['environment'],
+            'type'        => 'feedback'
+        ];
+
+        $this->load_values($args);
+
+        if ($this->save())
+            return $this;
+
+        return false;
+    }
+
+    /**
      * Checks & validates the comment
      *
      * @param array $params

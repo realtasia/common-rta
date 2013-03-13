@@ -5,9 +5,10 @@
  * fashion
  *
  * @author Jason Nathan
+ * @category RealtAsia
  * @package Queue
- * @subpackage Modules/Queue/Queue/Add
- * @version 0.9
+ * @subpackage Job_Add
+ * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */
 class Job_Add {
@@ -37,6 +38,10 @@ class Job_Add {
         $this->document_id   = Model::check_id($document_id);
         $this->user_id       = !is_null($user_id) ? Document::check_id($user_id) : $user_id;
         $this->document_type = $document_type;
+        if(Valid::email($user_id))
+        {
+            $this->email = $user_id;
+        }
     }
 
     /**
@@ -49,12 +54,30 @@ class Job_Add {
     {
         $this->key = 'comment';
 
-        return $this->create(array(
+        return $this->create([
                     'user_id'    => $this->user_id,
                     'date'       => time(),
                     'priority'   => 1,
                     'comment_id' => $comment_id
-                ));
+        ]);
+    }
+
+    /**
+     * Add a feedback Job to the queue
+     *
+     * @uses Job_Add->create()
+     * @return bool
+     */
+    public function feedback($comment_id)
+    {
+        $this->key       = 'feedback';
+        $this->is_single = TRUE;
+        return $this->create([
+            'user_id'    => $this->user_id,
+            'date'       => time(),
+            'priority'   => 1,
+            'comment_id' => $comment_id
+        ]);
     }
 
     /**
@@ -123,7 +146,7 @@ class Job_Add {
     {
         $this->key       = 'approve-testimonial';
         $this->is_single = TRUE;
-        $this->user_id = Document::check_id($writer_user_id);
+        $this->user_id   = Document::check_id($writer_user_id);
         return $this->generic();
     }
 
@@ -150,16 +173,16 @@ class Job_Add {
      */
     public function private_message($comment_id)
     {
-        $this->key       = 'private-message';
+        $this->key = 'private-message';
+        $this->is_single = true;
 
-        return $this->create(array(
-                    'user_id'    => $this->user_id,
-                    'date'       => time(),
-                    'priority'   => 1,
-                    'comment_id' => $comment_id
-        ));
+        return $this->create([
+            'user_id'    => $this->user_id,
+            'date'       => time(),
+            'priority'   => 1,
+            'comment_id' => $comment_id
+        ]);
     }
-
 
     /*     * *************** PROTECTED METHODS *********** */
 
@@ -176,10 +199,10 @@ class Job_Add {
      */
     protected function generic()
     {
-        return $this->create(array(
-                    'user_id' => $this->user_id,
-                    'date'    => time(),
-                        ), 1);
+        return $this->create([
+            'user_id' => $this->user_id,
+            'date'    => time(),
+        ]);
     }
 
     /**
@@ -196,10 +219,10 @@ class Job_Add {
      */
     protected function single_generic($email, $priority = 2)
     {
-        return $this->create(array(
-                    'user_email' => $email,
-                    'date'       => time()
-                        ), $priority);
+        return $this->create([
+            'user_email' => $email,
+            'date'       => time()
+        ], $priority);
     }
 
     /**
@@ -215,15 +238,15 @@ class Job_Add {
     protected function double_generic($mentionee_id)
     {
         if (is_array($mentionee_id))
-            $mentionee_id = array_map('Model::check_id', $mentionee_id);
+            $mentionee_id = array_map('Document::check_id', $mentionee_id);
         else
-            $mentionee_id = Model::check_id($mentionee_id);
+            $mentionee_id = Document::check_id($mentionee_id);
 
-        return $this->create(array(
-                    'user_id'       => $this->user_id, //mentioner
-                    'mentionee_ids' => $mentionee_id, // mentionees
-                    'date'          => time(),
-                        ), 1);
+        return $this->create([
+            'user_id'       => $this->user_id, //mentioner
+            'mentionee_ids' => $mentionee_id, // mentionees
+            'date'          => time()
+        ], 1);
     }
 
     /**
@@ -262,7 +285,7 @@ class Job_Add {
         return $Job->add_to_queue($new_job);
     }
 
-    /************************* PROTECTED  METHODS ************************* */
+    /*     * *********************** PROTECTED  METHODS ************************* */
 
     /**
      * Creates and returns a default schema array for a Job Document in Mongo
@@ -293,4 +316,5 @@ class Job_Add {
             'messages'      => $message_array
         ];
     }
+
 }
