@@ -92,6 +92,10 @@ class Oauth2_Authentication {
             Debug::log('Access Denied in check_password');
             return static::$error->create('access_denied');
         }
+        if(isset($user['password']))
+        {
+            $user['password'] = null;
+        }
 
         // get or create a new token
         return $this->get_token($client['client_id'], $user['_id'], TRUE, 'password');

@@ -85,32 +85,18 @@ class Model_Post extends Document {
     }
 
     /**
-     * A conversation is special. It is a post with no message. Messages are
-     * added via comments. This method automatically creates a comment.
+     * A conversation is special. It is a post with dynamic messages. Messages are
+     * added via comments & the latest message updates the conversation.
+     * This method automatically creates a comment.
      *
      * @param array $params
      * @return array|boolean
      */
     public function create_conversation(array $params)
     {
-        $message = $params['message'];
-        unset($params['message']);
+        $this->create($params);
 
-        if ($this->create($params))
-        {
-            $msg = parent::factory('comment');
-
-            $params['post'] = [ '_id'  => $this->_id, 'type' => $this->type];
-
-            $params['message'] = $message;
-
-            if ($msg->create_message($params))
-            {
-                return $msg;
-            }
-        }
-
-        return false;
+        return $this;
     }
 
     /**
@@ -563,7 +549,9 @@ class Model_Post extends Document {
                 $all = $defs;
                 break;
             default:
-                $all = \Arr::merge($defs, ['subscribe', 'unsubscribe', 'comment', 'share']);
+                $all = \Arr::merge($defs, [
+                    'subscribe', 'unsubscribe', 'comment', 'share', 'message'
+                ]);
                 break;
         }
 
@@ -745,24 +733,19 @@ class Model_Post extends Document {
             'to'          => [], // '_id', 'name' of the user this message was sent to (for messages)
             'page'        => [], // '_id', 'name', 'type' the page it was written on (location, user profile, album etc...)
             'page_parent' => [], // '_id', 'name', 'type' the page's parent (estate or library)
-            'company'     => [], // '_id', 'name', 'type' the user's company if available
             'name'        => '', // the content
             'excerpt'     => '', // the content summary (truncated)
             'message'     => '', // the content
-            'picture'     => null, // if this post has an image, this will be the url
-            'mediainfo'   => [], // if this post has an image, this will be the url
-            'link'        => [], // 'name', 'description', 'source' the original link if there is one.
-            'type'        => 'post', // wallpost, testimonial, conversation, listing, checkin, event, album
-            'subtype'     => '', // wallpost, testimonial, conversation, listing, checkin, event, album
+            'type'        => 'conversation', // wallpost, testimonial, conversation, listing, checkin, event, album
+            'subtype'     => '', // avatar
             'status'      => 'active', // pending, active, expired,
             'uri'         => '',
             'modified'    => 0,
             'privacy'     => ['is' => 'PUBLIC'],
             'counts'      => array_fill_keys([
-                'attachments', 'comments', 'events', 'likers', 'subscribers'
-                    ], 0),
-            'subscribers' => [],
-            'likers'      => []
+                'attachments', 'comments', 'events', 'likers', 'subscribers', 'conversations', 'newMessages'
+            ], 0),
+            'subscribers' => []
         ];
     }
 

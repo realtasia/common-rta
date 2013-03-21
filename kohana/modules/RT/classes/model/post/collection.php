@@ -23,7 +23,7 @@ class Model_Post_Collection extends Collection {
            'status' => null, 'skip' => 0, 'limit' => 11, 'sort' => 'active',
            's' => '', 'include_ids' => [], 'page_id' => null, 'parent_id' => null,
            'user_id' => null, 'type' => null, 'listing' => [], 'to_id' => null,
-           'privacy' => NULL, 'company_id' => null, 'filter' => null
+           'privacy' => NULL, 'company_id' => null, 'filter' => null, 'unread' => null
         ];
 
         // set some empty arrays
@@ -81,15 +81,18 @@ class Model_Post_Collection extends Collection {
         if($to_id)
             $query['to._id'] = Document::check_id($to_id);
 
+        if($unread)
+            $query['unread'] = Document::check_id($unread);
+
         // iterate through the $ids and make sure they're all MongoID objects
         if (!empty($ids))
             $query['_id']['$in'] = Arr::map('Document::check_id', $ids);
-        
+
         if (in_array($filter, ['Private Apartments', 'Serviced Apartments', 'Private Landed', 'HDB']))
         {
             $query['page.subtype'] = $filter;
-        }     
-        
+        }
+
         if(!empty($listing))
         {
             $query = \Arr::merge($query, self::process_listing($listing));
@@ -194,7 +197,7 @@ class Model_Post_Collection extends Collection {
      * @param string||MongoID $user_id
      * @return type
      */
-    public function inbox($args = array(), $user_id = NULL)
+    public function conversations($args = array(), $user_id = NULL)
     {
         if(!$user_id)
             return [];
@@ -235,12 +238,12 @@ class Model_Post_Collection extends Collection {
     }
 
     /**
-     * 
+     *
         [type] => Sale
         [price] => 5000000
         [rooms] => 3
         [built_size] => 5
-        [leaseSpace] => 
+        [leaseSpace] =>
         [land_size] => 0
         [cov] => 0
         [valuation] => 0
@@ -250,14 +253,14 @@ class Model_Post_Collection extends Collection {
         [baths] => 3
      */
     public static function process_listing($q)
-    {   
+    {
         $query = [
             'listing.type' => ucfirst(strtolower(\Arr::get($q, 'type', 'Sale'))),
             'listing.built_size' => ['$gte' => (int) \Arr::get($q, 'builtLow', 0)],
             'listing.price' => ['$gte' => (int) \Arr::get($q, 'priceLow', 0)],
             'listing.rooms' => ['$gte' => (int) \Arr::get($q, 'roomsLow', 0)],
-        ];                 
-        
+        ];
+
         $builtHigh = \Arr::get($q, 'builtHigh');
         if($builtHigh && (int) $builtHigh !== 9000)
         {
@@ -268,26 +271,26 @@ class Model_Post_Collection extends Collection {
         if($priceHigh)
         {
             $query['listing.price']['$lte'] = (int) $priceHigh;
-        }      
-        
+        }
+
         $roomsHigh = \Arr::get($q, 'roomsHigh');
         if($roomsHigh && (int) $roomsHigh !== 9)
         {
             $query['listing.rooms']['$lte'] = (int) $roomsHigh;
         }
-        
+
         $s = \Arr::get($q, 's');
         if($s)
         {
             $query['keywords'] = new MongoRegex("/^" . strtolower($s) . "/");
         }
-        
-        return $query;    
+
+        return $query;
     }
-    
+
     protected static $listing_fields = [
-        'type' => 'Sale', 'price' => 0, 'rooms' => 1,   'built_size' => 0, 
-        'leaseSpace' => '', 'land_size' => 0, 'cov' => 0, 'valuation' => 0,  
+        'type' => 'Sale', 'price' => 0, 'rooms' => 1,   'built_size' => 0,
+        'leaseSpace' => '', 'land_size' => 0, 'cov' => 0, 'valuation' => 0,
         'cobroke' => 0, 'unit' => 0, 'property_type' => 0, 'baths' => 0
     ];
 

@@ -68,15 +68,10 @@ class Model_Comment extends Document {
                 'type' => $params['post']['type'],
             ],
             'message' => $params['message'],
+            'excerpt' => $params['excerpt'],
             'user'    => $params['user'],
             'type'    => 'message'
         ];
-
-        if (isset($params['_id']))
-        {
-            $this->atomic($params['_id']);
-            unset($params['_id']);
-        }
 
         $this->load_values($params);
 
@@ -185,16 +180,9 @@ class Model_Comment extends Document {
 
             $object = parent::factory('post', $this->post['_id']);
 
-            $object->inc('counts.comments');
-            //$object->addToSet('comments', $this->as_array());
+            $object->inc('counts.' . Inflector::plural($this->type));
+
             $object->save();
-            /*
-             * Small hack to ensure a capped interaction list.
-             * @see https://github.com/colinmollenhour/mongodb-php-odm/issues/27#issuecomment-9950515
-             */
-//            Collection::factory('post')->update_safe(
-//                    ['_id'      => parent::check_id($this->post['_id']), 'comments' => ['$size' => 6]], ['$pop' => ['comments' => -1]]
-//            );
         }
 
         // update the user's last active

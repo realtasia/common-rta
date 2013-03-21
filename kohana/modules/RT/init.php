@@ -1,4 +1,4 @@
-<?phpdefined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 
 /**
  * Description of init
@@ -18,8 +18,8 @@ class RT {
     const COM_SERVER    = 'jjpc.net/common';
     const MONGOS        = 'mongodb://mongo1:27017,mongo2:27017/?replicaSet=rtdbs';
     const ADMINS        = 'RealtAsia Administrators <jason.nathan@realtasia.com>';
-    const NOTIFICATIONS = 'Realtasia Notifications <support@realtasia.com.sg>';
+    const NOTIFICATIONS = 'RealtAsia Notifications <support@realtasia.com.sg>';
     const SYSTEM        = 'SiRyA <support@realtasia.com>';
-    const BUCKET        = 'static2.realtasia.com';
+    const BUCKET        = 'static2.realtasia.com.sg';
 
 }

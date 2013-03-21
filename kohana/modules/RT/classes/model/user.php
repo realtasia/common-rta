@@ -209,7 +209,10 @@ class Model_User extends Document {
      */
     public function after_load()
     {
-        return $this;
+        if($this->password && count($this->password) > 0)
+        {
+            $this->password = null;
+        }
     }
 
     /**
@@ -223,6 +226,7 @@ class Model_User extends Document {
         $pid                    = parent::check_id($arr['_id']);
         $arr                    = parent::stringify($arr);
         $arr['created']         = $pid->getTimestamp();
+        $arr['password']        = null;
         $arr['connections']  = static::get_public_connection_routes($arr['_id']);
 
         if ($this->current_user && isset($arr['_id']))
@@ -444,12 +448,13 @@ class Model_User extends Document {
         $uid = \Arr::get($user, '_id');
         $lid = \Arr::path($user, 'library._id');
 
-        foreach (['privacy', 'notifications', 'inbox', 'subscriptions'] as $v)
+        foreach (['privacy', 'notifications', 'conversations', 'subscriptions'] as $v)
         {
             $actions[$v] = Router::user($v, $uid);
         }
 
         $actions['library'] = Router::user('library', $lid);
+        $actions['messages'] = Router::user('messages');
         $actions['user'] = $uid;
         return Arr::merge($actions, static::get_public_connection_routes($uid));
     }
@@ -715,6 +720,8 @@ class Model_User extends Document {
             'listings'      => 0,
             'pages'         => 0,
             'posts'         => 0,
+            'messages'      => 0,
+            'newMessages'   => 0,
             'subscribers'   => 0,
             'testimonials'  => [
                 'received'   => 0,

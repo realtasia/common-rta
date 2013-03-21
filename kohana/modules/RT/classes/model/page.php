@@ -27,7 +27,7 @@ class Model_Page extends Document {
         }
         else
         {
-            $query = ['slug' => new MongoRegex("/^" . URL::title($id) . "/")];
+            $query = ['slug' => URL::title($id)];
         }
 
         $query['privacy.is'] = 'PUBLIC';

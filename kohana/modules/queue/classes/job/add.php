@@ -1,8 +1,8 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
 /**
- * Realtasia Queue Adder. A helper class to add Jobs to the queue in a standardised
- * fashion
+ * Realtasia Job Adder. A helper class to add Jobs to the queue in a standardised
+ * fashion.
  *
  * @author Jason Nathan
  * @category RealtAsia
@@ -21,6 +21,10 @@ class Job_Add {
 
     /** @var string|MongoID  the user id of the person performing the interaction. */
     public $user_id;
+
+    /** @var string if user_id given is instead a valid email address. */
+    public $email;
+
 
     /** @var bool  if false, performs batch operations. */
     public $is_single = FALSE;
@@ -71,6 +75,25 @@ class Job_Add {
     public function feedback($comment_id)
     {
         $this->key       = 'feedback';
+        $this->is_single = TRUE;
+        return $this->create([
+            'user_id'    => $this->user_id,
+            'date'       => time(),
+            'priority'   => 1,
+            'comment_id' => $comment_id,
+            'email'      => $this->email
+        ]);
+    }
+
+    /**
+     * Add a registration Job to the queue
+     *
+     * @uses Job_Add->create()
+     * @return bool
+     */
+    public function join_beta($comment_id)
+    {
+        $this->key       = 'join-beta';
         $this->is_single = TRUE;
         return $this->create([
             'user_id'    => $this->user_id,

@@ -81,7 +81,7 @@ class Model_Interaction_Collection extends Mongo_Collection {
         {
             $query['user._id'] = Document::check_id($user_id);
         }
-        //return $query;
+        //return $skip;
         $results = $this->find($query)
                 ->limit($limit)
                 ->skip($skip);
