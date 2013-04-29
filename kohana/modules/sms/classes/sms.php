@@ -120,7 +120,7 @@ class SMS {
         // we need all 3
         if (!$this->to || !$this->from || !$this->message)
         {
-            Debug::log('Error invoked in MODPATH/classes/sms. Empty params');
+            //Debug::log('Error invoked in MODPATH/classes/sms. Empty params');
             return $this->error((object) ['errortext' => 'Invalid params, please set a valid $to, $from & $message']);
         }
 
@@ -152,7 +152,7 @@ class SMS {
         }
 
         // nope, didn't validate!!
-        Debug::log('Error invoked in MODPATH/classes/sms. invalid number');
+        //Debug::log('Error invoked in MODPATH/classes/sms. invalid number');
         return false;
     }
 

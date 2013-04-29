@@ -492,17 +492,9 @@ class Model_User extends Document {
         if(empty($c))
             return false;
 
-        if(!isset($this->name) || empty($this->name))
-        {
-            $user = $this->collection()->findOne(['_id' => parent::check_id($uid)], ['_id' => 1, 'name' => 1]);
-            $user = (object) $this->stringify($user);
-        }
-        else
-        {
-            $user = clone $this;
-        }
+
         $company = parent::factory('page', $c['_id']);
-        $company->pull('members', ['_id' => parent::check_id($user->_id), 'name' => $user->name]);
+        $company->pull('members', ['_id' => parent::check_id($uid)]);
         $company->inc('counts.members', -1);
         $company->save();
     }
@@ -639,15 +631,15 @@ class Model_User extends Document {
     public static $user_fields = [
         'password' => '',
         'logins'   => [
-            'user_id'      => '',
-            'type'         => '',
-            'username'     => '',
-            'email'        => '',
-            'access_token' => '',
-            'token_type'   => '',
-            'expires_in'   => '',
-            'name'         => '',
-            'picture'      => '',
+//            'user_id'      => '',
+//            'type'         => '',
+//            'username'     => '',
+//            'email'        => '',
+//            'access_token' => '',
+//            'token_type'   => '',
+//            'expires_in'   => '',
+//            'name'         => '',
+//            'picture'      => '',
         ],
         'settings'     => [
             'locale'  => 'en_SG',

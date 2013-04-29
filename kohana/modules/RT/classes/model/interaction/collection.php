@@ -84,7 +84,8 @@ class Model_Interaction_Collection extends Mongo_Collection {
         //return $skip;
         $results = $this->find($query)
                 ->limit($limit)
-                ->skip($skip);
+                ->skip($skip)
+                ->slaveOkay();
 
         if($field)
         {

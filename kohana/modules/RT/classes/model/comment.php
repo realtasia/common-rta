@@ -63,17 +63,16 @@ class Model_Comment extends Document {
     public function create_message($params)
     {
         $args = [
-            'post'    => [
-                '_id'  => $params['post']['_id'],
-                'type' => $params['post']['type'],
-            ],
-            'message' => $params['message'],
-            'excerpt' => $params['excerpt'],
-            'user'    => $params['user'],
-            'type'    => 'message'
+            'post'         => [],
+            'conversation' => [],
+            'message'      => '',
+            'excerpt'      => '',
+            'user'         => [],
+            'to'           => [],
+            'type'         => 'message'
         ];
 
-        $this->load_values($params);
+        $this->load_values(\Arr::merge($args, $params));
 
         if ($this->save())
             return $this;
