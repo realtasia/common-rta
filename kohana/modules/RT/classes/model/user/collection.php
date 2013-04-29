@@ -63,7 +63,7 @@ class Model_User_Collection extends Collection {
 
         // status is a must for a query. It is the fisrt field of a compound index
         $query['status'] = $status;
-
+        //return $status;
         if($privacy)
             $query['settings.privacy.is'] = $privacy;
 
@@ -133,7 +133,8 @@ class Model_User_Collection extends Collection {
                 ->fields(static::$protected_fields, false)
                 ->limit($limit)
                 ->sort($sort)
-                ->skip($skip);
+                ->skip($skip)
+                ->slaveOkay();
                 //->explain();
                 //
 //        // Give the MongoCursor a hint. Set earlier.

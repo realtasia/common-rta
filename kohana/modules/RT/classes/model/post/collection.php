@@ -115,7 +115,8 @@ class Model_Post_Collection extends Collection {
                 ->fields(['message' => 0])
                 ->limit($limit)
                 ->sort($sort)
-                ->skip($skip);
+                ->skip($skip)
+                ->slaveOkay();
         //die(json_encode(['data' =>$results->hasNext()]));
         while($results->hasNext())
         {
@@ -207,12 +208,12 @@ class Model_Post_Collection extends Collection {
         $limit = Arr::get($args, 'limit', 11);
         $skip = Arr::get($args, 'skip', 0);
         $sort = Arr::get($args, 'sort', ['_id' => -1]);
-        $id = Document::check_id(Arr::get($args, 'user', $user_id));
+        $id = Document::check_id($user_id);
 
         $query = [
             'type' => 'conversation', 'status' => $status, '$or' => [
-                'user._id' => $id,
-                'to._id'   => $id
+                ['user._id' => $id],
+                ['to._id'   => $id]
             ]
         ];
         $results = $this
@@ -229,9 +230,7 @@ class Model_Post_Collection extends Collection {
                 $row->current_user = $usr;
                 $row->after_load();
             }
-            $ret = $row->stringify($row->as_array());
-
-            $return[] = $ret;
+            $return[] = $row->stringify($row->as_array());
         }
 
         return $return;

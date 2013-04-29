@@ -248,7 +248,7 @@ class Model_Post extends Document {
         $arr['generated_title'] = static::generate_title($arr);
         $arr['is_owner']        = $cu_id && $u_id && ($u_id === $cu_id);
         $arr['is_page_owner']   = $cu_id && $u_id && ((string) Arr::get($arr['page'], '_id') === $cu_id);
-        if ($this->current_user)
+        if ($cu)
         {
             $arr['actions'] = static::get_action_routes($arr);
             if ($arr['is_owner'])
@@ -283,7 +283,7 @@ class Model_Post extends Document {
             while ($subdocs->hasNext())
             {
                 $doc                  = $subdocs->getNext();
-                $doc->current_user    = $this->current_user;
+                $doc->current_user    = $cu;
                 $arr['attachments'][] = $doc->stringify($doc->as_array());
             }
         }
@@ -304,6 +304,18 @@ class Model_Post extends Document {
             $arr['connections']['attachments'] = Router::listing('attachments');
             $arr['addedMedia']                 = parent::stringify((array) $arr['addedMedia']);
             $arr['attachments']                = [];
+        }
+        // recipient defaults to post owner unless it is a conversation type post
+        // where we check the participants against the logged-in user making the
+        // other user the recipient.
+        if($cu)
+        {
+            $arr['recipient'] = $arr['user'];
+
+            if($arr['type'] === 'conversation' && \Arr::get($arr['user'], '_id') === $cu_id)
+            {
+                $arr['recipient'] = $arr['to'];
+            }
         }
         // we should trigger the comment model's formatting so each comment in
         // this post is properly formatted.
@@ -647,12 +659,12 @@ class Model_Post extends Document {
 
         if (isset($post['page']['uri']))
         {
-            $page_link = html::anchor($post['page']['uri'], $post['page']['name'], ['title' => $page_title, 'class' => 'hoverCard', 'data-bind' => "title:'$page_title', qtip:getHoverCard"]);
+            $page_link = html::anchor($post['page']['uri'], $post['page']['name'], ['title' => $page_title, 'class' => 'muted']);
         }
         else
         {
             // this is a user...
-            $page_link = html::anchor('/' . $post['page']['_id'], $post['page']['name'], ['title' => $page_title, 'class' => 'hoverCard', 'data-bind' => "title:'$page_title', qtip:getUserHoverCard"]);
+            $page_link = html::anchor('/' . $post['page']['_id'], $post['page']['name'], ['title' => $page_title, 'class' => 'muted']);
         }
 
         switch ($post['type'])
@@ -795,7 +807,7 @@ class Model_Post extends Document {
             'uri'         => '',
             'modified'    => 0,
             'privacy'     => ['is' => 'PUBLIC'],
-            'counts'      => array_fill_keys(['attachments', 'comments', 'events', 'likers', 'subscribers'], 0),
+            'counts'      => array_fill_keys(['attachments', 'comments', 'events', 'likers', 'subscribers', 'conversations', 'newMessages'], 0),
             'addedMedia'  => [],
             'subscribers' => [],
             'likers'      => [],
@@ -826,7 +838,7 @@ class Model_Post extends Document {
             'uri'         => '',
             'modified'    => 0,
             'privacy'     => ['is' => 'PUBLIC'],
-            'counts'      => array_fill_keys([ 'attachments', 'comments', 'likers', 'subscribers'], 0),
+            'counts'      => array_fill_keys([ 'attachments', 'comments', 'likers', 'subscribers', 'conversations', 'newMessages'], 0),
             'subscribers' => [],
             'likers'      => []
         ];
@@ -851,7 +863,7 @@ class Model_Post extends Document {
             'uri'         => '',
             'modified'    => 0,
             'privacy'     => ['is' => 'PUBLIC'],
-            'counts'      => array_fill_keys(['comments', 'likers', 'subscribers'], 0),
+            'counts'      => array_fill_keys(['comments', 'likers', 'subscribers', 'conversations', 'newMessages'], 0),
             'subscribers' => [],
             'likers'      => []
         ];

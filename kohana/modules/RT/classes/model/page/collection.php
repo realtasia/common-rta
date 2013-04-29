@@ -105,7 +105,8 @@ class Model_Page_Collection extends Collection {
                 ->find($query)
                 ->limit($limit)
                 ->sort($sort)
-                ->skip($skip);
+                ->skip($skip)
+                ->slaveOkay();
 
         while ($results->hasNext())
         {
