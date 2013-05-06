@@ -144,8 +144,10 @@ class Oauth2_Authentication {
 
             if ($given_domain === $stored_domain)
                 return $this->get_token($values['client_id'], NULL, TRUE);
+
+            Debug::log("unauthorised invoked in credentials. Given: $given_domain, Stored: $stored_domain");
         }
-        Debug::log('unauthorised invoked in credentials');
+        Debug::log("unauthorised invoked in credentials. Client Not Found");
         return static::$error->create('unauthorized_client');
     }
 
