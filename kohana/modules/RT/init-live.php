@@ -15,7 +15,7 @@ class RT {
     const BASE_URL      = 'preview.realtasia.com.sg';
     const API_SERVER    = 'api.realtasia.com.sg';
     const APP_SERVER    = 'app.realtasia.com.sg';
-    const COM_SERVER    = 'preview.realtasia.com.sg/common';
+    const COM_SERVER    = 'realtasia.com.sg/common';
     const MONGOS        = 'mongodb://54.251.242.171:27017';
     const ADMINS        = 'RealtAsia Administrators <jason.nathan@realtasia.com>';
     const NOTIFICATIONS = 'RealtAsia Notifications <support@realtasia.com.sg>';
