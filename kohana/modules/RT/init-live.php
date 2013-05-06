@@ -12,7 +12,7 @@
  */
 class RT {
 
-    const BASE_URL      = 'preview.realtasia.com.sg';
+    const BASE_URL      = 'realtasia.com.sg';
     const API_SERVER    = 'api.realtasia.com.sg';
     const APP_SERVER    = 'app.realtasia.com.sg';
     const COM_SERVER    = 'realtasia.com.sg/common';
