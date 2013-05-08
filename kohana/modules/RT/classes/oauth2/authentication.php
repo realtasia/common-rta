@@ -147,7 +147,7 @@ class Oauth2_Authentication {
 
             Debug::log("unauthorised invoked in credentials. Given: $given_domain, Stored: $stored_domain");
         }
-        Debug::log("unauthorised invoked in credentials. Client Not Found");
+        Debug::log("unauthorised invoked in credentials. Client Not Found: {$params['client_id']}");
         return static::$error->create('unauthorized_client');
     }
 

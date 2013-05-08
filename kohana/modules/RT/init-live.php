@@ -17,7 +17,7 @@ class RT {
     const APP_SERVER    = 'app.realtasia.com.sg';
     const COM_SERVER    = 'realtasia.com.sg/common';
     const MONGOS        = 'mongodb://54.251.242.171:27017';
-    const ADMINS        = 'RealtAsia Administrators <jason.nathan@realtasia.com>';
+    const ADMINS        = 'RealtAsia Administrators <admin@realtasia.com>';
     const NOTIFICATIONS = 'RealtAsia Notifications <support@realtasia.com.sg>';
     const SYSTEM        = 'SiRyA <support@realtasia.com>';
     const BUCKET        = 'static2.realtasia.com.sg';
