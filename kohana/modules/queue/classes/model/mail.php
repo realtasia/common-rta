@@ -4,9 +4,11 @@
  * RTA Queue Model.
  *
  * @author Jason Nathan
- * @package realtasia-beta-0.8
- * @subpackage Queue
- * @copyright 2011 Realtasia Pte Ltd
+ * @category RealtAsia
+ * @package Queue
+ * @subpackage Model_Mail
+ * @version 1.0
+ * @copyright 2012 Realtasia Pte Ltd
  */
 
 class Model_Mail extends Model
@@ -58,5 +60,3 @@ class Model_Mail extends Model
         return $t - $m['active'] >= 60;
     }
 }
-
-?>
