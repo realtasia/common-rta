@@ -207,7 +207,7 @@ class Job_Add {
         ]);
     }
 
-    /*     * *************** PROTECTED METHODS *********** */
+    /**************** PROTECTED METHODS *********** */
 
     /**
      * Add a generic Job to the queue
@@ -320,12 +320,12 @@ class Job_Add {
     protected function get_job_defaults($priority = 1, $single = FALSE, $delivery = 'immediate')
     {
         if ($single)
-            $message_array = [$this->key => []];
+            $message_array = [$this->key => array()];
         else
             $message_array = [
-                'like'      => [],
-                'comment'   => [],
-                'subscribe' => []
+                'like'      => array(),
+                'comment'   => array(),
+                'subscribe' => array()
             ];
 
         return [

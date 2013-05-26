@@ -1,4 +1,4 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+ <?php defined('SYSPATH') or die('No direct script access.');
 
 /**
  * Realtasia Queue Processor.
@@ -284,11 +284,11 @@ class Job_Processor_Immediate {
     public function private_message($item)
     {
         $notifications = Notifications::factory($item['mentionee_ids']);
-        // check if recipient wants to receive emails for posts written on his wall
+        // check if recipient wants to receive emails for private messages
         if (!$notifications->messages())
             return;
 
-        $r = (string) $item['mentionee_ids'];
+        $r = (string) $this->original_document->unread['_id'];
         $i = (string) $item['user_id'];
         $this->set_users($r, $i);
 
@@ -315,7 +315,6 @@ class Job_Processor_Immediate {
         if($i !== $r)
         {
             $this->set_users($r, $i);
-
             return $this->single_recipient_emails($item, $r, 'wallpost');
         }
     }
@@ -384,11 +383,11 @@ class Job_Processor_Immediate {
             {
                 $item['user']    = $this->interactors[$item_uid];
                 //just for comments, retrieve the comment
-                if ($type === 'comment')
+                if ($type === 'comment' || $type === 'private-message')
                 {
                     $c = Document::factory('comment', $item['comment_id']);
                     $c->load();
-                    $item['comment'] = $c;
+                    $item[$type] = $c;
                 }
 
                 unset($item['comment_id'], $item['user_id']);
@@ -542,7 +541,17 @@ class Job_Processor_Immediate {
                 if ($t)
                 {
                     //echo Debug::vars($t);
-                    $mail_adder->process($this->recipients[$r], $type, $t);
+                    try
+                    {
+                        $debug = $mail_adder->process($this->recipients[$r], $type, $t);
+                        Kohana::$log->add('error',$debug);
+                        Kohana::$log->write();
+                    }
+                    catch(Exception $e)
+                    {
+                        Kohana::$log->add('error', 'Emailer processing failed, msg: ' . $e->getMessage());
+                        Kohana::$log->write();
+                    }
                 }
             }
         }

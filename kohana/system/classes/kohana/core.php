@@ -533,7 +533,6 @@ class Kohana_Core {
 			// Not changing modules, just return the current set
 			return Kohana::$_modules;
 		}
-
 		// Start a new list of include paths, APPPATH first
 		$paths = array(APPPATH);
 

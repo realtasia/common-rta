@@ -26,7 +26,7 @@ class Mail_Add{
     public static $doc;
 
     /**
-     * No __construct really needed as all properties are static but returns a new
+     * No __construct really needed as most properties are static but returns an
      * instance to aid in method chaining. Requires the original job document
      * and a retrieved post document.
      *
@@ -108,9 +108,9 @@ class Mail_Add{
                         RT::NOTIFICATIONS, [
                             'ToAddresses' => [RT::ADMINS]
                         ], [
-                            'Subject.Data'   => $content['header_plain'],
-                            'Body.Text.Data' => $plainview->render(),
-                            'Body.Html.Data' => $view->render(),
+                            'Subject.Data'   => trim($content['header_plain']),
+                            'Body.Text.Data' => trim($plainview->render()),
+                            'Body.Html.Data' => static::compactHTML($view->render())
                         ], [
                             'returnCurlHandle' => true
                         ]);
@@ -137,9 +137,9 @@ class Mail_Add{
                                 $recipient['name'] . "<" . $recipient['email'] . ">"
                             ]
                         ], [
-                            'Subject.Data'   => $content['header_plain'],
-                            'Body.Text.Data' => $plainview->render(),
-                            'Body.Html.Data' => $view->render(),
+                            'Subject.Data'   => trim($content['header_plain']),
+                            'Body.Text.Data' => trim($plainview->render()),
+                            'Body.Html.Data' => static::compactHTML($view->render())
                         ], [
                             'returnCurlHandle' => true
                         ]);
@@ -166,12 +166,41 @@ class Mail_Add{
         {
             if(isset($i['comment']))
             {
-                $excerpt = $i['comment']->excerpt;
+                $excerpt = $i['comment']->message;
                 $user    = $i['user'];
             }
         }
         //Kohana::$log->add('debug', static::_get_avatar($user));
         $summary  = static::_build_interaction_summary($recipient, $items, 'commented on ');
+        $comment  = View::factory('emails/content/comment')
+                        ->set('name', $user['name'])
+                        ->set('avatar', static::_get_avatar($user))
+                        ->set('comment', $excerpt);
+
+        return static::_generic($summary, $comment, $recipient);
+    }
+
+    /**
+     * Private messages work like comments but are only sent (currently) to a
+     * single person.
+     *
+     * @param type $recipient
+     * @param type $items
+     * @return type
+     */
+    public function private_message($recipient, $items)
+    {
+        //echo Debug::vars();
+        foreach($items as $i)
+        {
+            if(isset($i['private-message']))
+            {
+                $excerpt = $i['private-message']->message;
+                $user    = $i['user'];
+            }
+        }
+        //Kohana::$log->add('debug', static::_get_avatar($user));
+        $summary  = static::_build_interaction_summary($recipient, $items, 'wrote a private message ');
         $comment  = View::factory('emails/content/comment')
                         ->set('name', $user['name'])
                         ->set('avatar', static::_get_avatar($user))
@@ -431,15 +460,18 @@ class Mail_Add{
                        ->render();
 
         return [
-           'header_plain' => $greeting,
-           'message_plain' => Inflector::br2nl($content_message),
-           'message' => $content,
+           'header_plain' => trim($greeting),
+           'message_plain' => trim(Inflector::br2nl($content_message)),
+           'message' => trim($content)
         ];
     }
 
     /**
      * Completes the sentence summary for emails. Extracts the users, post item
      * and parent page item along with the relevant links.
+     *
+     * ** Updated to check if the person interacting did so on his own post so
+     * ** we get emails like ...commented on his own... etc.
      *
      * @param MongoDocument $recipient the user object for the recipient
      * @param array $items the items by interaction type
@@ -451,9 +483,29 @@ class Mail_Add{
      */
     protected static function _build_interaction_summary($recipient, $items, $action)
     {
+        $adj = null;
+        foreach($items as $i)
+        {
+            // this only works for comments and PMs. Should be easy to integrate
+            // other actions.
+            if(isset($i['comment']) || isset($i['private-message']))
+            {
+                $commentor = $i->user;
+                $doc_owner = isset(static::$doc->user) ? static::$doc->user : static::$doc->as_array();
+
+                // check if commentor is the same as doc owner
+                if( (string) $commentor['_id'] === (string) $doc_owner['_id'])
+                {
+                    // fetch the user to get his gender
+                    $getOwner = Document::factory('user', $doc_owner['_id']);
+                    $getOwner->load(null, 'info');
+                    $adj = strlower(\Arr::Get($getOwner->info, 'gender')) === 'male' ? 'his own ' : 'her own ';
+                }
+            }
+        }
         return static::get_counts($items)
               ."$action "
-              .static::_adj_or_noun($recipient)
+              .($adj ? $adj : static::_adj_or_noun($recipient))
               .static::_post_link()
               .static::_page_link();
     }
@@ -490,7 +542,11 @@ class Mail_Add{
      */
     protected static function _post_uri()
     {
-        return "/post/?id=" . static::$job->document_id;
+        $type = static::$doc->type ? static::$doc->type : 'user';
+        $name = $type === 'user' ? 'profile page' : $type;
+        $link = Inflector::singularize( (string) static::$doc->collection());
+
+        return "/$link/?id=" . static::$job->document_id;
     }
 
     /**
@@ -531,7 +587,7 @@ class Mail_Add{
      * name if not.
      *
      * @param MongoID $recipient_id the recipient id
-     * @param string $adjective the adjective to use
+     * @param string $adjective the possessive adjective to use
      * @return string the document owner name or an adjective (your)
      */
     protected static function _adj_or_noun($recipient, $adjective = 'your')
@@ -597,5 +653,26 @@ class Mail_Add{
         );
 
         return $greetings[array_rand($greetings)] . $name . ', ';
+    }
+
+    /**
+     * Small utility to remove whitespaces form html emails.
+     *
+     * @param string $html
+     * @return string
+     */
+    protected static function compactHTML($html)
+    {
+        $search = array(
+            '/\>[^\S ]+/s', //strip whitespaces after tags, except space
+            '/[^\S ]+\</s', //strip whitespaces before tags, except space
+            '/(\s)+/s'  // shorten multiple whitespace sequences
+            );
+        $replace = array(
+            '>',
+            '<',
+            '\\1'
+            );
+        return preg_replace($search, $replace, $html);
     }
 }
