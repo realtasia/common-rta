@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
- * 
+ *
  * @author Jason Nathan
  * @category Helpers
  * @package RT_Log
@@ -12,11 +12,13 @@ class Log_Mongo extends Log_Writer {
 
     public function write(array $messages)
     {
-        $m = Model::factory('log')->collection;
+        $m = Document::factory('log');
         $r = Request::current();
         foreach($messages as $message)
         {
-            $m->insert($message);
+            $m->load_values($message);
+            $m->save();
+            $m->clear();
 //            Email::factory('Beta ERROR!', Debug::vars($message, $r), 'text/html')
 //                  ->to('support@realtasia.com', 'Jason Nathan')
 //                  ->from('support@realtasia.com', 'Jason Nathan')

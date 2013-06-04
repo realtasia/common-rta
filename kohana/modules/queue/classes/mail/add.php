@@ -200,7 +200,7 @@ class Mail_Add{
             }
         }
         //Kohana::$log->add('debug', static::_get_avatar($user));
-        $summary  = static::_build_interaction_summary($recipient, $items, 'wrote a private message ');
+        $summary  = static::_build_interaction_summary($recipient, $items, 'wrote you a private message ');
         $comment  = View::factory('emails/content/comment')
                         ->set('name', $user['name'])
                         ->set('avatar', static::_get_avatar($user))
@@ -486,9 +486,9 @@ class Mail_Add{
         $adj = null;
         foreach($items as $i)
         {
-            // this only works for comments and PMs. Should be easy to integrate
+            // this only works for comments. Should be easy to integrate
             // other actions.
-            if(isset($i['comment']) || isset($i['private-message']))
+            if(isset($i['comment']))
             {
                 $commentor = $i->user;
                 $doc_owner = isset(static::$doc->user) ? static::$doc->user : static::$doc->as_array();
@@ -502,6 +502,11 @@ class Mail_Add{
                     $adj = strlower(\Arr::Get($getOwner->info, 'gender')) === 'male' ? 'his own ' : 'her own ';
                 }
             }
+            if(isset($i['private-message']))
+            {
+                return static::get_counts($items)
+                      ."$action.";
+                    }
         }
         return static::get_counts($items)
               ."$action "

@@ -1,4 +1,6 @@
- <?php defined('SYSPATH') or die('No direct script access.');
+<?php
+
+defined('SYSPATH') or die('No direct script access.');
 
 /**
  * Realtasia Queue Processor.
@@ -13,20 +15,20 @@
 class Job_Processor_Immediate {
 
     public $job;
-    public $recipients = [];
+    public $recipients  = [];
     public $interactors = [];
-    public $emails = [];
+    public $emails      = [];
     public $original_document;
     public $document_owner;
 
     /** @var bool if false, performs batch operations. */
     public $is_single = FALSE;
-    public static $types = [
+    public static $types     = [
         'single' => [
             'mention', 'testimonial', 'wallpost', 'approve-testimonial',
             'private-message', 'feedback'
         ],
-        'group' => [
+        'group'  => [
             'comment', 'like', 'subscribe'
         ]
     ];
@@ -54,13 +56,11 @@ class Job_Processor_Immediate {
     {
         // fetch the document
         $this->original_document = static::get_original_document($this->job);
-        //die(Debug::vars($this->original_document));
+
 
         // set the author
-        $od = $this->original_document;
-        $this->document_owner = isset($od->user)
-                ? (string) $od->user['_id']
-                : (string) $this->job->document_id;
+        $od                   = $this->original_document;
+        $this->document_owner = isset($od->user) ? (string) $od->user['_id'] : (string) $this->job->document_id;
 
 
         //echo Debug::vars($this->messages['comment']);
@@ -71,12 +71,10 @@ class Job_Processor_Immediate {
             foreach (self::$types['single'] as $type)
             {
                 $m = \Arr::get($this->messages, $type);
-
                 if ($m)
                 {
                     $this->{str_replace('-', '_', $type)}(current($m));
                 }
-
             }
 
             return $this;
@@ -118,17 +116,17 @@ class Job_Processor_Immediate {
 
         $i = empty($interactors) ? $this->extract_interactors($this->messages) : (array) $interactors;
 
-        $user_ids = array_unique(Arr::merge( $r, $i ));
+        $user_ids = array_unique(Arr::merge($r, $i));
 
         $cursor = static::_get_users($user_ids);
         // we put the retrieved users back into the recipients and interactor
         // properties
-        if($cursor)
+        if ($cursor)
         {
             while ($cursor->hasNext())
             {
-                $u = $cursor->getNext()->as_array();
-                $uid = (string) $u['_id'];
+                $u                      = $cursor->getNext()->as_array();
+                $uid                    = (string) $u['_id'];
                 if (in_array($uid, $r))
                     $this->recipients[$uid] = $u;
 
@@ -183,7 +181,6 @@ class Job_Processor_Immediate {
 
         return $this->single_recipient_emails($item, $r, 'feedback');
     }
-
 
     /**
      * sets possible 'like' email messages for each recipient. Checks their
@@ -283,16 +280,16 @@ class Job_Processor_Immediate {
      */
     public function private_message($item)
     {
-        $notifications = Notifications::factory($item['mentionee_ids']);
+        $notifications = Notifications::factory($this->original_document->unread);
         // check if recipient wants to receive emails for private messages
         if (!$notifications->messages())
             return;
 
-        $r = (string) $this->original_document->unread['_id'];
+        $r = (string) $this->original_document->unread;
         $i = (string) $item['user_id'];
         $this->set_users($r, $i);
 
-        return $this->single_recipient_emails( $item, $r, 'private-message');
+        return $this->single_recipient_emails($item, $r, 'private-message');
     }
 
     /**
@@ -312,7 +309,7 @@ class Job_Processor_Immediate {
             return;
         $r = (string) $item['mentionee_ids'];
         $i = (string) $item['user_id'];
-        if($i !== $r)
+        if ($i !== $r)
         {
             $this->set_users($r, $i);
             return $this->single_recipient_emails($item, $r, 'wallpost');
@@ -381,11 +378,11 @@ class Job_Processor_Immediate {
             // not get his own interaction emails.
             if ($item_uid !== $receip_id)
             {
-                $item['user']    = $this->interactors[$item_uid];
+                $item['user'] = $this->interactors[$item_uid];
                 //just for comments, retrieve the comment
                 if ($type === 'comment' || $type === 'private-message')
                 {
-                    $c = Document::factory('comment', $item['comment_id']);
+                    $c           = Document::factory('comment', $item['comment_id']);
                     $c->load();
                     $item[$type] = $c;
                 }
@@ -393,7 +390,7 @@ class Job_Processor_Immediate {
                 unset($item['comment_id'], $item['user_id']);
 
                 // add to the final array and build templates.
-                                //echo Debug::vars($item);
+                //echo Debug::vars($item);
                 $this->emails[(string) $receip_id][$type][] = $item;
             }
         }
@@ -412,11 +409,14 @@ class Job_Processor_Immediate {
     protected function single_recipient_emails($item, $receip_id, $type)
     {
         $item['user'] = $this->interactors[(string) $item['user_id']];
-//        echo Debug::vars([
-//            'r' => $this->recipients,
-//            'i' => $this->interactors
-//        ]);
-        unset($item['user_id']);
+        if ($type === 'comment' || $type === 'private-message')
+        {
+            $c           = Document::factory('comment', $item['comment_id']);
+            $c->load();
+            $item[$type] = $c;
+        }
+
+        unset($item['comment_id'], $item['user_id']);
 
         // add to the final array and build templates.
         $this->emails[(string) $receip_id][$type][] = $item;
@@ -433,7 +433,7 @@ class Job_Processor_Immediate {
     protected static function extract_recipients($document)
     {
         $object_type = Inflector::singular((string) $document->collection());
-        $args = [
+        $args        = [
             'object_id'   => $document->_id,
             'object_type' => $object_type,
             'limit'       => 100,
@@ -442,14 +442,14 @@ class Job_Processor_Immediate {
 
         $users = Collection::factory('interaction')->subscribers($args);
 
-        if($object_type === 'user')
+        if ($object_type === 'user')
         {
             $users[] = [
-              '_id' => (string) $document->_id
+                '_id' => (string) $document->_id
             ];
         }
 
-        if(!empty($users))
+        if (!empty($users))
         {
             //Kohana::$log->add('debug', print_r(Arr::path($users, '*._id', []), true));
             return Arr::path($users, '*._id', []);
@@ -479,7 +479,8 @@ class Job_Processor_Immediate {
 
     /**
      * Retrieves the original document that was interacted upon from the database
-     * uses the job document to fetch the doc id and model
+     * uses the job document to fetch the doc id and model. In the case of
+     * messages, retrieves the conversation.
      *
      * @param MongoDocument $job the job currently being processed
      * @return MongoDocument the extracted original document
@@ -500,17 +501,15 @@ class Job_Processor_Immediate {
     protected static function _get_users($user_ids)
     {
         $query['status'] = 'active';
-        $query['_id']    = is_array($user_ids)
-                            ? array('$in' => array_map('Document::check_id', $user_ids))
-                            : Document::check_id((string)$user_ids);
+        $query['_id']    = is_array($user_ids) ? array('$in' => array_map('Document::check_id', $user_ids)) : Document::check_id((string) $user_ids);
 
         $users = Collection::factory('user')
-                ->find($query)
-                ->fields(array_fill_keys([
-                    '_id','email','first_name','name','avatar','settings.notifications', 'info.gender'
-                ],1));
+          ->find($query)
+          ->fields(array_fill_keys([
+            '_id', 'email', 'first_name', 'name', 'avatar', 'settings.notifications', 'info.gender'
+            ], 1));
 
-        if($users->hasNext())
+        if ($users->hasNext())
         {
             return $users;
         }
@@ -527,12 +526,8 @@ class Job_Processor_Immediate {
     {
         $mail_adder = Mail_Add::factory($this->original_document, $this->job);
 
-        //echo debug::vars($this);
-        //echo "<pre>";
-        //print_r($this->emails);
         foreach ($this->emails as $r => $messages)
         {
-            //print_r($t);
             // loop through the message types.
             foreach (self::$types[$type_key] as $type)
             {
@@ -544,18 +539,14 @@ class Job_Processor_Immediate {
                     try
                     {
                         $debug = $mail_adder->process($this->recipients[$r], $type, $t);
-                        Kohana::$log->add('error',$debug);
-                        Kohana::$log->write();
                     }
-                    catch(Exception $e)
+                    catch (Exception $e)
                     {
-                        Kohana::$log->add('error', 'Emailer processing failed, msg: ' . $e->getMessage());
-                        Kohana::$log->write();
+                        Debug::log('Emailer processing failed, msg: ' . $e->getMessage());
                     }
                 }
             }
         }
-        //Kohana::$log->write();
         return $mail_adder;
     }
 
