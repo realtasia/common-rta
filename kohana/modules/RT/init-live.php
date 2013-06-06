@@ -20,7 +20,11 @@ class RT {
     const ADMINS        = 'RealtAsia Administrators <admin@realtasia.com>';
     const NOTIFICATIONS = 'RealtAsia Notifications <support@realtasia.com.sg>';
     const SYSTEM        = 'SiRyA <support@realtasia.com>';
+
+    const AWS_KEY       = '[REDACTED]';
+    const AWS_SECRET    = '[REDACTED]';
     const BUCKET        = 'static2.realtasia.com.sg';
+
     const CLIENT_ID     = '9022096490250056';
 
 }

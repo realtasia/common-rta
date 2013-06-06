@@ -56,7 +56,6 @@ class Mail_Add{
         //echo Debug::Vars($items);
         $content  = $this->{str_replace('-', '_', $type)}($recipient, $items);
         $notification_url = static::_notification_url($recipient['_id']);
-        $email = ASDK::SES();
         $url = 'http://' . RT::APP_SERVER;
 
         switch($type)
@@ -72,19 +71,12 @@ class Mail_Add{
                     ->set('title', $content['header_plain'])
                     ->set('teaser', strip_tags($content['message']))
                     ->set('content_view', $content['message']);
-
-                $this->emails[] = $email->send_email(
-                        RT::NOTIFICATIONS, [
-                            'ToAddresses' => [
-                                $recipient['name'] . "<" . $recipient['email'] . ">"
-                            ]
-                        ], [
-                            'Subject.Data'   => $content['header_plain'],
-                            'Body.Text.Data' => $plainview->render(),
-                            'Body.Html.Data' => $view->render(),
-                        ], [
-                            'returnCurlHandle' => true
-                        ]);
+                $this->emails[]   = static::email_array(array(
+                      'to'        => $recipient['name'] . "<" . $recipient['email'] . ">",
+                      'subject'   => trim($content['header_plain']),
+                      'plaintext' => trim($plainview->render()),
+                      'html'      => static::compactHTML($view->render()),
+                ));
                 break;
             case 'adminEmail':
                 $content = array(
@@ -104,16 +96,13 @@ class Mail_Add{
                         ->set('content_header', $content['header_plain'])
                         ->set('content_message', $content['message_plain']);
 
-                $this->emails[] = $email->send_email(
-                        RT::NOTIFICATIONS, [
-                            'ToAddresses' => [RT::ADMINS]
-                        ], [
-                            'Subject.Data'   => trim($content['header_plain']),
-                            'Body.Text.Data' => trim($plainview->render()),
-                            'Body.Html.Data' => static::compactHTML($view->render())
-                        ], [
-                            'returnCurlHandle' => true
-                        ]);
+                $this->emails[]   = static::email_array(array(
+                      'to'        => array(RT::ADMINS),
+                      'subject'   => trim($content['header_plain']),
+                      'plaintext' => trim($plainview->render()),
+                      'html'      => static::compactHTML($view->render()),
+                ));
+
                 break;
             default:
                 $view = View::factory('emails/email')
@@ -131,18 +120,13 @@ class Mail_Add{
                       ->set('content_header', $content['header_plain'])
                       ->set('content_message', $content['message_plain']);
 
-                $this->emails[] = $email->send_email(
-                        RT::NOTIFICATIONS, [
-                            'ToAddresses' => [
-                                $recipient['name'] . "<" . $recipient['email'] . ">"
-                            ]
-                        ], [
-                            'Subject.Data'   => trim($content['header_plain']),
-                            'Body.Text.Data' => trim($plainview->render()),
-                            'Body.Html.Data' => static::compactHTML($view->render())
-                        ], [
-                            'returnCurlHandle' => true
-                        ]);
+                $this->emails[]   = static::email_array(array(
+                      'to'        => $recipient['name'] . "<" . $recipient['email'] . ">",
+                      'subject'   => trim($content['header_plain']),
+                      'plaintext' => trim($plainview->render()),
+                      'html'      => static::compactHTML($view->render()),
+                ));
+
                 break;
         }
 
@@ -679,5 +663,22 @@ class Mail_Add{
             '\\1'
             );
         return preg_replace($search, $replace, $html);
+    }
+
+    protected static function email_array($arr)
+    {
+        return array(
+            'Source' => RT::NOTIFICATIONS,
+            'Destination' => array(
+                'To' => Arr::get($arr, 'to')
+            ),
+            'Message' => array(
+                'Subject' => array('Data' => Arr::get($arr, 'subject')),
+                'Body'    => array(
+                    'Text' => array('Data' => Arr::get($arr, 'plaintext')),
+                    'Html' => array('Data' => Arr::get($arr, 'html')),
+                )
+            )
+        );
     }
 }
