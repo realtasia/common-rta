@@ -670,7 +670,7 @@ class Mail_Add{
         return array(
             'Source' => RT::NOTIFICATIONS,
             'Destination' => array(
-                'To' => Arr::get($arr, 'to')
+                'ToAddresses' => array(Arr::get($arr, 'to'))
             ),
             'Message' => array(
                 'Subject' => array('Data' => Arr::get($arr, 'subject')),

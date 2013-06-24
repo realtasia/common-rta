@@ -1,7 +1,5 @@
 <?php
 
-defined('SYSPATH') or die('No direct script access.');
-
 /**
  * Description of init
  *
@@ -18,7 +16,7 @@ class RT {
     const API_SERVER    = 'rta.jjpc.net';
     const APP_SERVER    = 'beta.jjpc.net';
     const COM_SERVER    = 'jjpc.net/common';
-    const MONGOS        = 'mongodb://mongo1:27017,realtasia-main:27017,jjpc.net:27017/?replicaSet=rtdbs';
+    const MONGOS        = 'mongodb://jjpc.net:27017,mongo1:27017,realtasia-main:27017/?replicaSet=rtdbs';
     const ADMINS        = 'RealtAsia Administrators <jason.nathan@realtasia.com>';
     const NOTIFICATIONS = 'RealtAsia Notifications <support@realtasia.com.sg>';
     const SYSTEM        = 'SiRyA <support@realtasia.com>';
@@ -26,7 +24,7 @@ class RT {
     const AWS_KEY       = '[REDACTED]';
     const AWS_SECRET    = '[REDACTED]';
     const BUCKET        = 'static2.realtasia.com.sg';
-    
+
     const CLIENT_ID     = '123456789';
 
 }
