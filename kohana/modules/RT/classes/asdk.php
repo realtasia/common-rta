@@ -54,6 +54,7 @@ class ASDK {
               'dynamodb_client' => $dynamoDb,
               'table_name'      => 'app_sessions',
         ]);
+        //$sessionHandler->createSessionsTable(5, 5);
         return $sessionHandler->register();
     }
 

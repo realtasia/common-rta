@@ -914,7 +914,9 @@ class Model_Post extends Document {
         $link = '';
         if ($this->message)
         {
-            if (strlen($this->message) !== strlen($this->excerpt))
+            $m = strlen(trim($this->message));
+            $e = strlen(trim($this->excerpt));
+            if ($m > $e)
             {
                 $link = '&nbsp;&hellip;' . HTML::anchor($this->uri, '<small class="muted"><br>Continue Reading</small>', ['class' => 'post_read_more']);
             }
