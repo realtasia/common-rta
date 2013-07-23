@@ -79,7 +79,7 @@ abstract class Kohana_Asset {
 				$html = "<script type=\"text/javascript\">\n".$content."\n</script>";
 			break;
 			case Assets::STYLESHEET:
-				$html = "<style>\n".$content."\n</style>";
+				$html = "<style type=\"text/css\">\n".$content."\n</style>";
 			break;
 		}
 
@@ -95,7 +95,7 @@ abstract class Kohana_Asset {
 	 * @var  string  file
 	 */
 	protected $_file = NULL;
-	
+
 	/**
 	 * @var  array  engines
 	 */
@@ -163,7 +163,7 @@ abstract class Kohana_Asset {
 
 	/**
 	 * Get the engines that will be used to compile this asset
-	 * @return array 
+	 * @return array
 	 */
 	public function engines()
 	{
@@ -178,7 +178,7 @@ abstract class Kohana_Asset {
 	{
 		return $this->_type;
 	}
-	
+
 	/**
 	 * Get the processor of this asset
 	 * @return string
@@ -187,7 +187,7 @@ abstract class Kohana_Asset {
 	{
 		return $this->_processor;
 	}
-	
+
 	/**
 	 * Get the condition
 	 *
@@ -282,7 +282,7 @@ abstract class Kohana_Asset {
 		// Get file contents
 		$content = file_get_contents($this->source_file());
 
-		foreach ($this->engines() as $engine) 
+		foreach ($this->engines() as $engine)
 		{
 			// Process content with each engine
 			$content = Asset_Engine::process($engine, $content, $this);
