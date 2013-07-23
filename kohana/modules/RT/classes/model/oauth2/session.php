@@ -71,6 +71,7 @@ class Model_Oauth2_Session extends Document {
      */
     public function set_token($params, $new = false)
     {
+        Debug::log(print_r($params[true]));
         // the access token
         $access_token = sha1(time() . uniqid());
 
