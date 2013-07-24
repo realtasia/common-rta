@@ -71,13 +71,13 @@ class Model_Oauth2_Session extends Document {
      */
     public function set_token($params, $new = false)
     {
-        Debug::log(print_r($params[true]));
+        //Debug::log(print_r($params[true]));
         // the access token
         $access_token = sha1(time() . uniqid());
 
         // query array can safely contain these
         $query = [
-            'client_id'    => new MongoID($params['client_id']),
+            'client_id'    => $params['client_id'],
             'grant_type'   => $params['grant_type']
         ];
 
@@ -105,7 +105,7 @@ class Model_Oauth2_Session extends Document {
         // for the new or the update object.
         $params = [
             'client_id'    => $params['client_id'],
-            'user_id'      => isset($params['user_id']) ? $params['user_id'] : NULL,
+            'user_id'      => isset($params['user_id']) ? $query['user_id'] : NULL,
             'code'         => isset($params['code']) ? $params['code'] : NULL,
             'access_token' => $access_token,
             'expires_in'   => isset($params['user_id']) ? Date::MONTH * 2 : Date::HOUR * 2,
