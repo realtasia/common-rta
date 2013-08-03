@@ -2,7 +2,7 @@
 /**
  * OAuth 2.0 Authentication Class
  * OK, there are lot's more requirements for oAuth2, but we're on a deadline &
- * I oughta rush this. The only thing missing from the current grant_types are
+ * I oughta rush this. The major thing missing from the current grant_types are
  * scopes. Since our internal app doesn't need scopes (i.e., we use em' all!), I
  * didn't include it's implementation. Phew! Shoot me :-)
  *
@@ -98,7 +98,7 @@ class Oauth2_Authentication {
         }
 
         // get or create a new token
-        return $this->get_token($client['client_id'], $user['_id'], TRUE, 'password');
+        return $this->get_token($client['client_id'], $values['user_agent'], $user['_id'], TRUE, 'password');
     }
 
     /**
@@ -143,7 +143,7 @@ class Oauth2_Authentication {
             $stored_domain = parse_url($client['redirect_uri'], PHP_URL_HOST);
 
             if ($given_domain === $stored_domain)
-                return $this->get_token($values['client_id'], NULL, TRUE);
+                return $this->get_token($values['client_id'], $values['user_agent'], NULL, TRUE);
 
             Debug::log("unauthorised invoked in credentials. Given: $given_domain, Stored: $stored_domain");
         }
@@ -159,10 +159,11 @@ class Oauth2_Authentication {
      * @param string $grant_type
      * @return string
      */
-    public function get_token($client_id, $user_id = NULL, $new = false, $grant_type = 'client_credentials')
+    public function get_token($client_id, $user_agent, $user_id = NULL, $new = false, $grant_type = 'client_credentials')
     {
         $params = [
             'client_id'  => $client_id,
+            'user_agent'  => $user_agent,
             'grant_type' => $grant_type
         ];
 

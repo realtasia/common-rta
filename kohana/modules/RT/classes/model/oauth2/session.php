@@ -1,4 +1,7 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php
+
+defined('SYSPATH') or die('No direct script access.');
+
 /**
  * Description of collection
  *
@@ -10,8 +13,8 @@
  * @copyright 2012 Realtasia Pte Ltd
  */
 class Model_Oauth2_Session extends Document {
-    protected $name = 'oauth2_sessions';
 
+    protected $name = 'oauth2_sessions';
 
     /**
      * Gets a stored session for the given token.
@@ -49,7 +52,7 @@ class Model_Oauth2_Session extends Document {
     public function destroy($token)
     {
         $this->load(['access_token' => $token]);
-        return $this->delete() ? true : false;
+        return $this->loaded() ? $this->delete() : false;
     }
 
     /**
@@ -77,26 +80,27 @@ class Model_Oauth2_Session extends Document {
 
         // query array can safely contain these
         $query = [
-            'client_id'    => $params['client_id'],
-            'grant_type'   => $params['grant_type']
+            'client_id'  => $params['client_id'],
+            'user_agent' => $params['user_agent'],
+            'grant_type' => $params['grant_type']
         ];
 
         // only add the next 3 params if they exist
-        if(isset($params['user_id']))
+        if (isset($params['user_id']))
         {
             $query['user_id'] = new MongoID($params['user_id']);
         }
 
-        if(isset($params['_id']))
+        if (isset($params['_id']))
         {
             $query['_id'] = new MongoID($params['_id']);
         }
 
-        if(isset($params['access_token']))
+        if (isset($params['access_token']))
         {
             //Debug::log($params['access_token']);
             $query['access_token'] = $params['access_token'];
-            if($new)
+            if ($new)
             {
                 $this->destroy($params['access_token']);
             }
@@ -105,6 +109,7 @@ class Model_Oauth2_Session extends Document {
         // for the new or the update object.
         $params = [
             'client_id'    => $params['client_id'],
+            'user_agent'   => $params['user_agent'],
             'user_id'      => isset($params['user_id']) ? $query['user_id'] : NULL,
             'code'         => isset($params['code']) ? $params['code'] : NULL,
             'access_token' => $access_token,
@@ -115,10 +120,10 @@ class Model_Oauth2_Session extends Document {
         ];
 
         $return = $this->collection(true)->findAndModify([
-            'query'         => $query,
-            'update'        => $params,
-            'new'           => true,
-            'upsert'        => true
+            'query'  => $query,
+            'update' => $params,
+            'new'    => true,
+            'upsert' => true
         ]);
 
         //print_r($return);
