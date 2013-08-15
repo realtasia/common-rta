@@ -103,7 +103,6 @@ class Model_Post_Collection extends Collection {
             switch($sort)
             {
                 case 'active': $sort = ['modified' => -1]; break;
-                case 'newest': $sort = ['_id' => -1]; break;
                 default: $sort = ['_id' => -1]; break;
             }
         }

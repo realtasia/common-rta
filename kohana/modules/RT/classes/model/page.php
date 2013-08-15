@@ -104,11 +104,6 @@ class Model_Page extends Document {
         return $this;
     }
 
-    public function create_location($params)
-    {
-
-    }
-
     /**
      * Searches for a document that has unique values. Returns false if none is
      * found and the id of the document if found.
@@ -367,7 +362,7 @@ class Model_Page extends Document {
                     }
                     break;
                 case 'name':
-                    if ($type !== 'library')
+                    if ($this->_object->type !== 'library')
                     {
                         $keywords[] = $v;
                     }
@@ -376,5 +371,4 @@ class Model_Page extends Document {
         }
         return array_filter($keywords);
     }
-
 }
