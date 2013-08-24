@@ -4,7 +4,7 @@
  * Amazon Web Services Utility Helper.
  *
  * @author Jason Nathan
- * @package RealtAsia API
+ * @package RealtAsia APP
  * @subpackage Helper
  * @version 1.2
  * @copyright 2011 Realtasia Pte Ltd

@@ -18,6 +18,7 @@ class RT {
     const COM_SERVER    = 'jjpc.net/common';
     //const MONGOS        = 'mongodb://jjpc.net:27017,mongo1:27017,realtasia-main:27017/?replicaSet=rtdbs';
     const MONGOS        = 'mongodb://jjpc.net:27017';
+    //const MONGOS        = 'mongodb://deploy.realtasia.com:8017';
     const ADMINS        = 'RealtAsia Administrators <jason.nathan@realtasia.com>';
     const NOTIFICATIONS = 'RealtAsia Notifications <support@realtasia.com.sg>';
     const SYSTEM        = 'SiRyA <support@realtasia.com>';
@@ -26,6 +27,7 @@ class RT {
     const AWS_SECRET    = '[REDACTED]';
     const BUCKET        = 'static2.realtasia.com.sg';
 
-    const CLIENT_ID     = '123456789';
+    const CLIENT_ID     = 'jjpc.net';
+    const CLIENT_REDIRECT     = 'beta.jjpc.net';
 
 }

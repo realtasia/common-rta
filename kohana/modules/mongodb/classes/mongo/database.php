@@ -50,7 +50,7 @@
  * @author  Colin Mollenhour
  * @category Mongo
  * @package Mongo_Database
- * 
+ *
  * This class was adapted from http://github.com/Wouterrr/MangoDB
  */
 
