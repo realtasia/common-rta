@@ -14,6 +14,7 @@ class Model_User extends Document {
 
     static $new_user_has_company = false;
     static $after_delete_fields = [];
+    private $is_admin_request = false;
     /**
      * Retrieve a user by email, username or id
      *
@@ -227,7 +228,7 @@ class Model_User extends Document {
         $arr                    = parent::stringify($arr);
         $arr['created']         = $pid->getTimestamp();
         $arr['password']        = null;
-        $arr['connections']  = static::get_public_connection_routes($arr['_id']);
+        $arr['connections']     = static::get_public_connection_routes($arr['_id']);
 
         if ($this->current_user && isset($arr['_id']))
         {
@@ -251,11 +252,11 @@ class Model_User extends Document {
                 $interactions        = parent::factory('interaction', NULL, $current_user->_id);
                 $arr['interactions'] = $interactions->interacting($arr['_id'], 'user');
                 $arr['actions']      = static::get_action_routes($arr['_id']);
-                return $this->unset_private_fields($arr);
+                return $this->is_admin_request ? $arr : $this->unset_private_fields($arr);
             }
         }
 
-        return $this->unset_private_fields($arr);
+        return $this->is_admin_request ? $arr : $this->unset_private_fields($arr);
     }
 
     /**
@@ -599,7 +600,8 @@ class Model_User extends Document {
         unset($arr['password'],
                 $arr['logins'],
                 $arr['private_actions'],
-                $arr['settings']['billing']);
+                $arr['settings']['billing'],
+                $arr['keywords']);
 
         return $arr;
     }
@@ -610,6 +612,21 @@ class Model_User extends Document {
         $r = $this->collection()->findOne(['_id' => parent::check_id($id)], ['password' => 1]);
 
         return $r['password'] === static::hash($password);
+    }
+
+    /**
+     * A getter/setter that allows admins to retrieve sensitive fields. Yes this
+     * is a privacy flaw and not very secure, but I need a quick fix. Existing
+     * functionality is not aware of this method.
+     *
+     * @todo Seriously need to relook this
+     * @param boolean $set
+     * @return boolean
+     */
+    public function is_admin($set = false)
+    {
+        $this->is_admin_request = $set;
+        return $this->is_admin_request;
     }
 
     /**
