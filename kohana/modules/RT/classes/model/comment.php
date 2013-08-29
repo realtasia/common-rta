@@ -301,7 +301,9 @@ class Model_Comment extends Document {
         $link = '';
         if ($this->message)
         {
-            if (strlen($this->message) !== strlen($this->excerpt))
+            $m = mb_strlen(trim($this->message));
+            $e = mb_strlen(trim($this->excerpt));
+            if ($m > $e)
             {
                 $link = '&nbsp;&hellip;' . HTML::anchor($this->uri, '<small class="muted"><br>Continue Reading</small>', ['class' => 'comment_read_more']);
             }

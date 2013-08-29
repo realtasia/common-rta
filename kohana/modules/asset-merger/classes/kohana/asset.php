@@ -288,7 +288,11 @@ abstract class Kohana_Asset {
 			$content = Asset_Engine::process($engine, $content, $this);
 		}
 
-		if ($process AND $this->processor())
+        if($process AND $this->processor() === 'googleclosure')
+        {
+            $content = Asset_Processor::process($this->processor(), $this->source_file());
+        }
+		elseif ($process AND $this->processor())
 		{
 			// Process content with processor
 			$content = Asset_Processor::process($this->processor(), $content);
