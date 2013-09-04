@@ -61,21 +61,26 @@ class Model_User_Collection extends Collection {
 
         extract(Arr::merge($defaults, $args), EXTR_SKIP);
 
-        // status is a must for a query. It is the fisrt field of a compound index
+        // status is a must for a query. It is the first field of a compound index
         $query['status'] = $status;
-        //return $status;
-        if($privacy)
+
+        /** since private profiles show in comments, presence of include_ids mean
+         * this is likely to be an interactor (like/subscribe) type search.
+         * A user's other privacy settings still prevail except that private
+         * profiles don't show in the main people's search
+         */
+        if($privacy && !$include_ids)
             $query['settings.privacy.is'] = $privacy;
 
-        /*
-         * For some reason, explain() showed Mongo wasn't using any of the indexes
-         * created. So giving an explicit hint. This hint describes one of the
-         * compound indexes. It might be swapped with another later depending on
-         * the query.
-         */
-        $user_id_fields_hint = [
-            'status' => 1, 'roles' => 1, 'settings.privacy.is' => 1, 'active' => -1
-        ];
+//        /*
+//         * For some reason, explain() showed Mongo wasn't using any of the indexes
+//         * created. So giving an explicit hint. This hint describes one of the
+//         * compound indexes. It might be swapped with another later depending on
+//         * the query.
+//         */
+//        $user_id_fields_hint = [
+//            'status' => 1, 'roles' => 1, 'settings.privacy.is' => 1, 'active' => -1
+//        ];
 
         if($user_id)
         {
@@ -135,8 +140,8 @@ class Model_User_Collection extends Collection {
                 ->sort($sort)
                 ->skip($skip)
                 ->slaveOkay();
-                //->explain();
-                //
+//                ->explain();
+//
 //        // Give the MongoCursor a hint. Set earlier.
 //        if($user_search_fields_hint)
 //        {
@@ -146,7 +151,7 @@ class Model_User_Collection extends Collection {
 //        {
 //            $results->hint($user_id_fields_hint);
 //        }
-        //die(Debug::Vars($query));
+//        die(Debug::Vars($query));
         while($results->hasNext())
         {
             $row = $results->getNext();
@@ -156,9 +161,7 @@ class Model_User_Collection extends Collection {
                 $row->after_load();
             }
 
-            $ret = $row->stringify($row->as_array(true));
-
-            $return[] = $ret;
+            $return[] = $row->stringify($row->as_array(true));
         }
 
         return array_filter($return);
@@ -182,7 +185,7 @@ class Model_User_Collection extends Collection {
      * order
      *
      * @param array $args
-     * @uses parent::sorter
+     * @uses Collection::sorter
      * @return array properly sorted args
      */
     protected static function ensure_order(array $args)

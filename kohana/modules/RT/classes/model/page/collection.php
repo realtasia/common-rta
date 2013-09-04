@@ -99,15 +99,15 @@ class Model_Page_Collection extends Collection {
             }
         }
 
-        //return $query;
+        //return $args;
 
         $results = $this
                 ->find($query)
-                ->limit($limit)
                 ->sort($sort)
+                ->limit($limit)
                 ->skip($skip)
                 ->slaveOkay();
-
+        //return $results->cursor()->explain();
         while ($results->hasNext())
         {
             $row = $results->getNext();
