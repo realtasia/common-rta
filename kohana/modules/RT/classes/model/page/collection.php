@@ -44,7 +44,7 @@ class Model_Page_Collection extends Collection {
             $this->_user_id = Document::check_id($user_id);
 
         // set some empty arrays
-        $query  = $ids    = $return = [];
+        $query  = $ids    = $return = $or = [];
 
         $query['status'] = 'active';
 
@@ -54,25 +54,19 @@ class Model_Page_Collection extends Collection {
         /**
          * subtypes =>
          *      Locations (estate, hdb, private-apartment, private-landed,
-         *                 serviced-residences)
+         *                 serviced-apartment)
          *      Company (agency, property-management, developer)
          */
         if (!empty($subtypes))
             $query['subtype'] = ['$in' => (array) $subtypes];
 
         $query['subtype']['$ne'] = 'Estate';
-        // if specific records are needed add to the ids array
-        if (!empty($include_ids))
-            $ids              = $include_ids;
 
         if ($privacy)
             $query['privacy.is'] = $privacy;
 
         // this is the search term typed.
-        if ($s)
-        {
-            $query['keywords'] = new MongoRegex("/^" . strtolower($s) . "/");
-        }
+
 
         // this is different from include_ids as we are looking in the
         // parent_id property to find children. @TODO dbrefs instead?
@@ -83,8 +77,23 @@ class Model_Page_Collection extends Collection {
 
 
         // now we validate the consodilated ids and continue building
-        if (!empty($ids))
-            $query['_id']['$in'] = array_map('Document::check_id', $ids);
+        // if specific records are needed add to the ids array
+        if (!empty($include_ids))
+        {
+            $ids = array_map('Document::check_id', $include_ids);
+            if ($s)
+            {
+                $or[] = ['keywords' => new MongoRegex("/^" . strtolower($s) . "/")];
+                $or[] = ['_id' => [
+                    '$in' => $ids
+                ]];
+                $query['$or'] = $or;
+            }
+            else
+            {
+                $query['_id']['$in'] = $ids;
+            }
+        }
 
         if (!is_array($sort))
         {
@@ -99,7 +108,11 @@ class Model_Page_Collection extends Collection {
             }
         }
 
-        //return $args;
+        //return $query;
+
+        //$return['total'] = $this->find($query)->count();
+
+        $this->reset();
 
         $results = $this
                 ->find($query)
