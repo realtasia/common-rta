@@ -24,23 +24,23 @@ class Model_Post extends Document {
     public function create(array $params)
     {
 //        $sparse = array_fill_keys(['sparse', 'safe'], true);
-        $this->collection()->deleteIndexes();
+//        $this->collection()->deleteIndexes();
 
-        $this->collection()->ensureIndex(array_fill_keys([
-                    'status', 'user._id', 'privacy.is', 'modified'], 1), [
-            'name' => 'post_id_fields', 'safe' => true
-        ]);
-        $this->collection()->ensureIndex(['keywords' => 1]);
-        $this->collection()->ensureIndex(['page_parent._id' => 1]);
-        $this->collection()->ensureIndex(['company._id' => 1]);
-        $this->collection()->ensureIndex(['page._id' => 1]);
-        $this->collection()->ensureIndex(['page.subtype' => 1]);
-        $this->collection()->ensureIndex(['to._id' => 1]);
-        $this->collection()->ensureIndex(['type' => 1]);
-        $this->collection()->ensureIndex(['listing.unit' => 1]);
-        $this->collection()->ensureIndex(array_fill_keys([
-                    'listing.type', 'listing.price', 'listing.rooms', 'listing.built_size', 'listing.leaseSpace'
-                        ], 1));
+//        $this->collection()->ensureIndex(array_fill_keys([
+//                    'status', 'user._id', 'privacy.is', 'modified'], 1), [
+//            'name' => 'post_id_fields', 'safe' => true
+//        ]);
+//        $this->collection()->ensureIndex(['keywords' => 1]);
+//        $this->collection()->ensureIndex(['page_parent._id' => 1]);
+//        $this->collection()->ensureIndex(['company._id' => 1]);
+//        $this->collection()->ensureIndex(['page._id' => 1]);
+//        $this->collection()->ensureIndex(['page.subtype' => 1]);
+//        $this->collection()->ensureIndex(['to._id' => 1]);
+//        $this->collection()->ensureIndex(['type' => 1]);
+//        $this->collection()->ensureIndex(['listing.unit' => 1]);
+//        $this->collection()->ensureIndex(array_fill_keys([
+//                    'listing.type', 'listing.price', 'listing.rooms', 'listing.built_size', 'listing.leaseSpace'
+//                        ], 1));
 
         // overwrite defaults
         $type = \Arr::get($params, 'type', 'post') . '_fields';
@@ -753,6 +753,7 @@ class Model_Post extends Document {
             'status'      => 'active', // pending, active, expired,
             'uri'         => '',
             'modified'    => 0,
+            'keywords'    => [],
             'privacy'     => ['is' => 'PUBLIC'],
             'counts'      => array_fill_keys([
                 'attachments', 'comments', 'events', 'likers', 'subscribers', 'conversations', 'newMessages'

@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') OR die('No direct access allowed.');
 
-require 'AWSSDKforPHP/aws.phar';
+require_once 'AWSSDKforPHP/aws.phar';
 use Aws\Common\Enum\Region;
 
 return [
