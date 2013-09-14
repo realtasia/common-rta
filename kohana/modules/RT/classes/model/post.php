@@ -62,7 +62,7 @@ class Model_Post extends Document {
             // save
             $this->save();
             $this->uri = '/post?id=' . (string) $this->_id;
-            if ($this->message)
+            if (strlen($this->message) > 1)
             {
                 $this->excerpt = $this->get_excerpt_link();
             }
@@ -394,12 +394,16 @@ class Model_Post extends Document {
      */
     public function process_counts(array $params, $inc = 1)
     {
-        $pages     = array_filter(\Arr::extract($params, ['page', 'to', 'page_parent']));
+        $pages[]     = array_filter(\Arr::get($params, 'page', []));
+        $pages[]     = array_filter(\Arr::get($params, 'to', []));
+        $pages[]     = array_filter(\Arr::get($params, 'page_parent', []));
         $privacy   = \Arr::get($params, 'privacy');
         $type      = \Arr::get($params, 'type');
         $user      = \Arr::get($params, 'user');
         $subtype   = \Arr::get($params, 'subtype');
         $mediainfo = \Arr::get($params, 'mediainfo');
+
+        $pages = array_filter($pages);
 
         // not empty seem redundant, just in case there are no pages.
         // future posts maybe?
@@ -413,11 +417,13 @@ class Model_Post extends Document {
                     case 'wallpost' :
                     case 'checkin' :
                     case 'event' :
+                    case 'listing' :
                     case 'post' :
                         $type = $type === 'wallpost' ? 'posts' : Inflector::plural($type);
+
                         // for other kinds of posts, we don't update the
                         // user whose page was written on.
-                        parent::factory('page', $page['_id'])
+                        Document::factory('page', $page['_id'])
                                 ->inc('counts.' . $type, $inc)
                                 ->save();
                         break;
@@ -426,7 +432,7 @@ class Model_Post extends Document {
                         // get the page type
                         $page_type = $page['type'] === 'user' ? 'user' : 'page';
 
-                        parent::factory($page_type, $page['_id'])
+                        Document::factory($page_type, $page['_id'])
                                 ->inc('counts.testimonials.received', $inc)
                                 ->save();
                         break;
@@ -464,37 +470,35 @@ class Model_Post extends Document {
                         // conversations, we update both. Because we need
                         // the number of total conversations in each user's
                         // inbox.
-                        parent::factory('user', $page['_id'])
+                        Document::factory('user', $page['_id'])
                                 ->inc('counts.conversations', $inc)
                                 ->save();
                         break;
                     case 'album' :
                         // albums are organised by private and public
                         $field = $privacy['is'] === 'PUBLIC' ? 'albums.public' : 'albums.private';
-                        parent::factory('page', $page['_id'])
+                        Document::factory('page', $page['_id'])
                                 ->inc('counts.' . $field, $inc)
                                 ->save();
                         break;
                 }
+                continue;
             }
         } // pages
         // now we update the user that created the post
-        switch ($type)
+
+        if($type === 'testimonial')
         {
-            case 'testimonial' :
-                // update the user's count
-                parent::factory('user', $user['_id'])
-                        ->inc('counts.testimonials.written', $inc)
-                        ->save();
-                break;
-
-            default :
-                $type = $type === 'wallpost' ? 'posts' : Inflector::plural($type);
-
-                parent::factory('user', $user['_id'])
-                        ->inc('counts.' . $type, $inc)
-                        ->save();
-                break;
+            parent::factory('user', $user['_id'])
+                    ->inc('counts.testimonials.written', $inc)
+                    ->save();
+        }
+        else
+        {
+            $type = ($type === 'wallpost') ? 'posts' : Inflector::plural($type);
+            parent::factory('user', $user['_id'])
+                    ->inc('counts.' . $type, $inc)
+                    ->save();
         }
 
         return $this;
@@ -718,7 +722,7 @@ class Model_Post extends Document {
             'page'        => [], // '_id', 'name', 'type' the page it was written on (location, user profile, album etc...)
             'page_parent' => [], // '_id', 'name', 'type' the page's parent (estate or library)
             'company'     => [], // '_id', 'name', 'type' the user's company if available
-            'name'        => '', // the content
+            'name'        => '', // the name or title if there is one.
             'excerpt'     => '', // the content summary (truncated)
             'message'     => '', // the content
             'picture'     => null, // if this post has an image, this will be the url
@@ -730,9 +734,7 @@ class Model_Post extends Document {
             'uri'         => '',
             'modified'    => 0,
             'privacy'     => ['is' => 'PUBLIC'],
-            'counts'      => array_fill_keys([
-                'attachments', 'comments', 'events', 'likers', 'subscribers'
-                    ], 0),
+            'counts'      => array_fill_keys(['attachments', 'comments', 'events', 'likers', 'subscribers'], 0),
             'subscribers' => [],
             'likers'      => []
         ];
@@ -764,110 +766,39 @@ class Model_Post extends Document {
 
     protected static function testimonial_fields()
     {
-        return [
-            'user'        => [], // '_id', 'name' of the user who created this
-            'page'        => [], // '_id', 'name', 'type' the page it was written on (location, user profile, album etc...)
-            'page_parent' => [], // '_id', 'name', 'type' the page's parent (estate or library)
-            'company'     => [], // '_id', 'name', 'type' the user's company if available
-            'name'        => '', // the content
-            'excerpt'     => '', // the content summary (truncated)
-            'message'     => '', // the content
-            'picture'     => null, // if this post has an image, this will be the url
-            'mediainfo'   => [], // if this post has an image, this will be the url
-            'link'        => [], // 'name', 'description', 'source' the original link if there is one.
+        return \Arr::merge(static::post_fields(), [
             'type'        => 'testimonial', // wallpost, testimonial, conversation, listing, checkin, event, album
-            'subtype'     => '', // wallpost, testimonial, conversation, listing, checkin, event, album
             'status'      => 'pending', // pending, active, expired,
-            'uri'         => '',
-            'modified'    => 0,
-            'privacy'     => ['is' => 'PUBLIC'],
-            'counts'      => array_fill_keys([ 'attachments', 'comments', 'likers', 'subscribers'], 0),
-            'subscribers' => [],
-            'likers'      => []
-        ];
+        ]);
     }
 
     protected static function listing_fields()
     {
-        return [
-            'user'        => [], // '_id', 'name' of the user who created this
-            'page'        => [], // '_id', 'name', 'type' the page it was written on (location, user profile, album etc...)
-            'page_parent' => [], // '_id', 'name', 'type' the page's parent (estate or library)
-            'company'     => [], // '_id', 'name', 'type' the user's company if available
+        return \Arr::merge(static::post_fields(), [
             'listing'     => array_fill_keys([
                 'type', 'price', 'rooms', 'built_size', 'land_size', 'cov', 'valuation', 'leaseSpace', 'cobroke', 'unit', 'property_type', 'baths'
                     ], 0),
-            'name'        => '', // the content
-            'excerpt'     => '', // the content summary (truncated)
-            'message'     => '', // the content
-            'picture'     => null, // if this post has an image, this will be the url
-            'mediainfo'   => [], // if this post has an image, this will be the url
-            'link'        => [], // 'name', 'description', 'source' the original link if there is one.
-            'type'        => 'post', // wallpost, testimonial, conversation, listing, checkin, event, album
-            'status'      => 'active', // pending, active, expired,
-            'uri'         => '',
-            'modified'    => 0,
-            'privacy'     => ['is' => 'PUBLIC'],
-            'counts'      => array_fill_keys(['attachments', 'comments', 'events', 'likers', 'subscribers', 'conversations', 'newMessages'], 0),
+            'type'        => 'listing', // wallpost, testimonial, conversation, listing, checkin, event, album
             'addedMedia'  => [],
-            'subscribers' => [],
-            'likers'      => [],
             'keywords'    => [],
-            'subtype'     => "",
             'address'     => "",
             'showAddress' => true,
             'expiry'      => 0,
-        ];
+        ]);
     }
 
     protected static function album_fields()
     {
-        return [
-            'user'        => [], // '_id', 'name' of the user who created this
-            'page'        => [], // '_id', 'name', 'type' the page it was written on (location, user profile, album etc...)
-            'page_parent' => [], // '_id', 'name', 'type' the page's parent (estate or library)
-            'company'     => [], // '_id', 'name', 'type' the user's company if available
-            'name'        => '', // the content
-            'excerpt'     => '', // the content summary (truncated)
-            'message'     => '', // the content
-            'picture'     => null, // if this post has an image, this will be the url
-            'mediainfo'   => [], // if this post has an image, this will be the url
-            'link'        => [], // 'name', 'description', 'source' the original link if there is one.
+        return \Arr::merge(static::post_fields(), [
             'type'        => 'album', // wallpost, testimonial, conversation, listing, checkin, event, album
-            'subtype'     => '', // wallpost, testimonial, conversation, listing, checkin, event, album
-            'status'      => 'active', // pending, active, expired,
-            'uri'         => '',
-            'modified'    => 0,
-            'privacy'     => ['is' => 'PUBLIC'],
-            'counts'      => array_fill_keys([ 'attachments', 'comments', 'likers', 'subscribers', 'conversations', 'newMessages'], 0),
-            'subscribers' => [],
-            'likers'      => []
-        ];
+        ]);
     }
 
     protected static function attachment_fields()
     {
-        return [
-            'user'        => [], // '_id', 'name' of the user who created this
-            'page'        => [], // '_id', 'name', 'type' the page it was written on (location, user profile, album etc...)
-            'page_parent' => [], // '_id', 'name', 'type' the page's parent (estate or library)
-            'company'     => [], // '_id', 'name', 'type' the user's company if available
-            'name'        => '', // the content
-            'excerpt'     => '', // the content summary (truncated)
-            'message'     => '', // the content
-            'picture'     => null, // if this post has an image, this will be the url
-            'mediainfo'   => [], // if this post has an image, this will be the url
-            'link'        => [], // 'name', 'description', 'source' the original link if there is one.
+        return \Arr::merge(static::post_fields(), [
             'type'        => 'attachment', // wallpost, testimonial, conversation, listing, checkin, event, album
-            'subtype'     => '', // wallpost, testimonial, conversation, listing, checkin, event, album
-            'status'      => 'active', // pending, active, expired,
-            'uri'         => '',
-            'modified'    => 0,
-            'privacy'     => ['is' => 'PUBLIC'],
-            'counts'      => array_fill_keys(['comments', 'likers', 'subscribers', 'conversations', 'newMessages'], 0),
-            'subscribers' => [],
-            'likers'      => []
-        ];
+        ]);
     }
 
     protected static function validate_ids($data)

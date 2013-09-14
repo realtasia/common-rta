@@ -95,6 +95,7 @@ class Model_Post_Collection extends Collection {
 
         if(!empty($listing))
         {
+            //return $listing;
             $query = \Arr::merge($query, self::process_listing($listing));
         }
 
@@ -116,7 +117,7 @@ class Model_Post_Collection extends Collection {
                 ->sort($sort)
                 ->skip($skip)
                 ->slaveOkay();
-        //die(json_encode(['data' =>$results->hasNext()]));
+        //return $query;
         while($results->hasNext())
         {
             //die(json_encode(['data' => iterator_to_array($results)]));
@@ -206,7 +207,7 @@ class Model_Post_Collection extends Collection {
         $status = Arr::get($args, 'status', 'active');
         $limit = Arr::get($args, 'limit', 11);
         $skip = Arr::get($args, 'skip', 0);
-        $sort = Arr::get($args, 'sort', ['_id' => -1]);
+        $sort = Arr::get($args, 'sort', ['modified' => -1]);
         $id = Document::check_id($user_id);
 
         $query = [
@@ -252,6 +253,7 @@ class Model_Post_Collection extends Collection {
      */
     public static function process_listing($q)
     {
+        //return $q;
         $query = [
             'listing.type' => ucfirst(strtolower(\Arr::get($q, 'type', 'Sale'))),
             'listing.built_size' => ['$gte' => (int) \Arr::get($q, 'builtLow', 0)],
