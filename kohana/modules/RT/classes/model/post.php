@@ -663,12 +663,13 @@ class Model_Post extends Document {
 
         if (isset($post['page']['uri']))
         {
-            $page_link = html::anchor($post['page']['uri'], $post['page']['name'], ['title' => $page_title, 'class' => 'muted']);
+            // this is a page...
+            $page_link = html::anchor($post['page']['uri'], $post['page']['name'], ['title' => $page_title, 'class' => 'locationHoverCard']);
         }
         else
         {
             // this is a user...
-            $page_link = html::anchor('/' . $post['page']['_id'], $post['page']['name'], ['title' => $page_title, 'class' => 'muted']);
+            $page_link = html::anchor('/' . $post['page']['_id'], $post['page']['name'], ['title' => $page_title, 'class' => 'personHoverCard']);
         }
 
         switch ($post['type'])

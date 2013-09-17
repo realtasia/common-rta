@@ -69,11 +69,6 @@ class Model_User extends Document {
             $params['company'] = $company->to_array();
         }
 
-        if(isset($params['username']))
-        {
-            $params['uri'] = "/{$params['username']}";
-        }
-
         // overwrite defaults to remove unwanted params
         $data = Arr::overwrite(static::$user_fields, $params);
         // merge with defaults
@@ -148,6 +143,12 @@ class Model_User extends Document {
      */
     public function before_save($action)
     {
+        if (!isset($this->_changed["username"]) && isset($this->_object["username"]))
+        {
+            $this->uri = "/{$this->username}";
+            $this->username = strtolower($this->username);
+        }
+
         //Debug::log('Entered before_save ' . count($this->_operations));
         // Updates
         if ($action === parent::SAVE_UPDATE)
@@ -411,7 +412,7 @@ class Model_User extends Document {
         return [
             '$or' => [
                 ['_id' => new MongoID($username)],
-                ['username' => $username],
+                ['username' => strtolower($username)],
                 ['email' => $username],
             ]
         ];

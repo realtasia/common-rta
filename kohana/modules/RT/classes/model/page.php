@@ -25,9 +25,15 @@ class Model_Page extends Document {
         {
             $query['_id'] = $id;
         }
+        elseif(is_array($id))
+        {
+            $query = ['keywords' => [
+                '$in' => $id
+            ]];
+        }
         else
         {
-            $query = ['slug' => URL::title($id)];
+            $query = ['keywords' => URL::title($id)];
         }
 
         $query['privacy.is'] = 'PUBLIC';
