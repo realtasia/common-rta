@@ -405,12 +405,15 @@ class Model_Post extends Document {
 
         $pages = array_filter($pages);
 
+        //$contents = "";
+
         // not empty seem redundant, just in case there are no pages.
         // future posts maybe?
         if (!empty($pages))
         {
             foreach ($pages as $page)
             {
+                $contents .= "Processing {$page['name']} \n";
                 // we do different page updates based on the post type
                 switch ($type)
                 {
@@ -419,13 +422,13 @@ class Model_Post extends Document {
                     case 'event' :
                     case 'listing' :
                     case 'post' :
-                        $type = $type === 'wallpost' ? 'posts' : Inflector::plural($type);
-
+                        $plural = $type === 'wallpost' ? 'posts' : Inflector::plural($type);
+                        $contents .= "Adding a count to {$page['name']} \n";
                         // for other kinds of posts, we don't update the
                         // user whose page was written on.
-                        Document::factory('page', $page['_id'])
-                                ->inc('counts.' . $type, $inc)
-                                ->save();
+                        $contents .= var_export(Document::factory('page', $page['_id'])
+                                ->inc('counts.' . $plural, $inc)
+                                ->save(), true) . "\n";
                         break;
 
                     case 'testimonial' :
@@ -444,18 +447,18 @@ class Model_Post extends Document {
                         {
                             if (strpos($mediainfo['mime'], 'image') !== false)
                             {
-                                $type = 'picture';
+                                $plural = 'picture';
                             }
                             elseif ($subtype === 'avatar')
                             {
-                                $type = 'picture';
+                                $plural = 'picture';
                             }
                             else
                             {
-                                $type = 'document';
+                                $plural = 'document';
                             }
                             parent::factory('page', $page['_id'])
-                                    ->inc('counts.' . Inflector::plural($type), $inc)
+                                    ->inc('counts.' . Inflector::plural($plural), $inc)
                                     ->save();
                         }
                         else
@@ -482,8 +485,8 @@ class Model_Post extends Document {
                                 ->save();
                         break;
                 }
-                continue;
             }
+            file_put_contents('debug.html', $contents);
         } // pages
         // now we update the user that created the post
 

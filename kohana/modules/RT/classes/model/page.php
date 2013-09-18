@@ -360,7 +360,7 @@ class Model_Page extends Document {
         {
             switch ($k)
             {
-                case 'parent':
+                //case 'parent':
                 case 'page':
                     if (is_array($v))
                     {
@@ -368,6 +368,7 @@ class Model_Page extends Document {
                     }
                     break;
                 case 'name':
+                case 'slug':
                     if ($this->_object->type !== 'library')
                     {
                         $keywords[] = $v;

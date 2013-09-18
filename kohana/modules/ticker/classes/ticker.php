@@ -296,10 +296,15 @@ class Ticker {
      *
      * @return array
      */
-    public function defaults($relevancy = 1)
+    public function defaults($relevancy = 1, $doc = null)
     {
-        if(!$this->document)
+        if(!$this->document && !$doc)
             return [];
+
+        if($doc)
+        {
+            $this->document = (array) $doc;
+        }
 
         $privacy = \Arr::path($this->document, 'privacy.is');
 
