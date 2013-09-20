@@ -20,6 +20,7 @@ class Model_Interaction_Collection extends Mongo_Collection {
     public function subscriptions(array $args)
     {
         $args['interaction'] = 'subscribe';
+        //return $args;
         return $this->fetch($args);
     }
 
@@ -81,7 +82,7 @@ class Model_Interaction_Collection extends Mongo_Collection {
         {
             $query['user._id'] = Document::check_id($user_id);
         }
-        //return $skip;
+        //return $query;
         $results = $this->find($query)
                 ->limit($limit)
                 ->skip($skip)

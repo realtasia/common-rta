@@ -33,7 +33,7 @@ class Model_Page_Collection extends Collection {
             'limit'       => 11, 'offset'      => 0, 'type'        => '', 'skip'        => 0,
             'subtypes'    => [], 'sort'        => 'alpha', 'status'      => 'active',
             's'           => '', 'include_ids' => FALSE, 'privacy'     => NULL,
-            'object_id'   => FALSE, 'children'    => FALSE
+            'object_id'   => FALSE, 'children'    => FALSE, 'company_id' => NULL
         );
         extract(Arr::merge($defaults, $args), EXTR_SKIP);
 
@@ -75,6 +75,10 @@ class Model_Page_Collection extends Collection {
             $query['parent._id'] = Document::check_id($object_id);
         }
 
+        if ($company_id)
+        {
+            $query['company._id'] = Document::check_id($company_id);
+        }
 
         // now we validate the consodilated ids and continue building
         // if specific records are needed add to the ids array

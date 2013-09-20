@@ -396,6 +396,7 @@ class Model_Post extends Document {
     {
         $pages[]     = array_filter(\Arr::get($params, 'page', []));
         $pages[]     = array_filter(\Arr::get($params, 'to', []));
+        $pages[]     = array_filter(\Arr::get($params, 'company', []));
         $pages[]     = array_filter(\Arr::get($params, 'page_parent', []));
         $privacy   = \Arr::get($params, 'privacy');
         $type      = \Arr::get($params, 'type');
