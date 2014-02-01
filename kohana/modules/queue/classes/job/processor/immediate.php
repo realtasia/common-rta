@@ -367,7 +367,7 @@ class Job_Processor_Immediate {
      */
     protected function recipient_emails($items, $receip_id, $type)
     {
-        echo Debug::vars([$items, $receip_id]);
+        //echo Debug::vars([$items, $receip_id]);
         // loops through all the items.
         foreach ($items as $item)
         {

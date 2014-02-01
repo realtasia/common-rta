@@ -411,7 +411,7 @@ class Model_User extends Document {
         // just a regular lookup
         return [
             '$or' => [
-                ['_id' => new MongoID($username)],
+                ['_id' => Document::check_id($username)],
                 ['username' => strtolower($username)],
                 ['email' => $username],
             ]

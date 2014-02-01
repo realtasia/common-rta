@@ -179,7 +179,14 @@ class Document extends Mongo_Document {
 
         if(is_string($val) && strlen($val) === 24)
         {
-            $id = new MongoID($val);
+            try
+            {
+            	$id = new MongoID($val);
+            }
+			catch (MongoException $e)
+			{
+				$id = "";
+			}
         }
         return ((string) $id === $val) ? $id : $val;
     }

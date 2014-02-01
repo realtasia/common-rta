@@ -13,6 +13,33 @@
 class Model_Page extends Document {
 
     /**
+     * Retrieve a single page by slug or _id
+     *
+     * @param MongoID|string|array $id or an array of query params
+     * @return array|null
+     */
+    public function get_by_slug_or_id($id, array $fields = [], $object = TRUE)
+    {
+        $id = parent::check_id($id);
+		
+        if ($id instanceof MongoID)
+        {
+            $query['_id'] = $id;
+        }
+        else
+        {
+            $query = ['slug' => $id];
+        }
+
+        if ($this->load($query, $fields))
+        {
+            $ret = $this->stringify($this->as_array());
+            return $object ? (object) $ret : $ret;
+        }
+        return false;
+    }
+
+    /**
      * Retrieve a single page
      *
      * @param MongoID|string|array $id or an array of query params
