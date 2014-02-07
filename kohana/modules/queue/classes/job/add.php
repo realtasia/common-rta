@@ -188,7 +188,7 @@ class Job_Add {
     }
 
     /**
-     * Wallposts like testimonials are written on a user's profile page
+     * Private Messages are like com
      *
      * @param string|mongoID $profile_user_id the id of the user whose profile was written on
      * @uses Job_Add->create()

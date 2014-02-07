@@ -9,7 +9,7 @@
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */
-class Notifications{
+class Settings{
 
     /**
      * @var notifications object
@@ -24,7 +24,7 @@ class Notifications{
      */
     public static function factory($user)
     {
-        return new Notifications($user);
+        return new Settings($user);
     }
 
     public function __construct($user)

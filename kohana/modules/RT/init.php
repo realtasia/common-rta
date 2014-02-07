@@ -27,7 +27,7 @@ class RT {
 
     const AWS_KEY       = '[REDACTED]';
     const AWS_SECRET    = '[REDACTED]';
-    const BUCKET        = 'static2.realtasia.com.sg';
+    const BUCKET        = 'static.realtasia.com.sg';
 
     const CLIENT_ID     = '123456789';
     const CLIENT_REDIRECT     = 'app.jjnb.net';

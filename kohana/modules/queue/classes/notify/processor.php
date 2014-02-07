@@ -1,7 +1,6 @@
 <?php defined('SYSPATH') or die('No direct script access.');
-require_once MODPATH . 'kohana-aws/vendor/aws-sdk-for-php/sdk.class.php';
 /**
- * Realtasia Mail Adder. A helper class to add Emails to the queue in a standardised
+ * Realtasia Notify Processor. A helper class to add Notifications to the queue in a standardised
  * fashion
  *
  * @author Jason Nathan
@@ -11,11 +10,11 @@ require_once MODPATH . 'kohana-aws/vendor/aws-sdk-for-php/sdk.class.php';
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */
-class Mail_Add{
+class Notify_Processor{
 
-    /** @var array The generated list of emails to add to the db
+    /** @var array The generated list of notifications to add to the db
      */
-    public $emails = [];
+    public $notifications = [];
 
     /** @var MongoDocument object the original job from the job queue
      */
@@ -24,6 +23,10 @@ class Mail_Add{
     /** @var MongoDocument object the original document retrieved. normally a post.
      */
     public static $doc;
+	
+    /** @var boolean Debug flag
+     */
+	public static $debug = true;
 
     /**
      * No __construct really needed as most properties are static but returns an
@@ -38,7 +41,7 @@ class Mail_Add{
     {
         static::$doc = $doc;
         static::$job = $job;
-        return new Mail_Add;
+        return new Notify_Processor;
     }
 
     /**
@@ -53,85 +56,45 @@ class Mail_Add{
      */
     public function process($recipient, $type, $items)
     {
-        //echo Debug::Vars($items);
-        $content  = $this->{str_replace('-', '_', $type)}($recipient, $items);
-        $notification_url = static::_notification_url($recipient['_id']);
-        $url = 'http://' . RT::APP_SERVER;
+        static::debug("In notify");
+						
+        $content  = call_user_func( [$this, str_replace('-', '_', $type)], $recipient, $items);
+		$id = (string) $recipient["_id"];
 
-        switch($type)
-        {
-            case 'feedback': case 'registration': case 'markerting':
-            case 'welcome': case 'beta':
-                $view = View::factory('emails/generic')
-                    ->set('title', $content['header_plain'])
-                    ->set('teaser', strip_tags($content['message']))
-                    ->set('content_view', $content['message']);
+		/**
+		 * Notifications array is organised into [user_id => array of items]
+		 * Checking if the id exists
+		 */			
+		if(!isset($this->notifications[ $id ]))
+		{
+			unset($recipient["_id"]);
+			$this->notifications[ $id ] = $recipient;
+			$this->notifications[ $id ]['items'] = array();
+		}
+		
+		$item = array_merge($content, [
+			'settings' => \Arr::get($recipient, 'settings'),
+			'first_name' => \Arr::get($recipient, 'first_name'),
+			'name' => \Arr::get($recipient, 'name'),
+			'email' => \Arr::get($recipient, 'email')
+		]);
+		
+		static::debug("receipient..................:");
+		static::debug($recipient);
+		static::debug("..................:");
+		
+		$item['post_uri'] = static::_post_uri();
 
-                $plainview = View::factory('emails/content/plaintext')
-                    ->set('title', $content['header_plain'])
-                    ->set('teaser', strip_tags($content['message']))
-                    ->set('content_view', $content['message']);
-                $this->emails[]   = static::email_array(array(
-                      'to'        => $recipient['name'] . "<" . $recipient['email'] . ">",
-                      'subject'   => trim($content['header_plain']),
-                      'plaintext' => trim($plainview->render()),
-                      'html'      => static::compactHTML($view->render()),
-                ));
-                break;
-            case 'adminEmail':
-                $content = array(
-                    'header_plain'  => $content['header_plain'],
-                    'message_plain' => $content['message'],
-                    'message'       => View::factory('emails/content/standard')
-                            ->set('content_header', "<h3>{$content['header_plain']}</h3>")
-                            ->set('content_message', "<pre>{$content['message']}</pre>")
-                );
-
-                $view = View::factory('emails/admin')
-                        ->set('title', $content['header_plain'])
-                        ->set('teaser', strip_tags($content['header_plain']))
-                        ->set('content_view', $content['message']);
-
-                $plainview = View::factory('emails/content/plaintext_generic')
-                        ->set('content_header', $content['header_plain'])
-                        ->set('content_message', $content['message_plain']);
-
-                $this->emails[]   = static::email_array(array(
-                      'to'        => array(RT::ADMINS),
-                      'subject'   => trim($content['header_plain']),
-                      'plaintext' => trim($plainview->render()),
-                      'html'      => static::compactHTML($view->render()),
-                ));
-
-                break;
-            default:
-                $view = View::factory('emails/email')
-                    ->set('title', $content['header_plain'])
-                    ->set('notification_url', $notification_url)
-                    ->set('teaser', strip_tags($content['message']))
-                    ->set('type', ucfirst($type))
-                    ->set('post_link', $url . static::_post_uri())
-                    ->set('content_view', $content['message']);
-
-                $plainview = View::factory('emails/content/plaintext')
-                      ->set('notification_url', $notification_url)
-                      ->set('type', ucfirst($type))
-                      ->set('post_link', $url . static::_post_uri())
-                      ->set('content_header', $content['header_plain'])
-                      ->set('content_message', $content['message_plain']);
-
-                $this->emails[]   = static::email_array(array(
-                      'to'        => $recipient['name'] . "<" . $recipient['email'] . ">",
-                      'subject'   => trim($content['header_plain']),
-                      'plaintext' => trim($plainview->render()),
-                      'html'      => static::compactHTML($view->render()),
-                ));
-
-                break;
-        }
+		// the reason why the notifications is organised in this manner
+		// although super unlikely, better to check for duplicates.
+		// optimally against smaller arrays .
+		if(!in_array($item, $this->notifications[ $id ]['items']))
+		{
+			$this->notifications[ $id ]['items'][] = $item;
+		}
+		
 
         return $this;
-
     }
 
     /**
@@ -145,6 +108,7 @@ class Mail_Add{
      */
     public function comment($recipient, $items)
     {
+    	static::debug("In comment");
         //echo Debug::vars();
         foreach($items as $i)
         {
@@ -154,14 +118,16 @@ class Mail_Add{
                 $user    = $i['user'];
             }
         }
-        //Kohana::$log->add('debug', static::_get_avatar($user));
+        static::debug("passing to summary builder");
         $summary  = static::_build_interaction_summary($recipient, $items, 'commented on ');
-        $comment  = View::factory('emails/content/comment')
-                        ->set('name', $user['name'])
-                        ->set('avatar', static::_get_avatar($user))
-                        ->set('comment', $excerpt);
 
-        return static::_generic($summary, $comment, $recipient);
+        return [
+        	'summary' => $summary,
+        	'name'	  => $user['name'],
+        	'avatar'  => static::_get_avatar($user),
+        	'excerpt' => $excerpt,
+        	'type'    => 'comment'
+        ];
     }
 
     /**
@@ -185,12 +151,13 @@ class Mail_Add{
         }
         //Kohana::$log->add('debug', static::_get_avatar($user));
         $summary  = static::_build_interaction_summary($recipient, $items, 'wrote you a private message ');
-        $comment  = View::factory('emails/content/comment')
-                        ->set('name', $user['name'])
-                        ->set('avatar', static::_get_avatar($user))
-                        ->set('comment', $excerpt);
-
-        return static::_generic($summary, $comment, $recipient);
+        return [
+        	'summary' => $summary,
+        	'name'	  => $user['name'],
+        	'avatar'  => static::_get_avatar($user),
+        	'excerpt' => $excerpt,
+        	'type'    => 'private-message'
+        ];
     }
 
     /**
@@ -206,7 +173,11 @@ class Mail_Add{
 
         $comment  = "We have received your email and will keep you posted.";
 
-        return static::_generic($summary, $comment, $recipient);
+        return [
+        	'summary' => $summary,
+        	'excerpt' => $comment,
+        	'type'    => 'feedback'
+        ];
     }
 
     /**
@@ -222,8 +193,11 @@ class Mail_Add{
         $summary  = "we received your submission!";
 
         $comment  = Kohana::message('user/info', 'thank_you_beta_email');
-
-        return static::_generic($summary, $comment, $recipient);
+        return [
+        	'summary' => $summary,
+        	'excerpt' => $comment,
+        	'type'    => 'join_beta'
+        ];
     }
 
 
@@ -238,8 +212,10 @@ class Mail_Add{
     public function like($recipient, $items)
     {
         $summary  = static::_build_interaction_summary($recipient, $items, 'likes');
-
-        return static::_generic($summary, "", $recipient);
+        return [
+        	'summary' => $summary,
+        	'type'    => 'like'
+        ];
 
     }
 
@@ -254,8 +230,10 @@ class Mail_Add{
     public function subscribe($recipient, $items)
     {
         $summary  = static::_build_interaction_summary($recipient, $items, 'subscribed to ');
-
-        return static::_generic($summary, "", $recipient);
+        return [
+        	'summary' => $summary,
+        	'type'    => 'subscribe'
+        ];
     }
 
     /*****************Single Emails*********************/
@@ -272,7 +250,7 @@ class Mail_Add{
     public function testimonial($recipient, $item)
     {
         //echo Debug::vars($recipient);
-        $summary  = static::get_counts($item)
+        $summary  = static::get_people_counts($item)
                           ."wrote you a "
                           .static::_post_link('testimonial', 'testimonial')
                           ." in your profile page.";
@@ -292,15 +270,15 @@ class Mail_Add{
                 }
             }
         }
-        //die(Debug::vars(static::$doc));
-        $comment  = View::factory('emails/content/comment')
-                        ->set('name', $user['name'])
-                        ->set('avatar', static::_get_avatar($user['user']))
-                        ->set('comment', static::$doc->excerpt);
 
-        $content_message = $content_message . "\n" . $comment;
-
-        return static::_generic($summary, $content_message, $recipient);
+        $excerpt = $content_message . "\n" . static::$doc->excerpt;
+        return [
+        	'summary' => $summary,
+        	'name'	  => $user['name'],
+        	'avatar'  => static::_get_avatar($user),
+        	'excerpt' => $excerpt,
+        	'type'    => 'testimonial'
+        ];
     }
 
     /**
@@ -314,17 +292,18 @@ class Mail_Add{
     public function approve_testimonial($recipient, $item)
     {
         //echo Debug::vars($recipient);
-        $summary  = static::get_counts($item)
+        $summary  = static::get_people_counts($item)
                           ."approved the "
                           .static::_post_link('testimonial')
                           ." you wrote:";
 
-        $comment  = View::factory('emails/content/comment')
-                        ->set('name', 'You')
-                        ->set('avatar', "")
-                        ->set('comment', static::$doc->excerpt);
-
-        return static::_generic($summary, $comment, $recipient);
+        return [
+        	'summary' => $summary,
+        	'name'	  => $user['name'],
+        	'avatar'  => static::_get_avatar($user),
+        	'excerpt' => static::$doc->excerpt,
+        	'type'    => 'approve_testimonial'
+        ];
     }
 
     /**
@@ -337,8 +316,8 @@ class Mail_Add{
      */
     public function wallpost($recipient, $item)
     {
-        //echo Debug::vars($recipient);
-        $summary  = static::get_counts($item)
+    	static::debug("In wallpost");
+        $summary  = static::get_people_counts($item)
                           ."shared a "
                           .static::_post_link('post')
                           ." on your profile page.";
@@ -356,17 +335,17 @@ class Mail_Add{
                 }
             }
         }
-        //die(Debug::vars(static::$doc));
-        $comment  = View::factory('emails/content/comment')
-                        ->set('name', $user['name'])
-                        ->set('avatar', static::_get_avatar($user['user']))
-                        ->set('comment', static::$doc->excerpt)
-                        ->render();
 
-        return static::_generic($summary, $comment, $recipient);
+        return [
+        	'summary' => $summary,
+        	'name'	  => $user['name'],
+        	'avatar'  => static::_get_avatar($user),
+        	'excerpt' => static::$doc->excerpt,
+        	'type'    => 'wallpost'
+        ];
     }
-
-
+// 
+// 
     /**
      * Process likes
      *
@@ -375,13 +354,37 @@ class Mail_Add{
      * @uses static::_generic() to generate content
      * @return Mail_Add
      */
-    public function add($priority = 1)
+    public function addAll($priority = 1)
     {
-        if(empty($this->emails))
-              throw new Mail_Processor_Exception('There are no generated emails to add');
-
-        Document::factory('email')->add($this->emails, $priority);
-
+    	static::debug("Total Notifications: " . count($this->notifications));
+		
+        if(empty($this->notifications)) return; 
+        
+        static::debug("Starting to process notifications....");
+		
+		$m = Document::factory('notification');
+		
+		/**
+		 * Notifications array is organised into [user_id => array of items]
+		 * In this case $k is the user id.
+		 */		
+		foreach ($this->notifications as $k => $n) 
+		{								
+			$rid = new MongoId($k);
+			
+			// making each item a document in Mongo
+			foreach( $n['items'] as $item)
+			{
+				$m->receipient_id = $rid;
+				$m->load_values($item);
+				$m->in_progress = false;
+				$m->emailed = Model_Notification::PENDING;
+				$m->notified = Model_Notification::PENDING;
+				$m->save();
+				$m->clear();				
+			}
+						
+		}
         return $this;
     }
 
@@ -394,63 +397,66 @@ class Mail_Add{
      * @uses static::_extract_user to generate content
      * @return NULL
      */
-    public static function get_counts($items)
+    public static function get_people_counts($items)
     {
+    	static::debug("In people counter");
+		$users = array();
+		$original_count = 1;
+		
+		// weirdly, names get repeated sometimes. Just a double-check that it doesn't
+		// happen by making user names unique
+		foreach($items as $key => $item)
+		{
+			// since only the first 3 people are named.
+			if($original_count <= 3)
+			{
+				static::debug("Count is less than or equal to 3: " . $original_count);
+				$user = static::_extract_user($item);
+				if(!in_array($user, $users))
+				{
+					$users[] = $user;
+				}
+				else
+				{
+					// still need to update the master items as only first 3 users are
+					// in the users array.
+					unset($items[$key]);
+				}	
+			}
+			$original_count++;			
+			
+		}
+		static::debug("Done fetching users");
+		// after unique checks, count total number of people who interacted with this document.
         $count = count($items);
         switch($count)
         {
+        	// shouldn't happen, but you never know.
             case 0:
                 return '';
 
             case 1:
-                return static::_extract_user($items[0]) . ' ';
+                return $users[0] . ' ';
 
             case 2:
-                return static::_extract_user($items[0]) . ' and '
-                     . static::_extract_user($items[1]) . ' also ';
+                return $users[0] . ' and '
+                     . $users[1] . ' also ';
 
             case 3:
-                return static::_extract_user($items[0]) . ', '
-                     . static::_extract_user($items[1]) . ' and '
-                     . static::_extract_user($items[2]) . ' also ';
+                return $users[0] . ', '
+                     . $users[1] . ' and '
+                     . $users[2] . ' also ';
 
             // more than 3. return first three followed by the count.
             default:
-                return static::_extract_user($items[0]) . ', '
-                     . static::_extract_user($items[1]) . ', '
-                     . static::_extract_user($items[2]) . ' and '
+                return $users[0] . ', '
+                     . $users[1] . ', '
+                     . $users[2] . ' and '
                      . $count - 3 . ' other people also ';
         }
     }
 
-    /**
-     * Used by all notification interaction emails. Creates a greeting, the plain text
-     * version of the content and the HTML version of the content
-     *
-     * @param MongoDocument $recipient the user object for the recipient
-     * @param array $item the item by interaction type
-     * @uses static::_greeting to generate content
-     * @return array
-     */
-    protected static function _generic($summary, $content, $recipient)
-    {
-        $greeting        = static::_greeting($recipient['first_name']);
-        $content_header  = View::factory('emails/header/h4')
-                               ->set('header', $greeting . " $summary");
-
-        $content = View::factory('emails/content/standard')
-                       ->set('content_header', $content_header)
-                       ->set('content_message', $content)
-                       ->render();
-
-        return [
-           'header_plain' => trim($greeting),
-           'message_plain' => trim(Inflector::br2nl($content_message)),
-           'message' => trim($content)
-        ];
-    }
-
-    /**
+     /**
      * Completes the sentence summary for emails. Extracts the users, post item
      * and parent page item along with the relevant links.
      *
@@ -459,7 +465,7 @@ class Mail_Add{
      *
      * @param MongoDocument $recipient the user object for the recipient
      * @param array $items the items by interaction type
-     * @uses static::get_counts()
+     * @uses static::get_people_counts()
      * @uses static::_adj_or_noun()
      * @uses static::_post_link()
      * @uses static::_page_link()
@@ -467,6 +473,7 @@ class Mail_Add{
      */
     protected static function _build_interaction_summary($recipient, $items, $action)
     {
+    	static::debug("In summary builder");
         $adj = null;
         foreach($items as $i)
         {
@@ -483,16 +490,15 @@ class Mail_Add{
                     // fetch the user to get his gender
                     $getOwner = Document::factory('user', $doc_owner['_id']);
                     $getOwner->load(null, 'info');
-                    $adj = strlower(\Arr::Get($getOwner->info, 'gender')) === 'male' ? 'his own ' : 'her own ';
+                    $adj = strlower(\Arr::get($getOwner->info, 'gender')) === 'male' ? 'his own ' : 'her own ';
                 }
             }
             if(isset($i['private-message']))
             {
-                return static::get_counts($items)
-                      ."$action.";
-                    }
+                return static::get_people_counts($items) ."$action.";
+            }
         }
-        return static::get_counts($items)
+        return static::get_people_counts($items)
               ."$action "
               .($adj ? $adj : static::_adj_or_noun($recipient))
               .static::_post_link()
@@ -511,17 +517,6 @@ class Mail_Add{
         $message = (array) $message;
         $info = \Arr::get($message, 'user', $message);
         return $set_owner ? $info['name'] . "'s" : $info['name'];
-    }
-
-    /**
-     * Builds the notification (unsubscribe) uri for a recipient
-     *
-     * @param MongoID $recipient_id the recipient id
-     * @return string the generated uri
-     */
-    protected static function _notification_url($recipient_id)
-    {
-        return 'http://' . RT::APP_SERVER . '/' . $recipient_id . '/settings';
     }
 
     /**
@@ -629,56 +624,24 @@ class Mail_Add{
         return $url . strtoupper(substr($gender, 0, 1)) . $size . '.png';
     }
 
-    /**
-     * A small utility that randomises greetings in emails
-     *
-     * @param string $name the user name
-     * @return string
-     */
-    protected static function _greeting($name)
+    public static function debug($text)
     {
-        $greetings = array(
-           'Hello ', 'Hey there ', 'Hey ', 'Hi '
-        );
+    	if(!static::$debug) return;
+    	if(!is_string($text))
+		{
+			$text = var_export($text, true);
+		}
+		
+        $STDOUT = fopen("php://stdout", "w");
+        fwrite($STDOUT, "$text \n");
+        fclose($STDOUT);		
+		
+		
+        //echo "$text \n";
+        //echo "-------------------------------- \n";
+        //Kohana::$log->add("debug", $text);
+        //Kohana::$log->write();
 
-        return $greetings[array_rand($greetings)] . $name . ', ';
-    }
-
-    /**
-     * Small utility to remove whitespaces form html emails.
-     *
-     * @param string $html
-     * @return string
-     */
-    protected static function compactHTML($html)
-    {
-        $search = array(
-            '/\>[^\S ]+/s', //strip whitespaces after tags, except space
-            '/[^\S ]+\</s', //strip whitespaces before tags, except space
-            '/(\s)+/s'  // shorten multiple whitespace sequences
-            );
-        $replace = array(
-            '>',
-            '<',
-            '\\1'
-            );
-        return preg_replace($search, $replace, $html);
-    }
-
-    protected static function email_array($arr)
-    {
-        return array(
-            'Source' => RT::NOTIFICATIONS,
-            'Destination' => array(
-                'ToAddresses' => array(Arr::get($arr, 'to'))
-            ),
-            'Message' => array(
-                'Subject' => array('Data' => Arr::get($arr, 'subject')),
-                'Body'    => array(
-                    'Text' => array('Data' => Arr::get($arr, 'plaintext')),
-                    'Html' => array('Data' => Arr::get($arr, 'html')),
-                )
-            )
-        );
+        return;
     }
 }

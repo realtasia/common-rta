@@ -1,6 +1,4 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 
 /**
  * Realtasia Queue Processor.
@@ -20,7 +18,10 @@ class Job_Processor_Immediate {
     public $emails      = [];
     public $original_document;
     public $document_owner;
-
+	
+    /** @var boolean Debug flag
+     */
+	public static $debug = false;
     /** @var bool if false, performs batch operations. */
     public $is_single = FALSE;
     public static $types     = [
@@ -94,7 +95,7 @@ class Job_Processor_Immediate {
                 {
                     //print_r([$this->messages[$type], array_reverse($this->messages[$type])]);
                     // check notifications before building emails.
-                    $notifications = Notifications::factory($recipient);
+                    $notifications = Settings::factory($recipient);
                     $this->{$type}($m, $recipient_id, $notifications);
                 }
             }
@@ -280,7 +281,7 @@ class Job_Processor_Immediate {
      */
     public function private_message($item)
     {
-        $notifications = Notifications::factory($this->original_document->unread);
+        $notifications = Settings::factory($this->original_document->unread);
         // check if recipient wants to receive emails for private messages
         if (!$notifications->messages())
             return;
@@ -303,7 +304,7 @@ class Job_Processor_Immediate {
      */
     public function wallpost($item)
     {
-        $notifications = Notifications::factory($item['mentionee_ids']);
+        $notifications = Settings::factory($item['mentionee_ids']);
 
         if (!$notifications->wallpost())
             return;
@@ -327,7 +328,7 @@ class Job_Processor_Immediate {
      */
     public function testimonial($item)
     {
-        $notifications = Notifications::factory($item['mentionee_ids']);
+        $notifications = Settings::factory($item['mentionee_ids']);
         // check if recipient wants to receive emails for testimonials written
         // about him
         if (!$notifications->testimonial())
@@ -436,7 +437,7 @@ class Job_Processor_Immediate {
         $args        = [
             'object_id'   => $document->_id,
             'object_type' => $object_type,
-            'limit'       => 100,
+            'limit'       => 300,
             'skip'        => 0,
         ];
 
@@ -477,14 +478,15 @@ class Job_Processor_Immediate {
         return array_unique(array_values($ids));
     }
 
-    /**
+    /**$pro
      * Retrieves the original document that was interacted upon from the database
      * uses the job document to fetch the doc id and model. In the case of
-     * messages, retrieves the conversation.
+     * messages, retrieves thepublic static $debug = true; conversation.
      *
      * @param MongoDocument $job the job currently being processed
      * @return MongoDocument the extracted original document
-     */
+     */ 
+     
     protected static function get_original_document($job)
     {
         $d = Document::factory($job->document_type, $job->document_id);
@@ -522,32 +524,53 @@ class Job_Processor_Immediate {
      *
      * @return Mail_Add
      */
-    public function make_emails($type_key = 'group')
+    public function make_notifications($type_key = 'group')
     {
-        $mail_adder = Mail_Add::factory($this->original_document, $this->job);
-
+        $np = Notify_Processor::factory($this->original_document, $this->job);
+		static::debug("Running processor");
         foreach ($this->emails as $r => $messages)
         {
             // loop through the message types.
             foreach (self::$types[$type_key] as $type)
             {
                 $t = \Arr::get($messages, $type);
-                //die(Debug::vars($t));
                 if ($t)
                 {
                     //echo Debug::vars($t);
                     try
                     {
-                        $debug = $mail_adder->process($this->recipients[$r], $type, $t);
+                    	static::debug($np->process($this->recipients[$r], $type, $t));
+                        $debug = $np->process($this->recipients[$r], $type, $t);
                     }
                     catch (Exception $e)
                     {
-                        Debug::log('Emailer processing failed, msg: ' . $e->getMessage());
+                       static::debug('Emailer processing failed, msg: ' . $e->getMessage());
                     }
                 }
             }
         }
-        return $mail_adder;
+        return $np;
+    }
+	
+    public static function debug($text)
+    {
+    	if(!static::$debug) return;
+    	if(!is_string($text))
+		{
+			$text = var_export($text, true);
+		}
+		
+        $STDOUT = fopen("php://stdout", "w");
+        fwrite($STDOUT, "$text \n");
+        fclose($STDOUT);		
+		
+		
+        //echo "$text \n";
+        //echo "-------------------------------- \n";
+        //Kohana::$log->add("debug", $text);
+        //Kohana::$log->write();
+
+        return;
     }
 
 }

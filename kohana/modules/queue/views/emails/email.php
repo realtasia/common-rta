@@ -38,7 +38,7 @@
                                                 <div class="topbar" data-dropdown="dropdown">
                                                     <div class="topbar-inner">
                                                         <div class="container">
-                                                            <a style="float: left; padding:4px;" href="/"><img width="175px" height="40px" style="height: auto !important; line-height: 100% !important; outline: none !important; text-decoration: none !important; border: 0;" class="full-logo" alt="Realtasia Logo" src="http://beta.realtasia.com.sg/realtlogo5.png"></a>
+                                                            <a style="float: left; padding:4px;" href="/"><img width="175px" height="40px" style="height: auto !important; line-height: 100% !important; outline: none !important; text-decoration: none !important; border: 0;" class="full-logo" alt="Realtasia Logo" src="http://static.realtasia.com.sg/realtlogo5.png"></a>
                                                             <div class="clear"></div>
                                                         </div>
                                                     </div><!-- /topbar-inner -->
@@ -79,13 +79,13 @@
                                                     <td colspan="2" valign="middle" id="social" style="border-collapse: collapse; border: 0;">
                                                         <div style="color: #707070; font-family: Arial; font-size: 12px; line-height: 125%; text-align: center;" align="center">
                                                             <a href="http://www.twitter.com/realtasia" target="_blank" style="background-color: #00A0D1;color: #fff; text-decoration: none; min-width: 110px; font-size: 12px; border-radius: 2px; cursor: pointer;margin: 0 10px 0 1px; padding: 5px; border: 1px solid #555;">
-                                                                <img src="http://beta.realtasia.com.sg/assets/images/twitter-login.png" style="vertical-align: middle; width: 16px; height: auto !important; margin-top: -1px; margin-left: -1px; border-right-style: solid; border-right-color: #ccc; line-height: 100% !important; outline: none !important; text-decoration: none !important; padding: 0; border: 0;" />
+                                                                <img src="http://static.realtasia.com.sg/assets/images/twitter-login.png" style="vertical-align: middle; width: 16px; height: auto !important; margin-top: -1px; margin-left: -1px; border-right-style: solid; border-right-color: #ccc; line-height: 100% !important; outline: none !important; text-decoration: none !important; padding: 0; border: 0;" />
                                                                 <span class="fb-auth-button" id="fb-auth" style="color: #fff; text-shadow: -1px -1px #666; vertical-align: middle; font-weight: 500; display: inline-block; font-family: 'lucida grande',tahoma,verdana,arial,sans-serif; padding: 0; border: 0;">
                                                                     follow on Twitter
                                                                 </span>
                                                             </a>
                                                             <a href="http://www.facebook.com/realtasia" target="_blank" style="color: #0580BD; text-decoration: none; min-width: 110px; font-size: 12px; border-radius: 2px; cursor: pointer; background-color: #3B5998; margin: 0 10px 0 1px; padding: 5px; border: 1px solid #ddd;">
-                                                                <img src="http://beta.realtasia.com.sg/assets/images/facebook-login.png" style="vertical-align: middle; width: 16px; height: auto !important; margin-top: -1px; margin-left: -1px; border-right-style: solid; border-right-color: #ccc; line-height: 100% !important; outline: none !important; text-decoration: none !important; padding: 0; border: 0;" />
+                                                                <img src="http://static.realtasia.com.sg/assets/images/facebook-login.png" style="vertical-align: middle; width: 16px; height: auto !important; margin-top: -1px; margin-left: -1px; border-right-style: solid; border-right-color: #ccc; line-height: 100% !important; outline: none !important; text-decoration: none !important; padding: 0; border: 0;" />
                                                                 <span class="fb-auth-button" id="fb-auth" style="color: #fff; text-shadow: -1px -1px #666; vertical-align: middle; font-weight: 500; display: inline-block; font-family: 'lucida grande',tahoma,verdana,arial,sans-serif; padding: 0; border: 0;">
                                                                     follow on Facebook
                                                                 </span>

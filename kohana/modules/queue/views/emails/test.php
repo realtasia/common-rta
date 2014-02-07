@@ -42,7 +42,7 @@
                                     <tr>
                                         <td class="headerContent" style="border-collapse: collapse; color: #202020; font-family: Arial; font-size: 34px; font-weight: bold; line-height: 100%; text-align: left; vertical-align: middle; padding: 4px;" align="left" valign="middle">
                                             <!-- // Begin Module: Standard Header Image \\ -->
-                                            <img src="http://beta.realtasia.com.sg/realtlogo3.png" style="max-width: 600px; height: auto; line-height: 100%; outline: none; text-decoration: none; border: 0;" id="headerImage campaign-icon" />
+                                            <img src="http://static.realtasia.com.sg/realtlogo3.png" style="max-width: 600px; height: auto; line-height: 100%; outline: none; text-decoration: none; border: 0;" id="headerImage campaign-icon" />
                                             <!-- // End Module: Standard Header Image \\ -->
 
                                         </td>
