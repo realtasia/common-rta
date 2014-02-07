@@ -1,13 +1,19 @@
 <?php defined('SYSPATH') OR die('No direct access allowed.');
 
 require_once 'AWSSDKforPHP/aws.phar';
+
+if(!class_exists('RT'))
+{
+	require_once MODPATH . '/RT/init.php';
+}
+
 use Aws\Common\Enum\Region;
 
 return [
     'credentials' => [
 
-        'key'    => '[REDACTED]',
-        'secret' => '[REDACTED]',
+        'key'    => RT::AWS_KEY,
+        'secret' => RT::AWS_SECRET,
         'region' => Region::AP_SOUTHEAST_1
     ],
     'legacySDK'   => [
@@ -16,12 +22,12 @@ return [
          * Amazon Web Services Key. Found in the AWS Security Credentials. You can also pass this value as the first
          * parameter to a service constructor.
          */
-        'AWS_KEY'                        => '[REDACTED]',
+        'AWS_KEY'                        => RT::AWS_KEY,
         /**
          * Amazon Web Services Secret Key. Found in the AWS Security Credentials. You can also pass this value as
          * the second parameter to a service constructor.
          */
-        'AWS_SECRET_KEY'                 => '[REDACTED]',
+        'AWS_SECRET_KEY'                 => RT::AWS_SECRET,
         /**
          * Amazon Associates ID
          */
@@ -34,17 +40,17 @@ return [
          * Amazon Account ID without dashes. Used for identification with Amazon EC2. Found in the AWS Security
          * Credentials.
          */
-        'AWS_ACCOUNT_ID'                 => '236693320325',
+        'AWS_ACCOUNT_ID'                 => RT::ACCOUNT_ID,
         /**
          * Your CanonicalUser ID. Used for setting access control settings in AmazonS3. Found in the AWS Security
          * Credentials.
          */
-        'AWS_CANONICAL_ID'               => 'bc9f082e53608d5d04b2d41b68fe49ad5544cde1e71567e32400917b0fe5c5e2',
+        'AWS_CANONICAL_ID'               => RT::CANONICAL_ID,
         /**
          * Your CanonicalUser DisplayName. Used for setting access control settings in AmazonS3. Found in the AWS
          * Security Credentials (i.e. "Welcome =>AWS_CANONICAL_NAME").
          */
-        'AWS_CANONICAL_NAME'             => 'caroline gordon',
+        'AWS_CANONICAL_NAME'             => RT::CANONICAL_NAME,
         /**
          * 12-digit serial number taken from the Gemalto device used for Multi-Factor Authentication. Ignore this
          * if you're not using MFA.

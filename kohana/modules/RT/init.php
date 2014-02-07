@@ -18,6 +18,8 @@ class RT {
     const COM_SERVER    = 'jjnb.net/common';
 	const QUEUE_SERVER  = '127.0.0.1:5555';
 	const SOCK_SERVER   = 'sock.realtasia.com';
+	const REDIS_SERVER  = 'pubsub.nzt4tm.0001.apse1.cache.amazonaws.com';
+	const REDIS_PORT    = 6379;
     //const MONGOS        = 'mongodb://jjpc.net:27017,mongo1:27017,realtasia-main:27017/?replicaSet=rtdbs';
     const MONGOS        = 'mongodb://jjnb.net:27017';
     //const MONGOS        = 'mongodb://deploy.realtasia.com:8017';
@@ -27,6 +29,9 @@ class RT {
 
     const AWS_KEY       = '[REDACTED]';
     const AWS_SECRET    = '[REDACTED]';
+    const CANONICAL_ID  = '27c22ef33fc8b3af046e5fb40cb61f8cf4d89e97b4c013d32cb6cebf1a35921d';
+    const CANONICAL_NAME= 'Jason J Nathan';
+    const ACCOUNT_ID    = '527573915434';
     const BUCKET        = 'static.realtasia.com.sg';
 
     const CLIENT_ID     = '123456789';
