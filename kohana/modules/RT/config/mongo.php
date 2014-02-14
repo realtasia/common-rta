@@ -7,6 +7,6 @@ return [
         'database'  => 'db',
         'server'    => RT::MONGOS,
         'options'   => [],
-        'profiling' => FALSE
+        'profiling' => TRUE
     ]
 ];

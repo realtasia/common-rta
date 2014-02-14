@@ -13,14 +13,14 @@
 class RT {
 
     const BASE_URL      = 'jjnb.net';
-    const API_SERVER    = 'api.realtasia.com.sg';
-    const APP_SERVER    = 'www.realtasia.com.sg';
-    const COM_SERVER    = 'realtasia.com.sg/common';
+    const API_SERVER    = 'api.jjnb.net';
+    const APP_SERVER    = 'app.jjnb.net';
+    const COM_SERVER    = 'jjnb.net/common';
 	const SOCK_SERVER   = 'sock.realtasia.com';
 	//const SOCK_SERVER   = 'localhost:3000';
 	const REDIS_SERVER  = 'pubsub.nzt4tm.0001.apse1.cache.amazonaws.com';
 	const REDIS_PORT    = 6379;
-    const MONGOS        = 'mongodb://admin:83QYHfTm@SG-RealtDB-2027.servers.mongodirector.com:27017,SG-RealtDB-2028.servers.mongodirector.com:27017/admin?replicaSet=RS-RealtDB-0';
+    const MONGOS        = 'mongodb://admin:PlEPmfBc@SG-RealtDB2-2033.servers.mongodirector.com:27017,SG-RealtDB2-2034.servers.mongodirector.com:27017/admin?replicaSet=RS-RealtDB2-0';
     //const MONGOS        = 'mongodb://jjnb.net:27017';
     //const MONGOS        = 'mongodb://deploy.realtasia.com:8017';
     const ADMINS        = 'RealtAsia Administrators <jason.nathan@realtasia.com>';
