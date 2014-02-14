@@ -1,32 +1,30 @@
 <?php
-require 'Predis/Autoloader.php';
 
 class Publish
 {
-	public static $redis = null;
+	//public static $redis = null;
 	
-	public function instance()
+	public static function notify( array $message )
 	{
-		if(!static::$redis)
-		{
-			Predis\Autoloader::register();
-			static::$redis = new Predis\Client();				
-		}
-		
-		return self;
+		return Request::factory('http://' . RT::SOCK_SERVER)
+				->method(Request::POST)
+				->body(json_encode([
+					"channel" => (string) \Arr::get($message, "receipient_id"),
+					"message" => $message,
+				]))
+				->headers('Content-Type', 'application/json')
+				->execute();
 	}
 	
-	public static function send($message)
+	public static function adminNotify( array $message )
 	{
-		if(!static::$redis)
-		{
-			throw new Kohana_Exception("Publish can only be used if has been instantated.");
-		}
-				
-		static::$redis->publish('notify', json_encode([
-			"channel" => \Arr::get($message, "receipient_id"),
-			"message" => $message,
-		]));
+		return Request::factory('http://' . RT::SOCK_SERVER . '/adminNotify')
+				->method(Request::POST)
+				->body(json_encode([
+					"message" => $message,
+				]))
+				->headers('Content-Type', 'application/json')
+				->execute();
 	}
 	
 }

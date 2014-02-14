@@ -72,12 +72,12 @@ class Notify_Processor{
 			$this->notifications[ $id ]['items'] = array();
 		}
 		
-		$item = array_merge($content, [
+		$item = array_merge([
 			'settings' => \Arr::get($recipient, 'settings'),
 			'first_name' => \Arr::get($recipient, 'first_name'),
 			'name' => \Arr::get($recipient, 'name'),
 			'email' => \Arr::get($recipient, 'email')
-		]);
+		], $content);
 		
 		static::debug("receipient..................:");
 		static::debug($recipient);
@@ -115,7 +115,8 @@ class Notify_Processor{
             if(isset($i['comment']))
             {
                 $excerpt = $i['comment']->message;
-                $user    = $i['user'];
+                $user    = $i['comment']->user;
+				$cid	 = $i['comment']->_id;
             }
         }
         static::debug("passing to summary builder");
@@ -123,9 +124,10 @@ class Notify_Processor{
 
         return [
         	'summary' => $summary,
-        	'name'	  => $user['name'],
+        	'interactor_name'	  => $user['name'],
         	'avatar'  => static::_get_avatar($user),
         	'excerpt' => $excerpt,
+        	'timestamp' => Document::check_id($cid)->getTimestamp(),
         	'type'    => 'comment'
         ];
     }
@@ -146,16 +148,18 @@ class Notify_Processor{
             if(isset($i['private-message']))
             {
                 $excerpt = $i['private-message']->message;
-                $user    = $i['user'];
+                $user    = $i['private-message']->user;
+				$cid	 = $i['private-message']->_id;
             }
         }
         //Kohana::$log->add('debug', static::_get_avatar($user));
         $summary  = static::_build_interaction_summary($recipient, $items, 'wrote you a private message ');
         return [
         	'summary' => $summary,
-        	'name'	  => $user['name'],
+        	'interactor_name'	  => $user['name'],
         	'avatar'  => static::_get_avatar($user),
         	'excerpt' => $excerpt,
+        	'timestamp' => Document::check_id($cid)->getTimestamp(),
         	'type'    => 'private-message'
         ];
     }
@@ -371,6 +375,7 @@ class Notify_Processor{
 		foreach ($this->notifications as $k => $n) 
 		{								
 			$rid = new MongoId($k);
+			$time = Document::check_id(static::$doc->_id)->getTimestamp();
 			
 			// making each item a document in Mongo
 			foreach( $n['items'] as $item)
@@ -378,9 +383,14 @@ class Notify_Processor{
 				$m->receipient_id = $rid;
 				$m->load_values($item);
 				$m->in_progress = false;
-				$m->emailed = Model_Notification::PENDING;
-				$m->notified = Model_Notification::PENDING;
+				$m->emailed     = Model_Notification::PENDING;
+				$m->notified    = Model_Notification::PENDING;
+				$m->doc_id      = (string) static::$doc->_id;
+				$m->timestamp	= \Arr::get($item, 'timestamp', $time);
+				$m->doc_type    = static::$doc->type;
 				$m->save();
+				// send notification to socket server.
+				Publish::notify($m->stringify($m->as_array()));
 				$m->clear();				
 			}
 						
@@ -614,6 +624,11 @@ class Notify_Processor{
         $id   = (string) $user['_id'];
         $size = 40;
         $avtr = \Arr::get($user, 'avatar');
+		
+		if(!$avtr)
+		{
+			$avtr = Document::factory('user', $id)->avatar;
+		}
 
         if($avtr)
         {

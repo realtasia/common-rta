@@ -16,8 +16,8 @@ class RT {
     const API_SERVER    = 'api.jjnb.net';
     const APP_SERVER    = 'app.jjnb.net';
     const COM_SERVER    = 'jjnb.net/common';
-	const QUEUE_SERVER  = '127.0.0.1:5555';
-	const SOCK_SERVER   = 'sock.realtasia.com';
+	//const SOCK_SERVER   = 'sock.realtasia.com';
+	const SOCK_SERVER   = 'localhost:3000';
 	const REDIS_SERVER  = 'pubsub.nzt4tm.0001.apse1.cache.amazonaws.com';
 	const REDIS_PORT    = 6379;
     //const MONGOS        = 'mongodb://jjpc.net:27017,mongo1:27017,realtasia-main:27017/?replicaSet=rtdbs';

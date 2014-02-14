@@ -760,7 +760,6 @@ class Model_Post extends Document {
             'status'      => 'active', // pending, active, expired,
             'uri'         => '',
             'modified'    => 0,
-            'keywords'    => [],
             'privacy'     => ['is' => 'PUBLIC'],
             'counts'      => array_fill_keys([
                 'attachments', 'comments', 'events', 'likers', 'subscribers', 'conversations', 'newMessages'
