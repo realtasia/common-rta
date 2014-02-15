@@ -13,7 +13,7 @@
 class RT {
 
     const BASE_URL      = 'jjnb.net';
-    const API_SERVER    = 'api.jjnb.net';
+    const API_SERVER    = 'api.realtasia.com.sg';
     const APP_SERVER    = 'app.jjnb.net';
     const COM_SERVER    = 'jjnb.net/common';
 	const SOCK_SERVER   = 'sock.realtasia.com';
