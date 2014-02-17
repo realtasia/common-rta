@@ -1,5 +1,12 @@
 <?php defined('SYSPATH') or die('No direct script access.');
+
+ // if(!class_exists('AutoScalingClient'))
+	// require_once Kohana::find_file('vendor', 'aws-autoloader');
+
  
+use Aws\AutoScaling\AutoScalingClient;
+use Aws\Ec2\Ec2Client;
+
 class Deploy {
 
     public $repository = RT::DOC_ROOT;

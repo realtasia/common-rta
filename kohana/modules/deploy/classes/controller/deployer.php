@@ -1,8 +1,5 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
-use Aws\AutoScaling\AutoScalingClient;
-use Aws\Ec2\Ec2Client;
-	
 class Controller_Deployer extends Kohana_Controller{
 	
 	public static $repos = ["api", "app", "common", "queue"];
