@@ -13,12 +13,12 @@
 class RT {
 
     const BASE_URL      = 'jjnb.net';
-    const API_SERVER    = 'api.realtasia.com.sg';
+    const API_SERVER    = 'api.jjnb.net';
     const APP_SERVER    = 'app.jjnb.net';
     const COM_SERVER    = 'jjnb.net/common';
-		const SOCK_SERVER   = 'sock.realtasia.com';
-    const MONGOS        = 'mongodb://admin:PlEPmfBc@SG-RealtDB2-2033.servers.mongodirector.com:27017,SG-RealtDB2-2034.servers.mongodirector.com:27017/admin?replicaSet=RS-RealtDB2-0';
-    //const MONGOS        = 'mongodb://jjnb.net:27017';
+	const SOCK_SERVER   = 'localhost:3000';
+    //const MONGOS        = 'mongodb://admin:PlEPmfBc@SG-RealtDB2-2033.servers.mongodirector.com:27017,SG-RealtDB2-2034.servers.mongodirector.com:27017/admin?replicaSet=RS-RealtDB2-0';
+    const MONGOS        = 'mongodb://jjnb.net:27017';
 
     const ADMINS        = 'RealtAsia Administrators <jason.nathan@realtasia.com>';
     const NOTIFICATIONS = 'RealtAsia Notifications <support@realtasia.com.sg>';
@@ -33,7 +33,7 @@ class RT {
     const BUCKET        = 'static.realtasia.com.sg';
 
     const CLIENT_ID     = '123456789';
-    const CLIENT_REDIRECT     = 'app.jjnb.net';
+    const CLIENT_REDIRECT     = 'jjnb.net';
 	const DOC_ROOT		= '/home/jason/www/';
 	
     public static $AWS_ASGROUPS  = ["RealtAPI", "RealtApp"];	
