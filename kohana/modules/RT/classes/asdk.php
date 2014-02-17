@@ -9,7 +9,7 @@
  * @version 1.2
  * @copyright 2011 Realtasia Pte Ltd
  */
-require 'AWSSDKforPHP/aws.phar';
+ require_once Kohana::find_file('vendor', 'aws.phar');
 
 use Aws\S3\S3Client;
 use Aws\DynamoDb\DynamoDbClient,

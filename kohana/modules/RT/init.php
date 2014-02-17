@@ -32,7 +32,7 @@ class RT {
     const ACCOUNT_ID    = '527573915434';
     const BUCKET        = 'static.realtasia.com.sg';
 
-    const CLIENT_ID     = '123456789';
+    const CLIENT_ID     = '987654321';
     const CLIENT_REDIRECT     = 'jjnb.net';
 	const DOC_ROOT		= '/home/jason/www/';
 	
