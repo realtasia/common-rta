@@ -33,7 +33,7 @@ class RT {
     const BUCKET        = 'static.realtasia.com.sg';
 
     const CLIENT_ID     = '987654321';
-    const CLIENT_REDIRECT     = 'jjnb.net';
+    const CLIENT_REDIRECT     = 'app.jjnb.net';
 	const DOC_ROOT		= '/home/jason/www/';
 	
     public static $AWS_ASGROUPS  = ["RealtApi", "RealtApp"];	
