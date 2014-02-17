@@ -18,6 +18,9 @@ class Repo_Queue extends Deploy {
 		
 		parent::emptyDirectory(APPPATH . 'cache');
 		parent::emptyDirectory(APPPATH . 'logs');
+		@exec("sudo service rtanotify restart;");
+		@exec("sudo service rtaticker restart;");
+		@exec("sudo service rtaemail restart;");
 	}
 
 }
