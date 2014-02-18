@@ -160,7 +160,11 @@ class Deploy {
 
 	public static function debug($message)
 	{
-		if(!static::$_debug)
+		$msg = Debug::vars($message);
+		
+		file_put_contents( APPPATH . 'debug.html', $msg);
+		
+		if(static::$_debug)
 			echo Debug::vars($message);
 	}
 
