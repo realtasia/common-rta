@@ -19,11 +19,11 @@ class Repo_Common extends Deploy {
         {
         	Deploy::debug("Both the above files were found");
             unlink ($init);
-            rename($init, $init_live);
+            rename($init_live, $init);
         } 
 		elseif(is_file($init_live))
 		{
-			rename("$path/init.php", $init_live);
+			rename($init_live, "$path/init.php");
 		}
     }
 	
