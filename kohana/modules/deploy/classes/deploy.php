@@ -10,7 +10,7 @@ use Aws\Ec2\Ec2Client;
 class Deploy {
 
     public $repository = RT::DOC_ROOT;
-	public static $_debug = false;
+	public static $_debug = true;
 	
 
     /**
@@ -55,10 +55,7 @@ class Deploy {
             $this->run("before_pull");
 
             // In case any changes were made locally, make sure to reset it.
-            exec( 'cd ' . realpath($this->repository) . ' && git reset --hard HEAD', $output);
-
-            // pull changes
-            exec('git pull', $output);
+            exec( 'cd ' . realpath($this->repository) . ' && git reset --hard HEAD && git pull', $output);
 
             $this->run("after_pull");
             
