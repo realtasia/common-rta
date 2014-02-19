@@ -19,7 +19,9 @@ class Repo_App extends Deploy {
 		
 		parent::emptyDirectory(APPPATH . 'cache');
 		parent::emptyDirectory(APPPATH . 'logs');
-		parent::exmptyDirectory($this->repository . '/assets/js')
+		$url = $this->repository . '/assets/js/;';
+		unlink($url . 'deps.js');
+		unlink($url . 'final.js');
 	}
 
 }
