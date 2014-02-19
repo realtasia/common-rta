@@ -34,7 +34,7 @@ class RT {
 
     const CLIENT_ID     = '123456789';
     const CLIENT_REDIRECT     = 'realtasia.com.sg';
-	const DOC_ROOT		= '/home/ubuntu/www/';cd www
+	const DOC_ROOT		= '/home/ubuntu/www/';
 	
     public static $AWS_ASGROUPS  = ["RealtApi", "RealtApp"];	
 
