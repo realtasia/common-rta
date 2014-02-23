@@ -43,11 +43,11 @@ class ASDK {
     {
         $sessionHandler = SessionHandler::factory([
               'dynamodb_client' => static::dynamodb(),
-              'table_name'      => 'app_sessions',
+              'table_name'      => 'sessions',
         ]);
-
-        $sessionHandler->register();
-
+		//$sessionHandler->createSessionsTable(10, 5);
+		$sessionHandler->register();
+		
         return $sessionHandler;
     }
 

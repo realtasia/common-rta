@@ -1,5 +1,6 @@
 <?php defined('SYSPATH') or die('No direct script access.');
-require_once MODPATH . 'kohana-aws/vendor/aws-sdk-for-php/sdk.class.php';
+include_once MODPATH . 'RT/init.php';
+//require_once MODPATH . 'kohana-aws/vendor/aws-sdk-for-php/sdk.class.php';
 /**
  * Realtasia Mail Adder. A helper class to add Emails to the queue in a standardised
  * fashion

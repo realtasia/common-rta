@@ -289,7 +289,12 @@ class Ipn {
      */
     public function is_unique_transaction()
     {
-        return ORM::factory('PayPal_Payment')->is_unique($this->get_post_data('txn_id'), $this->get_post_data('payment_status'));
+    	$cursor = Collection::factory('payment')
+    		->find([
+    			'txn_id' => $this->get_post_data('txn_id'),
+    			'payment_status' => $this->get_post_data('payment_status')
+    		]);
+        return !$cursor->hasNext();
     }
 
     /**
@@ -315,14 +320,15 @@ class Ipn {
         $info = '';
         foreach ($this->get_post_data() as $key => $value)
         {
-            if (!in_array($key, ['txn_id', 'parent_txn_id', 'mc_gross', 'mc_currency', 'payer_id', 'payer_email', 'first_name', 'last_name']))
-            {
-                $info .= str_pad($key, 25) . " $value\n";
-            }
+           // if (!in_array($key, ['txn_id', 'parent_txn_id', 'mc_gross', 'mc_currency', 'payer_id', 'payer_email', 'first_name', 'last_name']))
+           // {
+           //     $info .= str_pad($key, 25) . " $value\n";
+           // }
+			$info .= $key . ": $value\n";           
         }
 
         // Create and setup payment
-        $payment = Document::factory('payments');
+        $payment = Document::factory('payment');
         $payment->set('transaction_id', $this->get_post_data('txn_id'));
         $payment->set('parent_transaction_id', $this->get_post_data('parent_txn_id'));
         $payment->set('payment_status', $this->get_post_data('payment_status'));
@@ -330,12 +336,15 @@ class Ipn {
         $payment->set('currency', $this->get_post_data('mc_currency'));
         $payment->set('payer_id', $this->get_post_data('payer_id'));
         $payment->set('payer_email', $this->get_post_data('payer_email'));
+        $payment->set('item_name', $this->get_post_data('item_name'));
+        $payment->set('item_number', $this->get_post_data('item_number'));
+        $payment->set('custom', $this->get_post_data('custom'));
         $payment->set('payer_name', $this->get_post_data('first_name', '') . ' ' . $this->get_post_data('last_name', ''));
         $payment->set('payment_date', date('Y-m-d H:i:s'));
         $payment->set('info', $info);
 
         // Save the payment
-        $payment->save();
+        return $payment->save();
     }
 
     /**
