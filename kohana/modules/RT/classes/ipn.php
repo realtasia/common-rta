@@ -317,15 +317,9 @@ class Ipn {
      */
     public function save_payment()
     {
-        $info = '';
-        foreach ($this->get_post_data() as $key => $value)
-        {
-           // if (!in_array($key, ['txn_id', 'parent_txn_id', 'mc_gross', 'mc_currency', 'payer_id', 'payer_email', 'first_name', 'last_name']))
-           // {
-           //     $info .= str_pad($key, 25) . " $value\n";
-           // }
-			$info .= $key . ": $value\n";           
-        }
+        $info = json_encode($this->get_post_data());
+		
+        foreach ($this->get_post_data() as $key => $value);
 
         // Create and setup payment
         $payment = Document::factory('payment');
@@ -344,7 +338,9 @@ class Ipn {
         $payment->set('info', $info);
 
         // Save the payment
-        return $payment->save();
+        $payment->save();
+		
+		return $payment->_id;
     }
 
     /**

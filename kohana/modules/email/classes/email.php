@@ -12,10 +12,10 @@ class Email extends Kohana_Email {
         if (!Email::$_mailer)
         {
             // Extract Amazon configured options for SES
-            extract(Kohana::$config->load('amazon')->as_array(), EXTR_SKIP);
+            //extract(Kohana::$config->load('amazon')->as_array(), EXTR_SKIP);
 
             // Create SES transport
-            $transport = Swift_Awstransport::newInstance($AWS_KEY, $AWS_SECRET_KEY);
+            $transport = Swift_Awstransport::newInstance(RT::AWS_KEY, RT::AWS_SECRET);
 
             // Create the SwiftMailer instance
             Email::$_mailer = Swift_Mailer::newInstance($transport);

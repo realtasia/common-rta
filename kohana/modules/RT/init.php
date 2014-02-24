@@ -27,6 +27,8 @@ class RT {
     const AWS_KEY       = '[REDACTED]';
     const AWS_SECRET    = '[REDACTED]';
     const AWS_REGION    = 'ap-southeast-1';
+	const SMTP_USER		= '[REDACTED]';
+	const SMTP_PASS		= 'AiEae0dwq5cpJcAT0aBJitGmwh6zDUKD078gijPFho7F';
     const CANONICAL_ID  = '27c22ef33fc8b3af046e5fb40cb61f8cf4d89e97b4c013d32cb6cebf1a35921d';
     const CANONICAL_NAME= 'Jason J Nathan';
     const ACCOUNT_ID    = '527573915434';

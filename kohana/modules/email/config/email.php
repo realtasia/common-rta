@@ -27,8 +27,8 @@ return array(
 	 */
 	'options' => array(
          'hostname' => 'email-smtp.us-east-1.amazonaws.com',
-         'username' => '[REDACTED]',
-         'password' => '[REDACTED]',
+         'username' => RT::SMTP_USER,
+         'password' => RT::SMTP_PASS,
          'port' => 465,
          'encryption' => 'tls',
       )
