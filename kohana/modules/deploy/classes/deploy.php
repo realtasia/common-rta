@@ -127,8 +127,8 @@ class Deploy {
 						'repo' => $repo
 					])
 					->execute();
-				
-				Deploy::debug($r->body());
+				if(static::$_debug)
+					echo $r->body();
 			}
 		}		
 	}
