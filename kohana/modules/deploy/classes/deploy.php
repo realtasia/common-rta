@@ -75,7 +75,7 @@ class Deploy {
 		$connect = array(
 		    'key'    => RT::AWS_KEY,
 		    'secret' => RT::AWS_SECRET,
-		    'region' => RT::AWS_REGION		
+		    'region' => RT::AWS_REGION_ALL		
 		);
 		# Create a autoscaling client object
 		$as_client = AutoScalingClient::factory($connect);

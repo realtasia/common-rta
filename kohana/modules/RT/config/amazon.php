@@ -7,14 +7,12 @@ if(!class_exists('RT'))
 	require_once MODPATH . '/RT/init.php';
 }
 
-use Aws\Common\Enum\Region;
-
 return [
     'credentials' => [
 
         'key'    => RT::AWS_KEY,
         'secret' => RT::AWS_SECRET,
-        'region' => Region::AP_SOUTHEAST_1
+        'region' => RT::AWS_REGION_ALL
     ],
     'legacySDK'   => [
 
