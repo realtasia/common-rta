@@ -11,16 +11,22 @@ class Repo_Queue extends Deploy {
 	{
 		return parent::tell_others($repo);
 	}	
+
+	public function before_pull()
+	{
+		Deploy::debug("In before pull");
+		Deploy::debug("Emptying Cache: " . APPPATH . 'cache');
+		parent::emptyDirectory(APPPATH . 'cache');
+		Deploy::debug("Emptying Logs: " . APPPATH . 'logs');		
+		parent::emptyDirectory(APPPATH . 'logs');
+	}
 	
 	public function after_pull()
 	{
 		Deploy::debug("In after pull");
-		
-		parent::emptyDirectory(APPPATH . 'cache');
-		parent::emptyDirectory(APPPATH . 'logs');
-		@exec("sudo service rtanotify restart;");
-		@exec("sudo service rtaticker restart;");
-		@exec("sudo service rtaemail restart;");
+		@exec("sudo service rtanotify restart;", $output);
+		@exec("sudo service rtaticker restart;", $output);
+		@exec("sudo service rtaemail restart;", $output);
 	}
 
 }

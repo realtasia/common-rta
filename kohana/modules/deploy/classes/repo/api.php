@@ -13,11 +13,12 @@ class Repo_Api extends Deploy {
 		return parent::tell_others($repo);
 	}	
 	
-	public function after_pull()
+	public function before_pull()
 	{
-		Deploy::debug("In after pull");
-		
+		Deploy::debug("In before pull");
+		Deploy::debug("Emptying Cache: " . APPPATH . 'cache');
 		parent::emptyDirectory(APPPATH . 'cache');
+		Deploy::debug("Emptying Logs: " . APPPATH . 'logs');		
 		parent::emptyDirectory(APPPATH . 'logs');
 	}
 }

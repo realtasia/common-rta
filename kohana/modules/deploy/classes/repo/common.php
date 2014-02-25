@@ -23,6 +23,7 @@ class Repo_Common extends Deploy {
         } 
 		elseif(is_file($init_live))
 		{
+        	Deploy::debug("Only the live file was found");			
 			rename($init_live, "$path/init.php");
 		}
     }

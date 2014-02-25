@@ -39,6 +39,6 @@ class RT {
     const CLIENT_REDIRECT     = 'app.jjnb.net';
 	const DOC_ROOT		= '/home/jason/www/';
 	
-    public static $AWS_ASGROUPS  = ["RealtApi", "RealtApp"];	
+    public static $AWS_ASGROUPS  = ["RealtAPI", "RealtApp"];	
 
 }

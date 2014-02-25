@@ -117,12 +117,18 @@ class Deploy {
 			$instance = $value['Instances'];
 			foreach($instance as $public_dns) {
 				
-				Request::factory('http://' . $public_dns['PublicDnsName'] . '/updaterepos')
-				->method("POST")
-				->post([
-					'repo' => $repo
-				])
-				->execute();
+				$url = 'http://' . $public_dns['PublicDnsName'] . '/updaterepos';
+				
+				Deploy::debug("Executing: " .  $url);
+				
+				$r = Request::factory($url)
+					->method(HTTP_Request::POST)
+					->post([
+						'repo' => $repo
+					])
+					->execute();
+				
+				Deploy::debug($r->body());
 			}
 		}		
 	}
@@ -165,7 +171,7 @@ class Deploy {
 		file_put_contents( APPPATH . 'debug.html', $msg);
 		
 		if(static::$_debug)
-			echo Debug::vars($message);
+			echo $msg;
 	}
 
 
