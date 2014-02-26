@@ -54,6 +54,8 @@ class Deploy {
         {
             $this->run("before_pull");
 
+
+			Deploy::debug('Attempting to cd into: ' . realpath($this->repository));
             // In case any changes were made locally, make sure to reset it.
             exec( 'cd ' . realpath($this->repository) . ' && git reset --hard HEAD && git pull', $output);
 
