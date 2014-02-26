@@ -105,7 +105,7 @@ class Ipn {
      */
     private function get_paypal_host()
     {
-        return (intval($this->get_post_data('test_ipn')) == 1) ? self::SANDBOX_HOST : self::PAYPAL_HOST;
+        return Kohana::$environment === Kohana::PRODUCTION ? self::PAYPAL_HOST : self::SANDBOX_HOST;
     }
 
     /**
@@ -318,11 +318,10 @@ class Ipn {
     public function save_payment()
     {
         $info = json_encode($this->get_post_data());
-		
-        foreach ($this->get_post_data() as $key => $value);
 
         // Create and setup payment
         $payment = Document::factory('payment');
+		$payment->load(['transaction_id' => $this->get_post_data('txn_id')]);
         $payment->set('transaction_id', $this->get_post_data('txn_id'));
         $payment->set('parent_transaction_id', $this->get_post_data('parent_txn_id'));
         $payment->set('payment_status', $this->get_post_data('payment_status'));
