@@ -18,6 +18,8 @@ class Deploy {
      * */
     public static function factory($repo = null, $debug = true)
     {
+    	static::$_debug = $debug;
+		
     	$repo = "Repo_" . ucfirst(strtolower($repo));
         if (class_exists($repo))
         {
