@@ -23,7 +23,7 @@ class Deploy {
     	$repo = "Repo_" . ucfirst(strtolower($repo));
         if (class_exists($repo))
         {
-            $Crepo = new $repo;
+            $Crepo = new $repo($debug);
             if ( is_subclass_of($Crepo, get_called_class()) )
             {
             	Deploy::debug("Yeap inside the repo subclass: " . $repo);
@@ -31,8 +31,15 @@ class Deploy {
                 return $Crepo;
             }
         }    	
-        return new Deploy($repo);
+        return new Deploy($debug);
     }
+	
+	
+	public function __construct($debug = true)
+	{
+		static::$_debug = $debug;
+		return $this;
+	}
 
     /**
      * A simple method that runs internal callbacks if they are callable
