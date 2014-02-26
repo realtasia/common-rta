@@ -21,12 +21,12 @@ class Deploy {
     	$repo = "Repo_" . ucfirst(strtolower($repo));
         if (class_exists($repo))
         {
-            $repo = new $repo;
-            if ( is_subclass_of($repo, get_called_class()) )
+            $Crepo = new $repo;
+            if ( is_subclass_of($Crepo, get_called_class()) )
             {
             	Deploy::debug("Yeap inside the repo subclass: " . $repo);
-                $repo->run("init");
-                return $repo;
+                $Crepo->run("init");
+                return $Crepo;
             }
         }    	
         return new Deploy($repo);
