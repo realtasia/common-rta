@@ -16,17 +16,15 @@ class Deploy {
     /**
      * A static factory method
      * */
-    public static function factory($repo = null)
+    public static function factory($repo = null, $debug = true)
     {
     	$repo = "Repo_" . ucfirst(strtolower($repo));
-    	Deploy::debug(class_exists($repo));
         if (class_exists($repo))
         {
             $repo = new $repo;
-			Deploy::debug(is_subclass_of($repo, get_called_class()));
             if ( is_subclass_of($repo, get_called_class()) )
             {
-            	Deploy::debug("Yeap found a subclass");
+            	Deploy::debug("Yeap inside the repo subclass: " . $repo);
                 $repo->run("init");
                 return $repo;
             }

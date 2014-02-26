@@ -8,11 +8,12 @@ class Controller_Deployer extends Kohana_Controller{
 	{
 		$repo = \Arr::get($_REQUEST, 'repo');
 		$payload = \Arr::get($_REQUEST, 'payload');
+		$debug = (bool) \Arr::get($_REQUEST, 'debug');
 		
 		if(!in_array($repo, static::$repos))
 			throw new HTTP_Exception_404();
 		
-		$d = Deploy::factory($repo);
+		$d = Deploy::factory($repo, $debug);
 		
 		if(is_subclass_of($d, 'Deploy'))
 			$d->execute();
