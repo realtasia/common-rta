@@ -87,12 +87,10 @@ class Deploy {
 		$ec2_ids = array();
 	
 		# This includes all Amazon EC2 instances that are members of the group
-		$result = $as_client->describeAutoScalingGroups(array(
-			'AutoScalingGroupNames'	=> RT::$AWS_ASGROUPS
-		));
+		$result = $as_client->describeAutoScalingGroups();
 		
 		$result = $result['AutoScalingGroups'];
-		
+			
 		if(empty($result))
 			return;
 
@@ -103,9 +101,11 @@ class Deploy {
 				$ec2_ids[] = $id['InstanceId'];
 		}
 	
+		Deploy::debug("Found these instanceIds: " .  Debug::vars($ec2_ids));
+	
 		# This includes all information about instance id in $ec2_id which are currently running
 		$result = $ec2_client->describeInstances(array(
-			'InstanceIds'	=> array_unique($ec2_ids),
+			'InstanceIds'	=> $ec2_ids,
 			'Filters'	=> array(
 				array(
 					'Name'	=> 'instance-state-name',
