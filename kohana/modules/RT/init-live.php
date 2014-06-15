@@ -16,8 +16,8 @@ class RT {
     const API_SERVER    = 'api.realtasia.com.sg';
     const APP_SERVER    = 'realtasia.com.sg';
     const COM_SERVER    = 'common.realtasia.com.sg';
-	const SOCK_SERVER   = 'sock.realtasia.com.sg';
-    const MONGOS        = 'mongodb://admin:BQs0dPUk@SG-RealtDB-2083.servers.mongodirector.com:27017,SG-RealtDB-2084.servers.mongodirector.com:27017/admin?replicaSet=RS-RealtDB-0';
+    const SOCK_SERVER   = 'sock.realtasia.com.sg';
+    const MONGOS        = 'mongodb://mongo1.realtasia.com.sg:27017';
     //const MONGOS        = 'mongodb://jjnb.net:27017';
 
     const ADMINS        = 'RealtAsia Administrators <jason.nathan@realtasia.com>';

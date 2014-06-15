@@ -16,9 +16,9 @@ class RT {
     const API_SERVER    = 'api.jjnb.net';
     const APP_SERVER    = 'app.jjnb.net';
     const COM_SERVER    = 'jjnb.net/common';
-	const SOCK_SERVER   = 'localhost:3000';
+    const SOCK_SERVER   = 'localhost:3000';
     //const MONGOS        = 'mongodb://admin:PlEPmfBc@SG-RealtDB2-2033.servers.mongodirector.com:27017,SG-RealtDB2-2034.servers.mongodirector.com:27017/admin?replicaSet=RS-RealtDB2-0';
-    const MONGOS        = 'mongodb://jjnb.net:27017';
+    const MONGOS        = 'mongodb://localhost:27017';
 
     const ADMINS        = 'RealtAsia Administrators <jason.nathan@realtasia.com>';
     const NOTIFICATIONS = 'RealtAsia Notifications <support@realtasia.com.sg>';
@@ -35,7 +35,7 @@ class RT {
     const ACCOUNT_ID    = '527573915434';
     const BUCKET        = 'static.realtasia.com.sg';
 
-    const CLIENT_ID     = '987654321';
+    const CLIENT_ID     = '123456789';
     const CLIENT_REDIRECT     = 'app.jjnb.net';
 	const DOC_ROOT		= '/home/jason/www/';
 	

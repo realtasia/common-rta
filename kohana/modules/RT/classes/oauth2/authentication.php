@@ -90,6 +90,13 @@ class Oauth2_Authentication {
         if(!$user = static::$mResource->check_password($values['username'], $values['password']))
         {
             Debug::log('Access Denied in check_password');
+        return [
+            'status' => 'error',
+            'data' => [
+                'title'   => $key,
+                'message' => "Password don't match records"
+            ]
+        ];			
             return static::$error->create('access_denied');
         }
         if(isset($user['password']))
