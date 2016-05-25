@@ -375,7 +375,7 @@ class Notify_Processor{
 		foreach ($this->notifications as $k => $n) 
 		{								
 			$rid = new MongoId($k);
-			$time = Document::check_id(static::$doc->_id)->getTimestamp();
+			//$time = Document::check_id(static::$doc->_id)->getTimestamp();
 			
 			// making each item a document in Mongo
 			foreach( $n['items'] as $item)
@@ -386,7 +386,7 @@ class Notify_Processor{
 				$m->emailed     = Model_Notification::PENDING;
 				$m->notified    = Model_Notification::PENDING;
 				$m->doc_id      = (string) static::$doc->_id;
-				$m->timestamp	= \Arr::get($item, 'timestamp', $time);
+				$m->timestamp	= \Arr::get($item, 'timestamp', time());
 				$m->doc_type    = static::$doc->type;
 				$m->save();
 				// send notification to socket server.

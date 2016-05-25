@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -42,7 +42,7 @@
                                     <tr>
                                         <td class="headerContent" style="border-collapse: collapse; color: #202020; font-family: Arial; font-size: 34px; font-weight: bold; line-height: 100%; text-align: left; vertical-align: middle; padding: 4px;" align="left" valign="middle">
                                             <!-- // Begin Module: Standard Header Image \\ -->
-                                            <img src="http://static.realtasia.com.sg/realtlogo3.png" style="max-width: 600px; height: auto; line-height: 100%; outline: none; text-decoration: none; border: 0;" id="headerImage campaign-icon" />
+                                            <img src="https://s3-ap-southeast-1.amazonaws.com/static2.realtasia.com.sg/realtlogo3.png" style="max-width: 600px; height: auto; line-height: 100%; outline: none; text-decoration: none; border: 0;" id="headerImage campaign-icon" />
                                             <!-- // End Module: Standard Header Image \\ -->
 
                                         </td>
