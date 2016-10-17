@@ -1,0 +1,15 @@
+{
+    "require": {
+        "kohana/core":     "3.3.*"
+    },
+    "require-dev": {
+        "kohana/unittest": "3.3.*",
+        "kohana/koharness" : "*@dev"
+    },
+    "extra": {
+        "installer-paths": {
+        	"vendor/{$vendor}/{$name}": ["type:kohana-module"]
+    	}
+    }
+ }
+
