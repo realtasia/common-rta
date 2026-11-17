@@ -26,7 +26,7 @@ return array(
 	 * @param   array   smtp: hostname, (username), (password), (port), (encryption)
 	 */
 	'options' => array(
-         'hostname' => 'email-smtp.us-east-1.amazonaws.com',
+         'hostname' => 'smtp.example.invalid',
          'username' => RT::SMTP_USER,
          'password' => RT::SMTP_PASS,
          'port' => 465,
